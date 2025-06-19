@@ -11,15 +11,15 @@ Function OnNoteHit(inputType, inputTime)
     If expectedNote.Type = inputType
         timingDifference <- Math.Abs(expectedNote.Time - inputTime)
         If timingDifference <= PerfectWindow Then
-            score = "Good"
+            score <- "Good"
         Else If timingDifference <= GoodWindow
-            score = "Okay"
+            score <- "Okay"
         Else
-            score = "Miss"
+            score <- "Miss"
         End If
     Else
         If GameSettings.MissOnWrongInput Then
-            score = "Miss"
+            score <- "Miss"
         End If
     End If
     UpdateScore(score)
@@ -30,7 +30,7 @@ End Function
 Function StartGame()
     PlayMusic()
     While gameIsRunning
-        currentTime = GetMusicPlaybackTime()
+        currentTime <- GetMusicPlaybackTime()
         SpawnNotes(currentTime + audioOffset)
     End While
 End Function
@@ -38,9 +38,9 @@ End Function
 // FR-3: The system shall track and display the player's score, accuracy, combo, and progress during gameplay.
 Function UpdateHUD()
     While gameIsRunning
-        hudScoreText.text = player.Score
-        hudAccuracyText.text = player.GetAccuracy()
-        hudComboText.text = player.Combo
+        hudScoreText.text <- player.Score
+        hudAccuracyText.text <- player.GetAccuracy()
+        hudComboText.text <- player.Combo
         hudProgressBar.SetProgress(currentTime, songLength)
     End While
 End Function
@@ -56,11 +56,11 @@ End Function
 Function CheckHyperTime(currentTime)
     While gameIsRunning
         If hyperTimeIntervals.Contains(currentTime) Then
-            hyperTimeActive = True
+            hyperTimeActive <- True
             enableVisualEffects("Hyper")
             applyScoreMultiplier(2.0)
         Else
-            hyperTimeActive = False
+            hyperTimeActive <- False
             disableVisualEffects("Hyper")
             resetScoreMultiplier()
         End If
@@ -83,17 +83,17 @@ End Function
 Function UpdateInput()
     If GameSettings.InputType = InputType.Keyboard Then
         While acceptingInput
-            leftRimPressed = Input.GetKeyDown(leftRimKey)
-            leftCentrePressed = Input.GetKeyDown(leftCentreKey)
-            rightCentrePressed = Input.GetKeyDown(rightCentreKey)
-            rightRimPressed = Input.GetKeyDown(rightRimKey)
+            leftRimPressed <- Input.GetKeyDown(leftRimKey)
+            leftCentrePressed <- Input.GetKeyDown(leftCentreKey)
+            rightCentrePressed <- Input.GetKeyDown(rightCentreKey)
+            rightRimPressed <- Input.GetKeyDown(rightRimKey)
         End While
     Else If GameSettings.InputType = InputType.Gamepad Then
         While acceptingInput
-            leftRimPressed = Input.GetButtonDown("LeftRim")
-            leftCentrePressed = Input.GetButtonDown("LeftCentre")
-            rightCentrePressed = Input.GetButtonDown("RightCentre")
-            rightRimPressed = Input.GetButtonDown("RightRim")
+            leftRimPressed <- Input.GetButtonDown("LeftRim")
+            leftCentrePressed <- Input.GetButtonDown("LeftCentre")
+            rightCentrePressed <- Input.GetButtonDown("RightCentre")
+            rightRimPressed <- Input.GetButtonDown("RightRim")
         End While
     End If
 End Function
@@ -114,11 +114,11 @@ Function SetVolume(audioType, value)
         Return
     End If
 
-    If audioType == AudioType.Master
+    If audioType = AudioType.Master
         GameVolume.SetMaster(value)
-    Else If audioType == AudioType.SFX Then
+    Else If audioType = AudioType.SFX Then
         GameVolume.SetVFX(value)
-    Else If audioType == AudioType.Music Then
+    Else If audioType = AudioType.Music Then
         GameVolume.SetMusic(value)
     Else
         LogError("AudioType not found.")
@@ -126,7 +126,7 @@ Function SetVolume(audioType, value)
 End Function
 
 Function SetAudioOffset(value)
-    audioOffset = value
+    audioOffset <- value
 End Function
 
 // FR-9: The system shall include a searchable chart (song) selection screen.
@@ -148,14 +148,14 @@ Function SelectChart(chart)
     selectedChart <- chart
     PlayPreviewAudio(selectedChart.Song)
     If PlayerSettings.PreferUnicode Then
-        chartUI.TitleDisplay.text = selectedChart.TitleUnicode
-        chartUI.ArtistDisplay.text = selectedChart.ArtistUnicode
+        chartUI.TitleDisplay.text <- selectedChart.TitleUnicode
+        chartUI.ArtistDisplay.text <- selectedChart.ArtistUnicode
     Else
-        chartUI.TitleDisplay.text = selectedChart.Title
-        chartUI.ArtistDisplay.text = selectedChart.Artist
+        chartUI.TitleDisplay.text <- selectedChart.Title
+        chartUI.ArtistDisplay.text <- selectedChart.Artist
     End If
-    chartUI.LengthDisplay.text = selectedChart.Length.FormatDuration()
-    chartUI.DifficultyDisplay.text = selectedChart.Display
+    chartUI.LengthDisplay.text <- selectedChart.Length.FormatDuration()
+    chartUI.DifficultyDisplay.text <- selectedChart.Display
 End Function
 
 // FR-12: The system shall maintain local leaderboards.
@@ -176,10 +176,10 @@ End Function
 
 // FR-13: The system shall support .osz and TJA files.
 Function OnFileImport(chartFile)
-    If chartFile.Extension == ".osz" Then
+    If chartFile.Extension = ".osz" Then
         extractedFile <- Extract(chartFile)
         parsedChart <- ParseExtractedOsz(extractedFile)
-    Else If chartFile.Extension == ".tja" Then
+    Else If chartFile.Extension = ".tja" Then
         parsedChart <- ParseTJA(chartFile)
     Else
         LogError("File extension is invalid.")
