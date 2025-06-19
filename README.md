@@ -13,5 +13,5 @@
     A clean, modern Taiko-style rhythm game, compatible with TJA and osu! formats.
   <p align="center">
     This is a repository for my SAT project for Software Development Units 3/4,<br />
-    as part of part of the VCE (Victorian Certificate of Education)
+    as part of part of the VCE (Victorian Certificate of Education).
 </div>
