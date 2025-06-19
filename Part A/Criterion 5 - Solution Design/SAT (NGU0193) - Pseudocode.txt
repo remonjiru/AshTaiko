@@ -1,0 +1,194 @@
+Pseudocode
+Written by Andrew Nguyen
+SAT Criterion 5
+VCE Software Development Unit 3
+Under the supervision of Mr. Toet
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+// FR-01: The system shall support a rhythm-based input system that includes hit detection for two types of drum notes (don and ka), with timing-based scoring.
+Function OnNoteHit(inputType, inputTime)
+    expectedNote <- getNextNote()
+    If expectedNote.Type = inputType
+        timingDifference <- Math.Abs(expectedNote.Time - inputTime)
+        If timingDifference <= PerfectWindow Then
+            score = "Good"
+        Else If timingDifference <= GoodWindow
+            score = "Okay"
+        Else
+            score = "Miss"
+        End If
+    Else
+        If GameSettings.MissOnWrongInput Then
+            score = "Miss"
+        End If
+    End If
+    UpdateScore(score)
+    AdvanceNotePointer()
+End Function
+
+// FR-02: The system shall display a real-time scrolling note chart synchronized to background music.
+Function StartGame()
+    PlayMusic()
+    While gameIsRunning
+        currentTime = GetMusicPlaybackTime()
+        SpawnNotes(currentTime + audioOffset)
+    End While
+End Function
+
+// FR-3: The system shall track and display the player's score, accuracy, combo, and progress during gameplay.
+Function UpdateHUD()
+    While gameIsRunning
+        hudScoreText.text = player.Score
+        hudAccuracyText.text = player.GetAccuracy()
+        hudComboText.text = player.Combo
+        hudProgressBar.SetProgress(currentTime, songLength)
+    End While
+End Function
+
+PLAYER
+Function GetAccuracy()
+    noteAccuracySum <- scoreGood * 1 + scoreOkay * 0.5
+    totalNoteCount <- scoreGood + scoreOkay + scoreMiss
+    Return noteAccuracySum / totalNoteCount
+End Function
+
+// FR-4: The system shall support a version of Go-Go Time (a high-energy visual and scoring boost segment), with toggleable visual effects.
+Function CheckHyperTime(currentTime)
+    While gameIsRunning
+        If hyperTimeIntervals.Contains(currentTime) Then
+            hyperTimeActive = True
+            enableVisualEffects("Hyper")
+            applyScoreMultiplier(2.0)
+        Else
+            hyperTimeActive = False
+            disableVisualEffects("Hyper")
+            resetScoreMultiplier()
+        End If
+    End While
+End Function
+
+// FR-5: The system shall support gameplay using both keyboard and external controllers.
+// FR-6: The system shall support customizable keybindings for all input actions.
+Function InitializeInput()
+    leftRimKey <- KeyCode.D
+    leftCentreKey <- KeyCode.F
+    rightCentreKey <- KeyCode.J
+    rightRimKey <- KeyCode.K
+End Function
+
+Function RebindKey(actionToRebind, newKeyCode)
+    BindKey(actionToRebind, newKeyCode)
+End Function
+
+Function UpdateInput()
+    If GameSettings.InputType = InputType.Keyboard Then
+        While acceptingInput
+            leftRimPressed = Input.GetKeyDown(leftRimKey)
+            leftCentrePressed = Input.GetKeyDown(leftCentreKey)
+            rightCentrePressed = Input.GetKeyDown(rightCentreKey)
+            rightRimPressed = Input.GetKeyDown(rightRimKey)
+        End While
+    Else If GameSettings.InputType = InputType.Gamepad Then
+        While acceptingInput
+            leftRimPressed = Input.GetButtonDown("LeftRim")
+            leftCentrePressed = Input.GetButtonDown("LeftCentre")
+            rightCentrePressed = Input.GetButtonDown("RightCentre")
+            rightRimPressed = Input.GetButtonDown("RightRim")
+        End While
+    End If
+End Function
+
+// FR-7: The system shall provide user interface customization, including custom colour palettes and toggleable visual effects.
+Function EditColorInPalette(paletteField, newValue)
+    palette.SetColor(paletteField, newValue)
+End Function
+
+Function SetVisualEffectActive(visualEffectID, isActive)
+    SetVisualEffect(visualEffectID, isActive)
+End Function
+
+// FR-8: The system shall allow the user to adjust audio settings, including the audio offset and volume levels.
+Function SetVolume(audioType, value)
+    If value < 0 Or value > 100
+        LogError("Invalid volume level, must be between 0 and 100.")
+        Return
+    End If
+
+    If audioType == AudioType.Master
+        GameVolume.SetMaster(value)
+    Else If audioType == AudioType.SFX Then
+        GameVolume.SetVFX(value)
+    Else If audioType == AudioType.Music Then
+        GameVolume.SetMusic(value)
+    Else
+        LogError("AudioType not found.")
+    End If
+End Function
+
+Function SetAudioOffset(value)
+    audioOffset = value
+End Function
+
+// FR-9: The system shall include a searchable chart (song) selection screen.
+Function SearchCharts(query)
+    results <- FilterChartList(query)
+    ClearChartList()
+    DisplayChartList(results)
+End Function
+
+// FR-10: The system shall allow sorting by attributes such as song title, artist name, difficulty, length, and date added.
+Function SortCharts(sortCriteria, ascending)
+    sortedChartList <- SortChartList(sortCriteria, ascending)
+    ClearChartList()
+    DisplayChartList(sortedChartList)
+End Function
+
+// FR-11: The system shall display detailed metadata for each chart, including the song title, artist, song length, total note count, difficulty, and preview audio.
+Function SelectChart(chart)
+    selectedChart <- chart
+    PlayPreviewAudio(selectedChart.Song)
+    If PlayerSettings.PreferUnicode Then
+        chartUI.TitleDisplay.text = selectedChart.TitleUnicode
+        chartUI.ArtistDisplay.text = selectedChart.ArtistUnicode
+    Else
+        chartUI.TitleDisplay.text = selectedChart.Title
+        chartUI.ArtistDisplay.text = selectedChart.Artist
+    End If
+    chartUI.LengthDisplay.text = selectedChart.Length.FormatDuration()
+    chartUI.DifficultyDisplay.text = selectedChart.Display
+End Function
+
+// FR-12: The system shall maintain local leaderboards.
+Function SaveScoreToLeaderboard()
+    leaderboard <- LoadLocalLeaderboard()
+    leaderboard.AddEntry(playerName, score, accuracy, date)
+    leaderboard.Save()
+End Function
+
+Function ShowLeaderboard()
+    leaderboard <- LoadLocalLeaderboard()
+    leaderboardUI.Clear()
+
+    For Each entry In leaderboard
+        leaderboardUI.AddEntry(entry)
+    End For
+End Function
+
+// FR-13: The system shall support .osz and TJA files.
+Function OnFileImport(chartFile)
+    If chartFile.Extension == ".osz" Then
+        extractedFile <- Extract(chartFile)
+        parsedChart <- ParseExtractedOsz(extractedFile)
+    Else If chartFile.Extension == ".tja" Then
+        parsedChart <- ParseTJA(chartFile)
+    Else
+        LogError("File extension is invalid.")
+        Return
+    End If
+    AddToChartLibrary(parsedChart)
+End Function
+
+// FR-14: The system shall allow users to disable flashing lights.
+Function SetPhotosensitivity(value)
+    GameSettings.PhotosensitivityMode <- value
+End Function
