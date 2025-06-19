@@ -65,7 +65,7 @@ This game is heavily inspired by Taiko no Tatsujin, osu! and the osu!taiko gamem
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] SAT Part A
+- [ ] SAT Part A (Submitted 20/06/25)
   - [x] Criteria 1 - Design Brief & Project Plan
   - [x] Criteria 2 - Analysis (Data Collection & Analytical Tools)
   - [x] Criteria 3 - Software Requirement Specification (SRS)
