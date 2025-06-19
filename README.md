@@ -10,11 +10,16 @@
 
 <h3 align="center">AshTaiko!</h3>
   <p align="center">
-    A clean, modern Taiko-style rhythm game, compatible with TJA and osu! formats.
-          <p align="center">
+    A clean, modern Taiko-style rhythm game, 
+    compatible with TJA and osu! formats.
+          
+  <p align="center">
     For VCE Software Development Units 3/4
   <p align="center">
     Created by Andrew Nguyen
+  <p align="center">
+    2025
+
 
 </div>
 
@@ -71,10 +76,13 @@ This game is heavily inspired by Taiko no Tatsujin, osu! and the osu!taiko gamem
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
-Thank you to Stephanie, Raf, Alex, Christian, Violet, and Mr. Toet and the rest of my friends and family for their continued support throughout the year. Also, the Toety Quotey team.
-
-
-
+Thank you to:
+* Stephanie, for her continued support throughout the project
+* Raf, the baddest of Cubans out there
+* Violet, my bestie
+* Mr. Toet, the one and only
+* The ToetyQuotey team
+* Alexander Kam for his game [Ascension](https://alexander-kam.itch.io/ascension), the folio for which was extremely useful throughout this project
 
 Free Mr. Toet!
 
