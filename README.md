@@ -5,7 +5,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/remonjirux/AshTaiko">
-    <img src="images/logo.png" alt="Logo" width="1000" height="auto">
+    <img src="images/logo.png" alt="Logo" width="500" height="auto">
   </a>
 
 <h3 align="center">AshTaiko!</h3>
