@@ -88,7 +88,7 @@ Thank you to:
 * Violet, my bestie
 * Mr. Toet, the one and only
 * The ToetyQuotey team
-* Alexander Kam for his game [Ascension](https://alexander-kam.itch.io/ascension), the folio for which was extremely useful throughout this project
+* Alexander Kam for his game [Ascension,](https://alexander-kam.itch.io/ascension) the folio for which was extremely useful throughout this project
 
 Free Mr. Toet!
 
