@@ -7,53 +7,49 @@ namespace AshTaiko
     public class DrumInputIndicator : MonoBehaviour
     {
         [SerializeField]
-        private InputActionAsset _inputActions;
+        private InputReader _input;
 
         [Header("Elements")]
         [SerializeField]
-        private SpriteRenderer _kaLeftSprite;
+        private DrumInputIndicatorPart _donLeft;
         [SerializeField]
-        private SpriteRenderer _donLeftSprite;
+        private DrumInputIndicatorPart _donRight;
 
-        private void OnEnable()
-        {
-            if (_inputActions == null)
-            {
-                GameDebug.LogError("InputActionAsset is currently unassigned.");
-            }
-        }
+        [SerializeField]
+        private DrumInputIndicatorPart _kaLeft;
+        [SerializeField]
+        private DrumInputIndicatorPart _kaRight;
 
-        private void Update()
+        private void Start()
         {
-            CheckForInputs();
-        }
-
-        private void CheckForInputs()
-        {
-            if (_inputActions.FindAction("Ka_Left").WasPressedThisFrame()) KaLeft();
-            if (_inputActions.FindAction("Don_Left").WasPressedThisFrame()) DonLeft();
-            if (_inputActions.FindAction("Don_Right").WasPressedThisFrame()) DonRight();
-            if (_inputActions.FindAction("Ka_Right").WasPressedThisFrame()) KaRight();
+            _input.DonLeftEvent += DonLeft;
+            _input.DonRightEvent += DonRight;
+            _input.KaLeftEvent += KaLeft;
+            _input.KaRightEvent += KaRight;
         }
 
         private void DonLeft()
         {
-
+            Debug.Log("DL");
+            _donLeft.Hit();
         }
 
         private void DonRight()
         {
-
+            Debug.Log("DR");
+            _donRight.Hit();
         }
 
         private void KaLeft()
         {
-
+            Debug.Log("KL");
+            _kaLeft.Hit();
         }
 
         private void KaRight()
         {
-
+            Debug.Log("KR");
+            _kaRight.Hit();
         }
     }
 }
