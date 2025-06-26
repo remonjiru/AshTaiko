@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 namespace AshTaiko
@@ -6,14 +7,52 @@ namespace AshTaiko
     public class Drum : MonoBehaviour
     {
         [SerializeField]
-        private InputActionAsset _actions;
+        private InputReader _input;
 
-        private void Update()
+        public event UnityAction<HitType> OnHit;
+
+        private void Start()
         {
-            if(_actions.FindAction("KaLeft").WasPressedThisFrame())
-            {
-                Debug.Log("lk");
-            }
+            _input.DonLeftEvent += DonLeft;
+            _input.DonRightEvent += DonRight;
+            _input.KaLeftEvent += KaLeft;
+            _input.KaRightEvent += KaRight;
         }
+
+        private void DonLeft()
+        {
+            OnHit?.Invoke(HitType.Don);
+        }
+
+        private void DonRight()
+        {
+            OnHit?.Invoke(HitType.Don);
+        }
+
+        private void KaLeft()
+        {
+            OnHit?.Invoke(HitType.Ka);
+        }
+
+        private void KaRight()
+        {
+            OnHit?.Invoke(HitType.Ka);
+        }
+    }
+
+    public class HitData
+    {
+        public HitData(HitType hitType)
+        {
+            HitType = hitType;
+        }
+
+        public HitType HitType { get; private set; }
+    }
+
+    public enum HitType
+    {
+        Don,
+        Ka
     }
 }

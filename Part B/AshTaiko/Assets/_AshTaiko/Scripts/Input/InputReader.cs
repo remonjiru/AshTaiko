@@ -35,8 +35,6 @@ namespace AshTaiko
         {
             if (context.phase == InputActionPhase.Performed)
             {
-                Debug.Log("DL");
-
                 DonLeftEvent?.Invoke();
             }
         }

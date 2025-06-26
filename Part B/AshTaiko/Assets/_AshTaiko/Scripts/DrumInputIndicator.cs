@@ -30,25 +30,21 @@ namespace AshTaiko
 
         private void DonLeft()
         {
-            Debug.Log("DL");
             _donLeft.Hit();
         }
 
         private void DonRight()
         {
-            Debug.Log("DR");
             _donRight.Hit();
         }
 
         private void KaLeft()
         {
-            Debug.Log("KL");
             _kaLeft.Hit();
         }
 
         private void KaRight()
         {
-            Debug.Log("KR");
             _kaRight.Hit();
         }
     }
