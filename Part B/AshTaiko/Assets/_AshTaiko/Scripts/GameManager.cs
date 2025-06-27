@@ -61,6 +61,7 @@ namespace AshTaiko
 
         public event UnityAction<int> OnScoreChange;
         public event UnityAction<int> OnComboChange;
+        public event UnityAction<Note> OnNoteHit;
 
         private int _score = 0;
         private int _combo = 0;
@@ -206,6 +207,7 @@ namespace AshTaiko
                         // --- Hit Effect ---
                         _combo++;
                         OnComboChange?.Invoke(_combo);
+                        OnNoteHit?.Invoke(note);
                         PlayHitEffect(note.transform.position); // Play visual/sound effect
                         Destroy(note.gameObject); // Remove the note from the scene
                         // TODO: Add scoring, combo, etc.

@@ -18,5 +18,10 @@ namespace AshTaiko
             _spriteRenderer.DOFade(1, 0.001f);
             _spriteRenderer.DOFade(0, 0.15f);
         }
+
+        public void Reset()
+        {
+            _spriteRenderer.DOFade(0, 0.001f);
+        }
     }
 }

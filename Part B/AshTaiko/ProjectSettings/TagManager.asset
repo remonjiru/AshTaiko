@@ -44,6 +44,9 @@ TagManager:
   - name: Playfield
     uniqueID: 2956009923
     locked: 0
+  - name: Notes
+    uniqueID: 1796861143
+    locked: 0
   - name: Gameplay
     uniqueID: 1682970959
     locked: 0
