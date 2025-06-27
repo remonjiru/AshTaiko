@@ -12,3 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 467962981b95de24a80aaa83ecb14034, type: 3}
   m_Name: InputReader
   m_EditorClassIdentifier: 
+  isDonLeftActive: 0
+  isDonRightActive: 0
+  hasBigDonExecuted: 0
+  isKaLeftActive: 0
+  isKaRightActive: 0

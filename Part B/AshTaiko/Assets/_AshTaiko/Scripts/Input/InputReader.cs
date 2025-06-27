@@ -28,6 +28,8 @@ namespace AshTaiko
 
         public event UnityAction DonLeftEvent = delegate { };
         public event UnityAction DonRightEvent = delegate { };
+        public event UnityAction DonBigEvent = delegate { };
+
         public event UnityAction KaLeftEvent = delegate { };
         public event UnityAction KaRightEvent = delegate { };
 

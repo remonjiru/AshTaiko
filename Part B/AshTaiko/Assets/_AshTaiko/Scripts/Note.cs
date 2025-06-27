@@ -13,6 +13,18 @@ namespace AshTaiko
         public float scrollSpeed = 1f;
         public bool isHit = false;
         public HitObject hitObject;
+        public NoteType noteType; // Store the type of this note
+                                  // Visual references for each type
+
+        public GameObject donVisual;
+        public GameObject kaVisual;
+        public GameObject donBigVisual;
+        public GameObject kaBigVisual;
+        public GameObject drumrollHeadVisual;
+        public GameObject drumrollEndVisual;
+        public GameObject drumrollBridgeVisual;
+        // For drumroll stretching
+        public Note drumrollEndNote; // Set by GameManager if this is a drumroll head
 
         [SerializeField]
         private SpriteRenderer _spriteRenderer;
@@ -27,15 +39,42 @@ namespace AshTaiko
             currentPosition = transform.position;
             this.scrollSpeed = scrollSpeed;
             this.hitObject = hitObject;
+            this.noteType = hitObject.Type; // Set the note type (Don, Ka, etc.)
+            SetVisuals();
+        }
 
-            // TO DO : CHAGNE THIS SHIT
-            if (hitObject.Type == NoteType.Don)
+        private void SetVisuals()
+        {
+            // Disable all visuals first
+            if (donVisual) donVisual.SetActive(false);
+            if (kaVisual) kaVisual.SetActive(false);
+            if (donBigVisual) donBigVisual.SetActive(false);
+            if (kaBigVisual) kaBigVisual.SetActive(false);
+            if (drumrollHeadVisual) drumrollHeadVisual.SetActive(false);
+            if (drumrollEndVisual) drumrollEndVisual.SetActive(false);
+            if (drumrollBridgeVisual) drumrollBridgeVisual.SetActive(false);
+
+            switch (noteType)
             {
-                _spriteRenderer.color = SkinManager.Instance.GetColor(SkinElement.Don);
-            }
-            if (hitObject.Type == NoteType.Ka)
-            {
-                _spriteRenderer.color = SkinManager.Instance.GetColor(SkinElement.Ka);
+                case NoteType.Don:
+                    if (donVisual) donVisual.SetActive(true);
+                    break;
+                case NoteType.Ka:
+                    if (kaVisual) kaVisual.SetActive(true);
+                    break;
+                case NoteType.DonBig:
+                    if (donBigVisual) donBigVisual.SetActive(true);
+                    break;
+                case NoteType.KaBig:
+                    if (kaBigVisual) kaBigVisual.SetActive(true);
+                    break;
+                case NoteType.Drumroll:
+                case NoteType.DrumrollBig:
+                    if (drumrollHeadVisual) drumrollHeadVisual.SetActive(true);
+                    break;
+                case NoteType.DrumrollBalloonEnd:
+                    if (drumrollEndVisual) drumrollEndVisual.SetActive(true);
+                    break;
             }
         }
 
@@ -50,11 +89,24 @@ namespace AshTaiko
             // Interpolate from spawn position to hit bar
             Vector3 targetPosition = Vector3.LerpUnclamped(judgementCirclePosition + Vector3.right * travelDistance, judgementCirclePosition, t);
             transform.position = targetPosition;
-            // // If too late, destroy or mark as missed
-            // if (currentTime > hitTime + 0.2f)
-            // {
-            //     Destroy(gameObject);
-            // }
+
+            float distancePastHitBar = judgementCirclePosition.x - transform.position.x;
+
+            if (noteType == NoteType.Drumroll || noteType == NoteType.DrumrollBig)
+            {
+                if (distancePastHitBar > 5f) // Adjust this value as needed (5 units past the hit bar)
+                {
+                    if (drumrollEndNote != null)
+                    {
+                        Destroy(gameObject);
+                    }
+                }
+                return;
+            }
+            if (distancePastHitBar > 5f) // Adjust this value as needed (5 units past the hit bar)
+            {
+                Destroy(gameObject);
+            }
         }
     }
 
