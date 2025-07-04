@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AshTaiko;
 using UnityEngine;
 
+// this one's basically a utility to just really quickly make a fake chart so i can play them 
 public class SongRecorder : MonoBehaviour
 {
     public InputReader _input;

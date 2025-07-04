@@ -4,6 +4,7 @@ namespace AshTaiko
 {
     public class Track : MonoBehaviour
     {
+        // singleton pattern
         public static Track Instance { get; private set; }
 
         [Header("Gameplay")]

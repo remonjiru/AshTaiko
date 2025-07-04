@@ -6,6 +6,7 @@ using UnityEngine.Events;
 
 namespace AshTaiko
 {
+    // if theres any bit of code in this right now that needs a refactor, it's gotta be this one
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
@@ -57,7 +58,7 @@ namespace AshTaiko
 
         private List<Note> _activeNotes = new List<Note>();
 
-        private int _nextJudgableNoteIndex = 0; // Points to the next note to be judged
+        private int _nextJudgableNoteIndex = 0; // next note to be judged
 
         public event UnityAction<int> OnScoreChange;
         public event UnityAction<int> OnComboChange;
@@ -92,7 +93,7 @@ namespace AshTaiko
 
         private void Update()
         {
-            // At the start of the frame, store the last and current dspTime
+            // At the start of the frame store the last and current dspTime
             _lastDspTime = _currentDspTime;
             _currentDspTime = AudioSettings.dspTime;
             _frameStartTime = Time.time;
@@ -116,8 +117,8 @@ namespace AshTaiko
                 _nextNoteIndex++;
             }
 
-            // --- Miss Handling ---
-            // If the next judgable note has passed its hit window and wasn't hit, mark as missed
+            // [-- MISS HANDLING --]
+            // If the next judgable note has passed its hit window and wasn't hit mark as missed
             while (_nextJudgableNoteIndex < _activeNotes.Count)
             {
                 Note note = _activeNotes[_nextJudgableNoteIndex];
@@ -127,21 +128,21 @@ namespace AshTaiko
                     continue;
                 }
                 float currentTime = GetSmoothedSongTime();
-                float missWindow = 0.15f; // Example miss window (tweak as needed)
+                float missWindow = 0.15f;
                 if (currentTime > note.hitTime + missWindow)
                 {
                     note.isHit = true;
-                    // --- Miss Effect ---
+                    // [-- Miss Effect --]
+                    // TODO: PLEASE PUT THIS INTO A DIFFERENT FUNCTION I DONT KNOW WHY IVE PUT TWO HERE
                     _combo = 0;
                     OnComboChange?.Invoke(_combo);
                     PlayMissEffect(note.transform.position); // Play miss visual/sound effect
-                    Destroy(note.gameObject); // Remove the note from the scene
-                    // TODO: Handle miss feedback (e.g., break combo)
+                    Destroy(note.gameObject); // boom
                     _nextJudgableNoteIndex++;
                 }
                 else
                 {
-                    // The next note is not yet missable
+                    // next note isn't missable, ignore for now
                     break;
                 }
             }
@@ -167,7 +168,7 @@ namespace AshTaiko
 
         public float GetSmoothedSongTime()
         {
-            // How far are we into the current frame?
+            // Check how long into current frame
             float t = Mathf.Clamp01((Time.time - _frameStartTime) / Time.deltaTime);
 
             // Interpolate between last and current dspTime
@@ -196,10 +197,11 @@ namespace AshTaiko
                 {
                     break;
                 }
+
                 // If the note is within the hit window
                 if (Mathf.Abs(currentTime - note.hitTime) <= hitWindow)
                 {
-                    // --- Only allow correct input type to hit the note ---
+                    // Only allow correct input type to hit the note
                     if (IsHitTypeMatchingNoteType(hitType, note.hitObject.Type))
                     {
                         Debug.Log("Hit!");
@@ -213,14 +215,15 @@ namespace AshTaiko
                         // TODO: Add scoring, combo, etc.
                         _nextJudgableNoteIndex++;
                     }
-                    // If input type doesn't match, ignore input (do not advance index)
+                    // if input type dont match
+                    // dont advance index
                     break;
                 }
                 else
                 {
                     // If the note is too late, mark as missed and move to next
                     note.isHit = true;
-                    // --- Miss Effect ---
+                    // [ -- Miss Effect -- ]
                     _combo = 0;
                     OnComboChange?.Invoke(_combo);
                     PlayMissEffect(note.transform.position); // Play miss visual/sound effect
@@ -250,14 +253,14 @@ namespace AshTaiko
 
         private void PlayHitEffect(Vector3 position)
         {
-            // TODO: Instantiate a hit effect prefab or play a sound at the given position
+            // TODO: Instantiate hit effect prefab or play a sound at the given position
             Instantiate(_hitEffect, _judgementCircle.position, Quaternion.identity);
             Debug.Log("Play hit effect at: " + position);
         }
 
         private void PlayMissEffect(Vector3 position)
         {
-            // TODO: Instantiate a miss effect prefab or play a sound at the given position
+            // TODO: Instantiate miss effect prefab or play a sound at the given position
             Debug.Log("Play miss effect at: " + position);
         }
 

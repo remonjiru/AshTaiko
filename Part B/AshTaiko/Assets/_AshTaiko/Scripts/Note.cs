@@ -43,7 +43,7 @@ namespace AshTaiko
         {
             float currentTime = GameManager.Instance.GetSmoothedSongTime();
             float timeLeft = hitTime - currentTime;
-            float effectivePreempt = preemptTime / scrollSpeed; // Faster scroll = shorter preempt
+            float effectivePreempt = preemptTime / scrollSpeed; // faster scroll = shorter preempt
 
             float t = 1f - timeLeft / effectivePreempt;
 
@@ -51,6 +51,7 @@ namespace AshTaiko
             Vector3 targetPosition = Vector3.LerpUnclamped(judgementCirclePosition + Vector3.right * travelDistance, judgementCirclePosition, t);
             transform.position = targetPosition;
             // // If too late, destroy or mark as missed
+            
             // if (currentTime > hitTime + 0.2f)
             // {
             //     Destroy(gameObject);
