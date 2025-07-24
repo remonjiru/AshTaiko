@@ -82,7 +82,7 @@ namespace AshTaiko
         {
             float currentTime = GameManager.Instance.GetSmoothedSongTime();
             float timeLeft = hitTime - currentTime;
-            float effectivePreempt = preemptTime / scrollSpeed; // Faster scroll = shorter preempt
+            float effectivePreempt = preemptTime / scrollSpeed; // faster scroll = shorter preempt
 
             float t = 1f - timeLeft / effectivePreempt;
 
