@@ -584,6 +584,18 @@ namespace AshTaiko
             return nominator / sum * 100;
         }
 
+        
+        // private float GetStressedAccuracy()
+        // {
+        //     // uses the osu taiko formula
+        //     hitGoods = 2147483647;
+        //     hitOkays = 2147483647;
+
+        //     float nominator = hitGoods + hitOkays * 0.5f;
+        //     float sum = hitGoods + hitOkays + hitBads;
+        //     return nominator / sum * 100;
+        // }
+
         public string GetSongTimestamp()
         {
             return _songManager.GetSongPositionString() + " / " + _songManager.GetSongLengthString();
