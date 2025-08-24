@@ -80,6 +80,13 @@ namespace AshTaiko
 
         void LateUpdate()
         {
+            // Debug: Check if component is disabled
+            if (!enabled)
+            {
+                Debug.LogWarning($"Note component at {hitTime}s is DISABLED! This will make it unhittable!");
+                return;
+            }
+            
             float currentTime = GameManager.Instance.GetSmoothedSongTime();
             float timeLeft = hitTime - currentTime;
             float effectivePreempt = preemptTime / scrollSpeed; // faster scroll = shorter preempt
@@ -92,21 +99,66 @@ namespace AshTaiko
 
             float distancePastHitBar = judgementCirclePosition.x - transform.position.x;
 
+            // Debug note destruction (only log occasionally to avoid spam)
+            if (Time.frameCount % 60 == 0 && distancePastHitBar > 5f)
+            {
+                Debug.Log($"Note {hitTime}s: distance={distancePastHitBar:F1}, isHit={isHit}, type={noteType}, enabled={enabled}");
+            }
+
+            // Only destroy notes if they've been properly judged or are way past the hit window
             if (noteType == NoteType.Drumroll || noteType == NoteType.DrumrollBig)
             {
-                if (distancePastHitBar > 5f) // Adjust this value as needed (5 units past the hit bar)
+                // For drumrolls, only destroy if we have an end note and are way past
+                if (distancePastHitBar > 10f && drumrollEndNote != null) // Increased from 5f to 10f
                 {
-                    if (drumrollEndNote != null)
-                    {
-                        Destroy(gameObject);
-                    }
+                    Debug.Log($"Destroying drumroll note at {hitTime}s (distance: {distancePastHitBar:F1})");
+                    Destroy(gameObject);
                 }
                 return;
             }
-            if (distancePastHitBar > 5f) // Adjust this value as needed (5 units past the hit bar)
+            
+            // For regular notes, only destroy if they're way past the hit window
+            // This prevents premature destruction due to timing issues
+            if (distancePastHitBar > 10f && isHit) // Only destroy if already judged AND way past
             {
+                Debug.Log($"Destroying judged note at {hitTime}s (distance: {distancePastHitBar:F1})");
                 Destroy(gameObject);
             }
+            else if (distancePastHitBar > 20f) // Emergency cleanup for notes that are very far past
+            {
+                Debug.LogWarning($"Note at {hitTime}s destroyed due to extreme distance: {distancePastHitBar:F1} units past hit bar");
+                Destroy(gameObject);
+            }
+        }
+        
+        // Debug method to check note status
+        [ContextMenu("Check Note Status")]
+        public void CheckNoteStatus()
+        {
+            float currentTime = GameManager.Instance.GetSmoothedSongTime();
+            float timeLeft = hitTime - currentTime;
+            float distancePastHitBar = judgementCirclePosition.x - transform.position.x;
+            
+            Debug.Log($"=== NOTE STATUS CHECK ===");
+            Debug.Log($"Note at time: {hitTime}s");
+            Debug.Log($"Current song time: {currentTime:F3}s");
+            Debug.Log($"Time until hit: {timeLeft:F3}s");
+            Debug.Log($"Distance past hit bar: {distancePastHitBar:F1} units");
+            Debug.Log($"Is hit: {isHit}");
+            Debug.Log($"Note type: {noteType}");
+            Debug.Log($"Position: {transform.position}");
+            Debug.Log($"Judgement circle: {judgementCirclePosition}");
+            Debug.Log($"Active: {gameObject.activeInHierarchy}");
+            Debug.Log($"Enabled: {enabled}");
+            Debug.Log($"================================");
+        }
+        
+        // Method to force note to be hit (for debugging)
+        [ContextMenu("Force Hit Note")]
+        public void ForceHitNote()
+        {
+            isHit = true;
+            Debug.Log($"Note at {hitTime}s forced to hit state");
         }
     }
 
@@ -124,3 +176,4 @@ namespace AshTaiko
         BalloonBig = 9,
     }
 }
+
