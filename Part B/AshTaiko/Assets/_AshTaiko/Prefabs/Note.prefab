@@ -50,26 +50,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 990b7cd3110a7564484c206496473197, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hitTime: 0
-  spawnTime: 0
-  preemptTime: 0
-  travelDistance: 0
-  judgementCirclePosition: {x: 0, y: 0, z: 0}
-  scrollSpeed: 1
-  isHit: 0
-  hitObject:
+  _hitTime: 0
+  _spawnTime: 0
+  _preemptTime: 0
+  _travelDistance: 0
+  _judgementCirclePosition: {x: 0, y: 0, z: 0}
+  _scrollSpeed: 1
+  _hitObject:
     Time: 0
-    ScrollSpeed: 1
+    ScrollSpeed: 0
     Type: 0
-  noteType: 0
-  donVisual: {fileID: 6964309201370446509}
-  kaVisual: {fileID: 7360241014684525687}
-  donBigVisual: {fileID: 5502192236686774723}
-  kaBigVisual: {fileID: 6115264073271594337}
-  drumrollHeadVisual: {fileID: 6490786413011468484}
-  drumrollEndVisual: {fileID: 6490786413011468484}
-  drumrollBridgeVisual: {fileID: 275882314076200267}
-  drumrollEndNote: {fileID: 0}
+  _noteType: 0
+  _donVisual: {fileID: 6964309201370446509}
+  _kaVisual: {fileID: 7360241014684525687}
+  _donBigVisual: {fileID: 5502192236686774723}
+  _kaBigVisual: {fileID: 6115264073271594337}
+  _drumrollHeadVisual: {fileID: 6490786413011468484}
+  _drumrollEndVisual: {fileID: 6490786413011468484}
+  _drumrollBridgeVisual: {fileID: 275882314076200267}
+  _drumrollEndNote: {fileID: 0}
   _spriteRenderer: {fileID: 0}
 --- !u!1001 &309420475685272260
 PrefabInstance:

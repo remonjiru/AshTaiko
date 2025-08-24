@@ -2467,11 +2467,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b75d8dfe332dbd40a46fa97d7d1e0e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shadowColor: {r: 0, g: 0, b: 0, a: 0.5}
-  shadowDistance: {x: 0, y: -4}
-  m_UseGraphicAlpha: 1
-  iterations: 5
-  shadowSpread: {x: 1, y: 1}
+  _shadowColor: {r: 0, g: 0, b: 0, a: 0.5}
+  _shadowDistance: {x: 1, y: -1}
+  _useGraphicAlpha: 1
+  _iterations: 5
+  _shadowSpread: {x: 1, y: 1}
 --- !u!1 &997787467
 GameObject:
   m_ObjectHideFlags: 0
@@ -2693,10 +2693,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 498c56cddfd4ec34ca324f1548dca52d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showMs: 1
-  timer: 0
-  refresh: 0.2
-  avgFramerate: 0
+  _showMs: 1
+  _refresh: 0.5
 --- !u!222 &1037557881
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -5333,19 +5331,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45b51822d0934e248bc2280d49a9afb8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  notePrefab: {fileID: 7916830881856841872, guid: f0effced487346a468c7f8baa6c73f95, type: 3}
-  drumrollBridgePrefab: {fileID: 6267461054753013875, guid: 4e9e629caa3a0464cbadcee5683fc9d8, type: 3}
+  _notePrefab: {fileID: 7916830881856841872, guid: f0effced487346a468c7f8baa6c73f95, type: 3}
+  _drumrollBridgePrefab: {fileID: 6267461054753013875, guid: 4e9e629caa3a0464cbadcee5683fc9d8, type: 3}
   _songManager: {fileID: 590596589}
   _drum: {fileID: 1985368620}
   _judgementCircle: {fileID: 822003719}
   _hitEffect: {fileID: 3240260122888283015, guid: ac82358c341e77145a57d016034f5522, type: 3}
   _notes: []
-  travelDistance: 15
-  _smoothedDsp: 0
-  songStartTime: 0
-  songEndTime: 0
-  debugDrumrollIndicator: {fileID: 405689576}
-  debugJudgementIndicator: {fileID: 1915880485}
+  _travelDistance: 15
+  _debugDrumrollIndicator: {fileID: 405689576}
+  _debugJudgementIndicator: {fileID: 1915880485}
 --- !u!1 &1675730724
 GameObject:
   m_ObjectHideFlags: 0
@@ -9812,8 +9807,8 @@ MonoBehaviour:
   _receptacle: {fileID: 822003719}
   _startPosition: {fileID: 91481917}
   _endPosition: {fileID: 669904539}
-  offscreenOffsetStart: {x: 0, y: 0, z: 0}
-  offscreenOffsetEnd: {x: 0, y: 0, z: 0}
+  _offscreenOffsetStart: {x: 0, y: 0, z: 0}
+  _offscreenOffsetEnd: {x: 0, y: 0, z: 0}
 --- !u!1 &2131121481
 GameObject:
   m_ObjectHideFlags: 0

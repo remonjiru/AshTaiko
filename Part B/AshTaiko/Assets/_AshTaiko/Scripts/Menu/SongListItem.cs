@@ -9,86 +9,86 @@ namespace AshTaiko.Menu
     public class SongListItem : MonoBehaviour
     {
         [Header("UI References")]
-        [SerializeField] private TextMeshProUGUI titleText;
-        [SerializeField] private TextMeshProUGUI artistText;
-        [SerializeField] private TextMeshProUGUI creatorText;
-        [SerializeField] private TextMeshProUGUI lengthText;
-        [SerializeField] private TextMeshProUGUI difficultyText;
-        [SerializeField] private Image backgroundImage;
-        [SerializeField] private Button itemButton;
+        [SerializeField] private TextMeshProUGUI _titleText;
+        [SerializeField] private TextMeshProUGUI _artistText;
+        [SerializeField] private TextMeshProUGUI _creatorText;
+        [SerializeField] private TextMeshProUGUI _lengthText;
+        [SerializeField] private TextMeshProUGUI _difficultyText;
+        [SerializeField] private Image _backgroundImage;
+        [SerializeField] private Button _itemButton;
         
         [Header("Visual States")]
-        [SerializeField] private Color normalColor = Color.white;
-        [SerializeField] private Color selectedColor = Color.yellow;
-        [SerializeField] private Color hoverColor = Color.cyan;
+        [SerializeField] private Color _normalColor = Color.white;
+        [SerializeField] private Color _selectedColor = Color.yellow;
+        [SerializeField] private Color _hoverColor = Color.cyan;
         
-        private SongEntry songData;
-        private int songIndex;
-        private bool isSelected = false;
+        private SongEntry _songData;
+        private int _songIndex;
+        private bool _isSelected = false;
         
         public UnityAction<int> OnSongSelected;
         
         private void Awake()
         {
-            if (itemButton != null)
+            if (_itemButton != null)
             {
-                itemButton.onClick.AddListener(OnItemClicked);
+                _itemButton.onClick.AddListener(OnItemClicked);
             }
         }
         
         public void Initialize(SongEntry song, int index)
         {
-            songData = song;
-            songIndex = index;
+            _songData = song;
+            _songIndex = index;
             
             UpdateDisplay();
         }
         
         private void UpdateDisplay()
         {
-            if (songData == null) return;
+            if (_songData == null) return;
             
             // Update text fields
-            if (titleText != null)
-                titleText.text = songData.Title;
+            if (_titleText != null)
+                _titleText.text = _songData.Title;
             
-            if (artistText != null)
-                artistText.text = songData.Artist;
+            if (_artistText != null)
+                _artistText.text = _songData.Artist;
             
-            if (creatorText != null)
-                creatorText.text = songData.Creator;
+            if (_creatorText != null)
+                _creatorText.text = _songData.Creator;
             
             // Update length
-            if (lengthText != null)
+            if (_lengthText != null)
             {
                 float totalLength = 0;
-                if (songData.Charts != null && songData.Charts.Count > 0)
+                if (_songData.Charts != null && _songData.Charts.Count > 0)
                 {
-                    totalLength = songData.Charts[0].TotalLength;
+                    totalLength = _songData.Charts[0].TotalLength;
                 }
-                lengthText.text = FormatTime(totalLength);
+                _lengthText.text = FormatTime(totalLength);
             }
             
             // Update difficulty info
-            if (difficultyText != null)
+            if (_difficultyText != null)
             {
-                difficultyText.text = GetDifficultyString();
+                _difficultyText.text = GetDifficultyString();
             }
             
             // Update background image if available
-            if (backgroundImage != null && !string.IsNullOrEmpty(songData.BackgroundImage))
+            if (_backgroundImage != null && !string.IsNullOrEmpty(_songData.BackgroundImage))
             {
                 // Load background image (you'd need to implement image loading)
-                // backgroundImage.sprite = LoadSprite(songData.BackgroundImage);
+                // _backgroundImage.sprite = LoadSprite(_songData.BackgroundImage);
             }
         }
         
         private string GetDifficultyString()
         {
-            if (songData.Charts == null || songData.Charts.Count == 0)
+            if (_songData.Charts == null || _songData.Charts.Count == 0)
                 return "No charts";
             
-            var difficulties = songData.Charts.Select(c => c.Difficulty.ToString()).ToArray();
+            var difficulties = _songData.Charts.Select(c => c.Difficulty.ToString()).ToArray();
             return string.Join(", ", difficulties);
         }
         
@@ -101,46 +101,46 @@ namespace AshTaiko.Menu
         
         private void OnItemClicked()
         {
-            OnSongSelected?.Invoke(songIndex);
+            OnSongSelected?.Invoke(_songIndex);
         }
         
         public void SetSelected(bool selected)
         {
-            isSelected = selected;
+            _isSelected = selected;
             UpdateVisualState();
         }
         
         private void UpdateVisualState()
         {
-            if (titleText != null)
+            if (_titleText != null)
             {
-                titleText.color = isSelected ? selectedColor : normalColor;
+                _titleText.color = _isSelected ? _selectedColor : _normalColor;
             }
             
-            if (artistText != null)
+            if (_artistText != null)
             {
-                artistText.color = isSelected ? selectedColor : normalColor;
+                _artistText.color = _isSelected ? _selectedColor : _normalColor;
             }
             
-            if (creatorText != null)
+            if (_creatorText != null)
             {
-                creatorText.color = isSelected ? selectedColor : normalColor;
+                _creatorText.color = _isSelected ? _selectedColor : _normalColor;
             }
         }
         
         public void OnPointerEnter()
         {
-            if (!isSelected)
+            if (!_isSelected)
             {
-                if (titleText != null) titleText.color = hoverColor;
-                if (artistText != null) artistText.color = hoverColor;
-                if (creatorText != null) creatorText.color = hoverColor;
+                if (_titleText != null) _titleText.color = _hoverColor;
+                if (_artistText != null) _artistText.color = _hoverColor;
+                if (_creatorText != null) _creatorText.color = _hoverColor;
             }
         }
         
         public void OnPointerExit()
         {
-            if (!isSelected)
+            if (!_isSelected)
             {
                 UpdateVisualState();
             }
@@ -148,12 +148,12 @@ namespace AshTaiko.Menu
         
         public SongEntry GetSongData()
         {
-            return songData;
+            return _songData;
         }
         
         public int GetSongIndex()
         {
-            return songIndex;
+            return _songIndex;
         }
     }
 }

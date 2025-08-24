@@ -5,26 +5,22 @@ namespace AshTaiko
 {
     public class SkinManager : MonoBehaviour
     {
-        public static SkinManager Instance;
+        public static SkinManager Instance { get; private set; }
 
         [SerializeField]
         private Color _donColor;
+        
         [SerializeField]
         private Color _kaColor;
 
         public Color GetColor(SkinElement element)
         {
-            Color colorToReturn = Color.white;
-            switch (element)
+            return element switch
             {
-                case SkinElement.Don:
-                    return _donColor;
-                case SkinElement.Ka:
-                    return _kaColor;
-                default:
-                    break;
-            }
-            return colorToReturn;
+                SkinElement.Don => _donColor,
+                SkinElement.Ka => _kaColor,
+                _ => Color.white
+            };
         }
 
         private void Awake()

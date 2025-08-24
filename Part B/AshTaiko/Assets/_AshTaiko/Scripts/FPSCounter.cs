@@ -1,35 +1,44 @@
 ﻿using UnityEngine;
 using TMPro;
 
-public class FPSCounter : MonoBehaviour
+namespace AshTaiko
 {
-    public bool showMs = true;
-    public float timer, refresh, avgFramerate;
-    private TextMeshProUGUI displayText;
-    
-    float deltaTime;
-
-    private void Awake()
+    public class FPSCounter : MonoBehaviour
     {
-        displayText = GetComponent<TextMeshProUGUI>();
-    }
-
-
-    private void Update()
-    {
-        this.deltaTime += (Time.unscaledDeltaTime - this.deltaTime) * 0.1f;
-		float ms = this.deltaTime * 1000f;
-		float fps = 1f / this.deltaTime;
-
-        float timelapse = Time.unscaledDeltaTime;
-        timer = timer <= 0 ? refresh : timer -= timelapse;
-
-        if (timer <= 0) avgFramerate = (int)(1f / timelapse);
+        [SerializeField]
+        private bool _showMs = true;
         
-        if(showMs) 
+        [SerializeField]
+        private float _refresh = 0.5f;
+        
+        private float _timer;
+        private float _avgFramerate;
+        private TextMeshProUGUI _displayText;
+        private float _deltaTime;
+
+        private void Awake()
         {
-            displayText.text = string.Format("{0:0.0} ms ({1:0.} fps)", ms, fps);
-            return;
+            _displayText = GetComponent<TextMeshProUGUI>();
+        }
+
+        private void Update()
+        {
+            _deltaTime += (Time.unscaledDeltaTime - _deltaTime) * 0.1f;
+            float ms = _deltaTime * 1000f;
+            float fps = 1f / _deltaTime;
+
+            float timeLapse = Time.unscaledDeltaTime;
+            _timer = _timer <= 0 ? _refresh : _timer - timeLapse;
+
+            if (_timer <= 0) 
+            {
+                _avgFramerate = (int)(1f / timeLapse);
+            }
+            
+            if (_showMs) 
+            {
+                _displayText.text = string.Format("{0:0.0} ms ({1:0.} fps)", ms, fps);
+            }
         }
     }
 }

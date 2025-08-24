@@ -9,29 +9,29 @@ namespace AshTaiko.Menu
     public class SongSelectionManager : MonoBehaviour
     {
         [Header("UI References")]
-        [SerializeField] private Transform songListContent;
-        [SerializeField] private GameObject songItemPrefab;
-        [SerializeField] private TMP_InputField searchInput;
-        [SerializeField] private Dropdown difficultyFilter;
-        [SerializeField] private Button randomButton;
-        [SerializeField] private Button scanButton;
+        [SerializeField] private Transform _songListContent;
+        [SerializeField] private GameObject _songItemPrefab;
+        [SerializeField] private TMP_InputField _searchInput;
+        [SerializeField] private Dropdown _difficultyFilter;
+        [SerializeField] private Button _randomButton;
+        [SerializeField] private Button _scanButton;
         
         [Header("Song Display")]
-        [SerializeField] private TextMeshProUGUI currentSongTitle;
-        [SerializeField] private TextMeshProUGUI currentSongArtist;
-        [SerializeField] private TextMeshProUGUI currentSongCreator;
-        [SerializeField] private TextMeshProUGUI currentSongLength;
-        [SerializeField] private TextMeshProUGUI currentSongBPM;
-        [SerializeField] private Image currentSongBackground;
+        [SerializeField] private TextMeshProUGUI _currentSongTitle;
+        [SerializeField] private TextMeshProUGUI _currentSongArtist;
+        [SerializeField] private TextMeshProUGUI _currentSongCreator;
+        [SerializeField] private TextMeshProUGUI _currentSongLength;
+        [SerializeField] private TextMeshProUGUI _currentSongBPM;
+        [SerializeField] private Image _currentSongBackground;
         
         [Header("Difficulty Display")]
-        [SerializeField] private Transform difficultyButtonsParent;
-        [SerializeField] private GameObject difficultyButtonPrefab;
+        [SerializeField] private Transform _difficultyButtonsParent;
+        [SerializeField] private GameObject _difficultyButtonPrefab;
         
-        private List<SongEntry> allSongs = new List<SongEntry>();
-        private List<SongEntry> filteredSongs = new List<SongEntry>();
-        private int currentSongIndex = 0;
-        private Difficulty selectedDifficulty = Difficulty.Normal;
+        private List<SongEntry> _allSongs = new List<SongEntry>();
+        private List<SongEntry> _filteredSongs = new List<SongEntry>();
+        private int _currentSongIndex = 0;
+        private Difficulty _selectedDifficulty = Difficulty.Normal;
         
         private void Start()
         {
@@ -43,16 +43,16 @@ namespace AshTaiko.Menu
         private void InitializeUI()
         {
             // Initialize difficulty filter dropdown
-            difficultyFilter.ClearOptions();
-            difficultyFilter.AddOptions(new List<string> { "All", "Easy", "Normal", "Hard", "Insane", "Expert", "Master" });
-            difficultyFilter.onValueChanged.AddListener(OnDifficultyFilterChanged);
+            _difficultyFilter.ClearOptions();
+            _difficultyFilter.AddOptions(new List<string> { "All", "Easy", "Normal", "Hard", "Insane", "Expert", "Master" });
+            _difficultyFilter.onValueChanged.AddListener(OnDifficultyFilterChanged);
             
             // Initialize search input
-            searchInput.onValueChanged.AddListener(OnSearchChanged);
+            _searchInput.onValueChanged.AddListener(OnSearchChanged);
             
             // Initialize buttons
-            randomButton.onClick.AddListener(SelectRandomSong);
-            scanButton.onClick.AddListener(ScanForNewSongs);
+            _randomButton.onClick.AddListener(SelectRandomSong);
+            _scanButton.onClick.AddListener(ScanForNewSongs);
             
             // Initialize difficulty buttons
             CreateDifficultyButtons();
@@ -61,7 +61,7 @@ namespace AshTaiko.Menu
         private void CreateDifficultyButtons()
         {
             // Clear existing buttons
-            foreach (Transform child in difficultyButtonsParent)
+            foreach (Transform child in _difficultyButtonsParent)
             {
                 Destroy(child.gameObject);
             }
@@ -71,7 +71,7 @@ namespace AshTaiko.Menu
             
             foreach (Difficulty diff in difficulties)
             {
-                GameObject buttonObj = Instantiate(difficultyButtonPrefab, difficultyButtonsParent);
+                GameObject buttonObj = Instantiate(_difficultyButtonPrefab, _difficultyButtonsParent);
                 Button button = buttonObj.GetComponent<Button>();
                 TextMeshProUGUI buttonText = buttonObj.GetComponentInChildren<TextMeshProUGUI>();
                 
@@ -84,7 +84,7 @@ namespace AshTaiko.Menu
                 button.onClick.AddListener(() => OnDifficultySelected(capturedDiff));
                 
                 // Set initial selected difficulty
-                if (diff == selectedDifficulty)
+                if (diff == _selectedDifficulty)
                 {
                     button.interactable = false;
                 }
@@ -95,8 +95,8 @@ namespace AshTaiko.Menu
         {
             if (ChartDatabase.Instance != null)
             {
-                allSongs = ChartDatabase.Instance.GetSongs().ToList();
-                filteredSongs = allSongs.ToList();
+                _allSongs = ChartDatabase.Instance.GetSongs().ToList();
+                _filteredSongs = _allSongs.ToList();
                 RefreshSongList();
             }
         }
@@ -104,20 +104,20 @@ namespace AshTaiko.Menu
         private void RefreshSongList()
         {
             // Clear existing song items
-            foreach (Transform child in songListContent)
+            foreach (Transform child in _songListContent)
             {
                 Destroy(child.gameObject);
             }
             
             // Create song items
-            for (int i = 0; i < filteredSongs.Count; i++)
+            for (int i = 0; i < _filteredSongs.Count; i++)
             {
-                GameObject songItemObj = Instantiate(songItemPrefab, songListContent);
+                GameObject songItemObj = Instantiate(_songItemPrefab, _songListContent);
                 SongListItem songItem = songItemObj.GetComponent<SongListItem>();
                 
                 if (songItem != null)
                 {
-                    songItem.Initialize(filteredSongs[i], i);
+                    songItem.Initialize(_filteredSongs[i], i);
                     songItem.OnSongSelected += OnSongItemSelected;
                 }
             }
@@ -125,17 +125,17 @@ namespace AshTaiko.Menu
         
         private void UpdateSongDisplay()
         {
-            if (filteredSongs.Count == 0) return;
+            if (_filteredSongs.Count == 0) return;
             
-            SongEntry currentSong = filteredSongs[currentSongIndex];
+            SongEntry currentSong = _filteredSongs[_currentSongIndex];
             
             // Update song info
-            currentSongTitle.text = currentSong.Title;
-            currentSongArtist.text = currentSong.Artist;
-            currentSongCreator.text = currentSong.Creator;
+            _currentSongTitle.text = currentSong.Title;
+            _currentSongArtist.text = currentSong.Artist;
+            _currentSongCreator.text = currentSong.Creator;
             
             // Get the selected difficulty chart
-            ChartData currentChart = currentSong.GetChart(selectedDifficulty);
+            ChartData currentChart = currentSong.GetChart(_selectedDifficulty);
             if (currentChart == null)
             {
                 // Try to find any available chart
@@ -144,21 +144,21 @@ namespace AshTaiko.Menu
             
             if (currentChart != null)
             {
-                currentSongLength.text = FormatTime(currentChart.TotalLength);
-                currentSongBPM.text = currentChart.TimingPoints != null && currentChart.TimingPoints.Count > 0 ? 
+                _currentSongLength.text = FormatTime(currentChart.TotalLength);
+                _currentSongBPM.text = currentChart.TimingPoints != null && currentChart.TimingPoints.Count > 0 ? 
                     $"{currentChart.TimingPoints[0].BPM:F0} BPM" : "Unknown BPM";
             }
             else
             {
-                currentSongLength.text = "No chart available";
-                currentSongBPM.text = "Unknown BPM";
+                _currentSongLength.text = "No chart available";
+                _currentSongBPM.text = "Unknown BPM";
             }
             
             // Update background image if available
             if (!string.IsNullOrEmpty(currentSong.BackgroundImage))
             {
                 // Load background image (you'd need to implement image loading)
-                // currentSongBackground.sprite = LoadSprite(currentSong.BackgroundImage);
+                // _currentSongBackground.sprite = LoadSprite(currentSong.BackgroundImage);
             }
             
             // Safety check for Charts list
@@ -181,9 +181,9 @@ namespace AshTaiko.Menu
             }
             
             // Update difficulty button states based on available charts
-            for (int i = 0; i < difficultyButtonsParent.childCount; i++)
+            for (int i = 0; i < _difficultyButtonsParent.childCount; i++)
             {
-                Transform buttonTransform = difficultyButtonsParent.GetChild(i);
+                Transform buttonTransform = _difficultyButtonsParent.GetChild(i);
                 Button button = buttonTransform.GetComponent<Button>();
                 TextMeshProUGUI buttonText = buttonTransform.GetComponentInChildren<TextMeshProUGUI>();
                 
@@ -197,7 +197,7 @@ namespace AshTaiko.Menu
                     buttonText.color = hasDifficulty ? Color.white : Color.gray;
                     
                     // Highlight selected difficulty
-                    if (diff == selectedDifficulty && hasDifficulty)
+                    if (diff == _selectedDifficulty && hasDifficulty)
                     {
                         button.interactable = false;
                         buttonText.color = Color.yellow;
@@ -208,13 +208,13 @@ namespace AshTaiko.Menu
         
         private void OnSongItemSelected(int index)
         {
-            currentSongIndex = index;
+            _currentSongIndex = index;
             UpdateSongDisplay();
         }
         
         private void OnDifficultySelected(Difficulty difficulty)
         {
-            selectedDifficulty = difficulty;
+            _selectedDifficulty = difficulty;
             UpdateSongDisplay();
         }
         
@@ -222,15 +222,15 @@ namespace AshTaiko.Menu
         {
             if (value == 0) // "All"
             {
-                filteredSongs = allSongs.ToList();
+                _filteredSongs = _allSongs.ToList();
             }
             else
             {
                 Difficulty selectedDiff = (Difficulty)(value - 1);
-                filteredSongs = allSongs.Where(s => s.Charts != null && s.Charts.Any(c => c.Difficulty == selectedDiff)).ToList();
+                _filteredSongs = _allSongs.Where(s => s.Charts != null && s.Charts.Any(c => c.Difficulty == selectedDiff)).ToList();
             }
             
-            currentSongIndex = 0;
+            _currentSongIndex = 0;
             RefreshSongList();
             UpdateSongDisplay();
         }
@@ -239,11 +239,11 @@ namespace AshTaiko.Menu
         {
             if (string.IsNullOrEmpty(searchQuery))
             {
-                filteredSongs = allSongs.ToList();
+                _filteredSongs = _allSongs.ToList();
             }
             else
             {
-                filteredSongs = allSongs.Where(s => 
+                _filteredSongs = _allSongs.Where(s => 
                     (s.Title != null && s.Title.ToLower().Contains(searchQuery.ToLower())) ||
                     (s.Artist != null && s.Artist.ToLower().Contains(searchQuery.ToLower())) ||
                     (s.Creator != null && s.Creator.ToLower().Contains(searchQuery.ToLower())) ||
@@ -251,16 +251,16 @@ namespace AshTaiko.Menu
                 ).ToList();
             }
             
-            currentSongIndex = 0;
+            _currentSongIndex = 0;
             RefreshSongList();
             UpdateSongDisplay();
         }
         
         private void SelectRandomSong()
         {
-            if (filteredSongs.Count > 0)
+            if (_filteredSongs.Count > 0)
             {
-                currentSongIndex = Random.Range(0, filteredSongs.Count);
+                _currentSongIndex = Random.Range(0, _filteredSongs.Count);
                 UpdateSongDisplay();
             }
         }
@@ -283,10 +283,10 @@ namespace AshTaiko.Menu
         
         public void StartGame()
         {
-            if (filteredSongs.Count > 0)
+            if (_filteredSongs.Count > 0)
             {
-                SongEntry selectedSong = filteredSongs[currentSongIndex];
-                ChartData selectedChart = selectedSong.GetChart(selectedDifficulty);
+                SongEntry selectedSong = _filteredSongs[_currentSongIndex];
+                ChartData selectedChart = selectedSong.GetChart(_selectedDifficulty);
                 
                 if (selectedChart != null)
                 {
@@ -295,25 +295,25 @@ namespace AshTaiko.Menu
                 }
                 else
                 {
-                    Debug.LogWarning($"No chart found for difficulty {selectedDifficulty} in song {selectedSong.Title}");
+                    Debug.LogWarning($"No chart found for difficulty {_selectedDifficulty} in song {selectedSong.Title}");
                 }
             }
         }
         
         public void NextSong()
         {
-            if (filteredSongs.Count > 0)
+            if (_filteredSongs.Count > 0)
             {
-                currentSongIndex = (currentSongIndex + 1) % filteredSongs.Count;
+                _currentSongIndex = (_currentSongIndex + 1) % _filteredSongs.Count;
                 UpdateSongDisplay();
             }
         }
         
         public void PreviousSong()
         {
-            if (filteredSongs.Count > 0)
+            if (_filteredSongs.Count > 0)
             {
-                currentSongIndex = (currentSongIndex - 1 + filteredSongs.Count) % filteredSongs.Count;
+                _currentSongIndex = (_currentSongIndex - 1 + _filteredSongs.Count) % _filteredSongs.Count;
                 UpdateSongDisplay();
             }
         }

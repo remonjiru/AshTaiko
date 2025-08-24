@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d, type: 3}
   m_Name: SongDatabase
   m_EditorClassIdentifier: 
-  songs:
-  - UniqueId: 40ebe5ce-2133-4ce5-b50b-28a90f961536
+  _songs:
+  - UniqueId: de386ff6-f36c-457f-aa4b-385a20a3f5d8
     Title: Tamale
     TitleUnicode: Tamale
     Artist: Tyler, The Creator
@@ -12767,7 +12767,7 @@ MonoBehaviour:
       TotalLength: 158.627
       MaxCombo: 210
       StarRating: 0
-  - UniqueId: ff2b5342-7f2c-4307-8db0-e83baa03b9e5
+  - UniqueId: fb22ef80-50f0-42a3-916f-e136d022d93b
     Title: Miku (Cut Ver.)
     TitleUnicode: Miku (Cut Ver.)
     Artist: Anamanaguchi
@@ -17303,7 +17303,7 @@ MonoBehaviour:
       TotalLength: 76.007
       MaxCombo: 329
       StarRating: 0
-  - UniqueId: 08f7024f-249d-4adb-b4ae-7f663ef201c3
+  - UniqueId: 73206912-cea9-4550-8b1b-c7cfc82ae8dc
     Title: Rokuchounen to Ichiya Monogatari
     TitleUnicode: 
     Artist: 

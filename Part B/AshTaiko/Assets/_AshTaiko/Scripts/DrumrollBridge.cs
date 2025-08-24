@@ -5,10 +5,17 @@ namespace AshTaiko
 {
     public class DrumrollBridge : MonoBehaviour
     {
-        public Note headNote;
-        public Note endNote;
+        [SerializeField]
+        private Note _headNote;
+        
+        [SerializeField]
+        private Note _endNote;
 
-        private bool hasExisted;
+        private bool _hasExisted;
+
+        // Public properties for access
+        public Note headNote { get => _headNote; set => _headNote = value; }
+        public Note endNote { get => _endNote; set => _endNote = value; }
 
         private void OnEnable()
         {
@@ -17,22 +24,22 @@ namespace AshTaiko
 
         void LateUpdate()
         {
-            if (headNote == null && endNote == null) Destroy(gameObject);
+            if (_headNote == null && _endNote == null) Destroy(gameObject);
             
-            if (endNote == null && hasExisted)
+            if (_endNote == null && _hasExisted)
             {
                 Destroy(gameObject);
                 return;
             }
-            Vector3 fallback = (headNote != null) ? headNote.transform.position - transform.right * 100 : endNote.transform.position - transform.right * 100;
+            Vector3 fallback = (_headNote != null) ? _headNote.transform.position - transform.right * 100 : _endNote.transform.position - transform.right * 100;
 
             Vector3 start = fallback;
-            if (headNote != null) start = headNote.transform.position;
+            if (_headNote != null) start = _headNote.transform.position;
             Vector3 end = fallback;
-            if (endNote != null)
+            if (_endNote != null)
             {
-                end = endNote.transform.position;
-                hasExisted = true;
+                end = _endNote.transform.position;
+                _hasExisted = true;
             }
 
             //Vector3 mid = (start + end) / 2f;F

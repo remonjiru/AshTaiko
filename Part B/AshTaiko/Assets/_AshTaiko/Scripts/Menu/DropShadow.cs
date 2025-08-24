@@ -15,15 +15,19 @@ namespace UnityEngine.UI
     public class DropShadow : BaseMeshEffect
     {
         [SerializeField]
-        private Color shadowColor = new Color(0f, 0f, 0f, 0.5f);
+        private Color _shadowColor = new Color(0f, 0f, 0f, 0.5f);
  
         [SerializeField]
-        private Vector2 shadowDistance = new Vector2(1f, -1f);
+        private Vector2 _shadowDistance = new Vector2(1f, -1f);
  
         [SerializeField]
-        private bool m_UseGraphicAlpha = true;
-        public int iterations = 5;
-        public Vector2 shadowSpread = Vector2.one;
+        private bool _useGraphicAlpha = true;
+        
+        [SerializeField]
+        private int _iterations = 5;
+        
+        [SerializeField]
+        private Vector2 _shadowSpread = Vector2.one;
  
         protected DropShadow()
         {}
@@ -31,18 +35,18 @@ namespace UnityEngine.UI
 #if UNITY_EDITOR
         protected override void OnValidate()
         {
-            EffectDistance = shadowDistance;
+            EffectDistance = _shadowDistance;
             base.OnValidate();
         }
  
 #endif
  
-        public Color effectColor
+        public Color EffectColor
         {
-            get { return shadowColor; }
+            get { return _shadowColor; }
             set
             {
-                shadowColor = value;
+                _shadowColor = value;
                 if (graphic != null)
                     graphic.SetVerticesDirty();
             }
@@ -50,10 +54,10 @@ namespace UnityEngine.UI
  
         public Vector2 ShadowSpread
         {
-            get { return shadowSpread; }
+            get { return _shadowSpread; }
             set
             {
-                shadowSpread = value;
+                _shadowSpread = value;
                 if (graphic != null)
                     graphic.SetVerticesDirty();
             }
@@ -61,10 +65,10 @@ namespace UnityEngine.UI
  
         public int Iterations
         {
-            get { return iterations; }
+            get { return _iterations; }
             set
             {
-                iterations = value;
+                _iterations = value;
                 if (graphic != null)
                     graphic.SetVerticesDirty();
             }
@@ -72,22 +76,22 @@ namespace UnityEngine.UI
  
         public Vector2 EffectDistance
         {
-            get { return shadowDistance; }
+            get { return _shadowDistance; }
             set
             {
-                shadowDistance = value;
+                _shadowDistance = value;
  
                 if (graphic != null)
                     graphic.SetVerticesDirty();
             }
         }
  
-        public bool useGraphicAlpha
+        public bool UseGraphicAlpha
         {
-            get { return m_UseGraphicAlpha; }
+            get { return _useGraphicAlpha; }
             set
             {
-                m_UseGraphicAlpha = value;
+                _useGraphicAlpha = value;
                 if (graphic != null)
                     graphic.SetVerticesDirty();
             }
@@ -102,20 +106,20 @@ namespace UnityEngine.UI
             List<UIVertex> vertsCopy = new List<UIVertex>(verts);
             verts.Clear();
  
-            for(int i=0; i<iterations; i++)
+            for(int i=0; i<_iterations; i++)
             {
                 for(int v=0; v<count; v++)
                 {
                     vt = vertsCopy[v];
                     Vector3 position = vt.position;
-                    float fac = (float)i/(float)iterations;
-                    position.x *= (1 + shadowSpread.x*fac*0.01f);
-                    position.y *= (1 + shadowSpread.y*fac*0.01f);
-                    position.x += shadowDistance.x * fac;
-                    position.y += shadowDistance.y * fac;
+                    float fac = (float)i/(float)_iterations;
+                    position.x *= (1 + _shadowSpread.x*fac*0.01f);
+                    position.y *= (1 + _shadowSpread.y*fac*0.01f);
+                    position.x += _shadowDistance.x * fac;
+                    position.y += _shadowDistance.y * fac;
                     vt.position = position;
-                    Color32 color = shadowColor;
-                    color.a = (byte)((float)color.a /(float)iterations);
+                    Color32 color = _shadowColor;
+                    color.a = (byte)((float)color.a /(float)_iterations);
                     vt.color = color;
                     verts.Add(vt);
                 }

@@ -8,41 +8,41 @@ namespace AshTaiko
 {
     public class TjaImporter
     {
-        private string[] fileLines;
-        private int currentLine;
-        private SongEntry currentSong;
-        private ChartData currentChart;
-        private float currentBPM = 120f;
-        private float currentOffset = 0f;
-        private float beatLength = 0.5f; // 120 BPM = 0.5 seconds per beat
-        private bool inNotesSection = false;
-        private List<string> currentNotesData = new List<string>();
-        private int currentMeasure = 0;
-        private float currentTime = 0f;
-        private float currentMeasureDuration = 0f;
-        private int currentTimeSignatureNumerator = 4;
-        private int currentTimeSignatureDenominator = 4;
+        private string[] _fileLines;
+        private int _currentLine;
+        private SongEntry _currentSong;
+        private ChartData _currentChart;
+        private float _currentBPM = 120f;
+        private float _currentOffset = 0f;
+        private float _beatLength = 0.5f; // 120 BPM = 0.5 seconds per beat
+        private bool _inNotesSection = false;
+        private List<string> _currentNotesData = new List<string>();
+        private int _currentMeasure = 0;
+        private float _currentTime = 0f;
+        private float _currentMeasureDuration = 0f;
+        private int _currentTimeSignatureNumerator = 4;
+        private int _currentTimeSignatureDenominator = 4;
         
         public SongEntry ImportSong(string filePath)
         {
             try
             {
                 Debug.Log($"Starting TJA import: {filePath}");
-                fileLines = File.ReadAllLines(filePath);
-                currentLine = 0;
+                _fileLines = File.ReadAllLines(filePath);
+                _currentLine = 0;
                 
-                currentSong = new SongEntry();
-                currentChart = null;
-                currentBPM = 120f;
-                currentOffset = 0f;
-                beatLength = 0.5f;
-                inNotesSection = false;
-                currentNotesData.Clear();
-                currentMeasure = 0;
-                currentTime = 0f;
-                currentMeasureDuration = 0f;
-                currentTimeSignatureNumerator = 4;
-                currentTimeSignatureDenominator = 4;
+                _currentSong = new SongEntry();
+                _currentChart = null;
+                _currentBPM = 120f;
+                _currentOffset = 0f;
+                _beatLength = 0.5f;
+                _inNotesSection = false;
+                _currentNotesData.Clear();
+                _currentMeasure = 0;
+                _currentTime = 0f;
+                _currentMeasureDuration = 0f;
+                _currentTimeSignatureNumerator = 4;
+                _currentTimeSignatureDenominator = 4;
                 
                 // First pass: parse metadata and create charts
                 ParseMetadataAndCharts();
@@ -52,26 +52,26 @@ namespace AshTaiko
                 
                 // Set the audio filename relative to the TJA file
                 string tjaDirectory = Path.GetDirectoryName(filePath);
-                if (!string.IsNullOrEmpty(currentSong.AudioFilename))
+                if (!string.IsNullOrEmpty(_currentSong.AudioFilename))
                 {
-                    currentSong.AudioFilename = Path.Combine(tjaDirectory, currentSong.AudioFilename);
-                    Debug.Log($"TJA: Full audio path = {currentSong.AudioFilename}");
+                    _currentSong.AudioFilename = Path.Combine(tjaDirectory, _currentSong.AudioFilename);
+                    Debug.Log($"TJA: Full audio path = {_currentSong.AudioFilename}");
                 }
                 
                 // Calculate final statistics for all charts
-                foreach (var chart in currentSong.Charts)
+                foreach (var chart in _currentSong.Charts)
                 {
                     CalculateChartStatistics(chart);
                 }
                 
-                Debug.Log($"TJA import completed: {currentSong.Title} - {currentSong.Artist}");
-                Debug.Log($"TJA: Created {currentSong.Charts.Count} charts");
-                foreach (var chart in currentSong.Charts)
+                Debug.Log($"TJA import completed: {_currentSong.Title} - {_currentSong.Artist}");
+                Debug.Log($"TJA: Created {_currentSong.Charts.Count} charts");
+                foreach (var chart in _currentSong.Charts)
                 {
                     Debug.Log($"TJA: Chart '{chart.Version}' - {chart.HitObjects.Count} notes, {chart.TimingPoints.Count} timing points");
                 }
                 
-                return currentSong;
+                return _currentSong;
             }
             catch (Exception e)
             {
@@ -83,44 +83,44 @@ namespace AshTaiko
         
         private void ParseMetadataAndCharts()
         {
-            currentLine = 0;
+            _currentLine = 0;
             
-            while (currentLine < fileLines.Length)
+            while (_currentLine < _fileLines.Length)
             {
-                string line = fileLines[currentLine].Trim();
+                string line = _fileLines[_currentLine].Trim();
                 
                 // Skip comments and empty lines
                 if (string.IsNullOrEmpty(line) || line.StartsWith("//"))
                 {
-                    currentLine++;
+                    _currentLine++;
                     continue;
                 }
                 
                 // Parse metadata
                 if (line.StartsWith("TITLE:"))
                 {
-                    currentSong.Title = line.Substring("TITLE:".Length).Trim();
-                    Debug.Log($"TJA: Title = {currentSong.Title}");
+                    _currentSong.Title = line.Substring("TITLE:".Length).Trim();
+                    Debug.Log($"TJA: Title = {_currentSong.Title}");
                 }
                 else if (line.StartsWith("ARTIST:"))
                 {
-                    currentSong.Artist = line.Substring("ARTIST:".Length).Trim();
-                    Debug.Log($"TJA: Artist = {currentSong.Artist}");
+                    _currentSong.Artist = line.Substring("ARTIST:".Length).Trim();
+                    Debug.Log($"TJA: Artist = {_currentSong.Artist}");
                 }
                 else if (line.StartsWith("CREATOR:"))
                 {
-                    currentSong.Creator = line.Substring("CREATOR:".Length).Trim();
-                    Debug.Log($"TJA: Creator = {currentSong.Creator}");
+                    _currentSong.Creator = line.Substring("CREATOR:".Length).Trim();
+                    Debug.Log($"TJA: Creator = {_currentSong.Creator}");
                 }
                 else if (line.StartsWith("SOURCE:"))
                 {
-                    currentSong.Source = line.Substring("SOURCE:".Length).Trim();
-                    Debug.Log($"TJA: Source = {currentSong.Source}");
+                    _currentSong.Source = line.Substring("SOURCE:".Length).Trim();
+                    Debug.Log($"TJA: Source = {_currentSong.Source}");
                 }
                 else if (line.StartsWith("WAVE:"))
                 {
-                    currentSong.AudioFilename = line.Substring("WAVE:".Length).Trim();
-                    Debug.Log($"TJA: Audio = {currentSong.AudioFilename}");
+                    _currentSong.AudioFilename = line.Substring("WAVE:".Length).Trim();
+                    Debug.Log($"TJA: Audio = {_currentSong.AudioFilename}");
                 }
                 else if (line.StartsWith("BPM:"))
                 {
@@ -155,14 +155,14 @@ namespace AshTaiko
                     ParseStyle(line);
                 }
                 
-                currentLine++;
+                _currentLine++;
             }
         }
         
         private void ParseNotesForCharts()
         {
             // For each chart, parse the notes section
-            foreach (var chart in currentSong.Charts)
+            foreach (var chart in _currentSong.Charts)
             {
                 ParseNotesForChart(chart);
             }
@@ -170,23 +170,23 @@ namespace AshTaiko
         
         private void ParseNotesForChart(ChartData chart)
         {
-            currentLine = 0;
-            currentChart = chart;
-            inNotesSection = false;
-            currentNotesData.Clear();
-            currentMeasure = 0;
-            currentTime = 0f;
+            _currentLine = 0;
+            _currentChart = chart;
+            _inNotesSection = false;
+            _currentNotesData.Clear();
+            _currentMeasure = 0;
+            _currentTime = 0f;
             
             // CRITICAL: Initialize timing system for this chart
             // Use the BPM and offset from the metadata
-            currentBPM = 186f; // Default from your TJA file
-            currentOffset = -11.432f; // From your TJA file
-            beatLength = 60f / currentBPM;
-            currentTimeSignatureNumerator = 4;
-            currentTimeSignatureDenominator = 4;
-            currentMeasureDuration = (currentTimeSignatureNumerator * 4f * beatLength) / currentTimeSignatureDenominator;
+            _currentBPM = 186f; // Default from your TJA file
+            _currentOffset = -11.432f; // From your TJA file
+            _beatLength = 60f / _currentBPM;
+            _currentTimeSignatureNumerator = 4;
+            _currentTimeSignatureDenominator = 4;
+            _currentMeasureDuration = (_currentTimeSignatureNumerator * 4f * _beatLength) / _currentTimeSignatureDenominator;
             
-            Debug.Log($"TJA: Initialized timing for chart '{chart.Version}' - BPM: {currentBPM}, BeatLength: {beatLength:F3}s, MeasureDuration: {currentMeasureDuration:F3}s, Offset: {currentOffset:F3}s");
+            Debug.Log($"TJA: Initialized timing for chart '{chart.Version}' - BPM: {_currentBPM}, BeatLength: {_beatLength:F3}s, MeasureDuration: {_currentMeasureDuration:F3}s, Offset: {_currentOffset:F3}s");
             
             // Reset timing for this chart
             chart.TimingPoints.Clear();
@@ -195,21 +195,21 @@ namespace AshTaiko
             // Add initial timing point
             TimingPoint tp = new TimingPoint();
             tp.Time = 0;
-            tp.BeatLength = beatLength * 1000f;
+            tp.BeatLength = _beatLength * 1000f;
             tp.Meter = 4;
             tp.Uninherited = true;
             chart.TimingPoints.Add(tp);
             
             Debug.Log($"TJA: Parsing notes for chart '{chart.Version}'");
             
-            while (currentLine < fileLines.Length)
+            while (_currentLine < _fileLines.Length)
             {
-                string line = fileLines[currentLine].Trim();
+                string line = _fileLines[_currentLine].Trim();
                 
                 // Skip comments and empty lines
                 if (string.IsNullOrEmpty(line) || line.StartsWith("//"))
                 {
-                    currentLine++;
+                    _currentLine++;
                     continue;
                 }
                 
@@ -225,7 +225,7 @@ namespace AshTaiko
                     }
                 }
                 
-                currentLine++;
+                _currentLine++;
             }
             
             Debug.Log($"TJA: Finished parsing chart '{chart.Version}' - {chart.HitObjects.Count} notes");
@@ -234,13 +234,13 @@ namespace AshTaiko
         private void ParseNotesSection(ChartData chart)
         {
             // Skip the COURSE: line
-            currentLine++;
+            _currentLine++;
             
-            Debug.Log($"TJA: Starting notes section parsing - Initial timing: BPM={currentBPM}, BeatLength={beatLength:F3}s, MeasureDuration={currentMeasureDuration:F3}s, Offset={currentOffset:F3}s");
+            Debug.Log($"TJA: Starting notes section parsing - Initial timing: BPM={_currentBPM}, BeatLength={_beatLength:F3}s, MeasureDuration={_currentMeasureDuration:F3}s, Offset={_currentOffset:F3}s");
             
-            while (currentLine < fileLines.Length)
+            while (_currentLine < _fileLines.Length)
             {
-                string line = fileLines[currentLine].Trim();
+                string line = _fileLines[_currentLine].Trim();
                 
                 // Check if we've reached the end of this chart's notes
                 if (line.StartsWith("COURSE:") || line.StartsWith("TITLE:") || line.StartsWith("ARTIST:"))
@@ -252,22 +252,22 @@ namespace AshTaiko
                 // Skip comments and empty lines
                 if (string.IsNullOrEmpty(line) || line.StartsWith("//"))
                 {
-                    currentLine++;
+                    _currentLine++;
                     continue;
                 }
                 
                 // Check for #START and #END commands
                 if (line.StartsWith("#START"))
                 {
-                    inNotesSection = true;
+                    _inNotesSection = true;
                     Debug.Log($"TJA: Entering notes section for chart '{chart.Version}'");
                 }
                 else if (line.StartsWith("#END"))
                 {
-                    inNotesSection = false;
+                    _inNotesSection = false;
                     Debug.Log($"TJA: Exiting notes section for chart '{chart.Version}'");
                 }
-                else if (inNotesSection)
+                else if (_inNotesSection)
                 {
                     // Handle TJA commands
                     if (line.StartsWith("#BPMCHANGE"))
@@ -333,7 +333,7 @@ namespace AshTaiko
                     }
                 }
                 
-                currentLine++;
+                _currentLine++;
             }
         }
         
@@ -341,21 +341,21 @@ namespace AshTaiko
         {
             // Remove the trailing comma and parse the measure
             string measureData = line.TrimEnd(',');
-            Debug.Log($"TJA: Parsing measure {currentMeasure}: {measureData}");
+            Debug.Log($"TJA: Parsing measure {_currentMeasure}: {measureData}");
             
             if (measureData.Length == 0)
             {
                 // Empty measure - just advance time
-                currentTime += currentMeasureDuration;
-                currentMeasure++;
+                _currentTime += _currentMeasureDuration;
+                _currentMeasure++;
                 return;
             }
             
             // Calculate timing for this measure
             // According to TJA spec: "each measure is equally divided by the amount of numbers there are inside"
-            float noteSpacing = currentMeasureDuration / measureData.Length;
+            float noteSpacing = _currentMeasureDuration / measureData.Length;
             
-            Debug.Log($"TJA: Measure {currentMeasure} - {measureData.Length} notes, duration: {currentMeasureDuration:F3}s, spacing: {noteSpacing:F3}s, currentTime: {currentTime:F3}s");
+            Debug.Log($"TJA: Measure {_currentMeasure} - {measureData.Length} notes, duration: {_currentMeasureDuration:F3}s, spacing: {noteSpacing:F3}s, currentTime: {_currentTime:F3}s");
             
             for (int i = 0; i < measureData.Length; i++)
             {
@@ -366,7 +366,7 @@ namespace AshTaiko
                 float noteTimeInMeasure = i * noteSpacing;
                 // TJA offset: negative values delay notes (make them appear later), positive values make them appear sooner
                 // In our system: negative times = earlier, positive times = later, so we need to reverse the offset
-                float totalNoteTime = currentTime + noteTimeInMeasure - currentOffset;
+                float totalNoteTime = _currentTime + noteTimeInMeasure - _currentOffset;
                 
                 // Convert note character to NoteType
                 NoteType noteType = ConvertTjaNoteChar(noteChar);
@@ -376,14 +376,14 @@ namespace AshTaiko
                     HitObject hitObject = new HitObject(totalNoteTime, 1f, noteType);
                     chart.HitObjects.Add(hitObject);
                     
-                    Debug.Log($"TJA: Note at measure {currentMeasure}, position {i}/{measureData.Length}, time {totalNoteTime:F3}s, type {noteType} (char: {noteChar})");
-                    Debug.Log($"  - Base time: {currentTime:F3}s, Note in measure: {noteTimeInMeasure:F3}s, Offset: {currentOffset:F3}s, Final: {totalNoteTime:F3}s");
+                    Debug.Log($"TJA: Note at measure {_currentMeasure}, position {i}/{measureData.Length}, time {totalNoteTime:F3}s, type {noteType} (char: {noteChar})");
+                    Debug.Log($"  - Base time: {_currentTime:F3}s, Note in measure: {noteTimeInMeasure:F3}s, Offset: {_currentOffset:F3}s, Final: {totalNoteTime:F3}s");
                 }
             }
             
             // Move to next measure
-            currentTime += currentMeasureDuration;
-            currentMeasure++;
+            _currentTime += _currentMeasureDuration;
+            _currentMeasure++;
         }
         
         private void ParseBPMChangeCommand(string line, ChartData chart)
@@ -395,21 +395,21 @@ namespace AshTaiko
                 Debug.Log($"TJA: BPM change command detected: {line}");
                 
                 // Update current BPM and beat length
-                currentBPM = newBPM;
-                beatLength = 60f / newBPM;
+                _currentBPM = newBPM;
+                _beatLength = 60f / newBPM;
                 
                 // Recalculate current measure duration
-                currentMeasureDuration = (currentTimeSignatureNumerator * 4f * beatLength) / currentTimeSignatureDenominator;
+                _currentMeasureDuration = (_currentTimeSignatureNumerator * 4f * _beatLength) / _currentTimeSignatureDenominator;
                 
                 // Create timing point for this BPM change
                 TimingPoint tp = new TimingPoint();
-                tp.Time = currentTime * 1000f; // Convert to milliseconds
-                tp.BeatLength = beatLength * 1000f;
-                tp.Meter = currentTimeSignatureNumerator;
+                tp.Time = _currentTime * 1000f; // Convert to milliseconds
+                tp.BeatLength = _beatLength * 1000f;
+                tp.Meter = _currentTimeSignatureNumerator;
                 tp.Uninherited = true;
                 chart.TimingPoints.Add(tp);
                 
-                Debug.Log($"TJA: BPM change to {newBPM} at measure {currentMeasure}, time {currentTime:F3}s, new beat length: {beatLength:F3}s, measure duration: {currentMeasureDuration:F3}s");
+                Debug.Log($"TJA: BPM change to {newBPM} at measure {_currentMeasure}, time {_currentTime:F3}s, new beat length: {_beatLength:F3}s, measure duration: {_currentMeasureDuration:F3}s");
             }
         }
         
@@ -426,13 +426,13 @@ namespace AshTaiko
                 {
                     Debug.Log($"TJA: Measure command detected: {line}");
                     
-                    currentTimeSignatureNumerator = numerator;
-                    currentTimeSignatureDenominator = denominator;
+                    _currentTimeSignatureNumerator = numerator;
+                    _currentTimeSignatureDenominator = denominator;
                     
                     // Recalculate current measure duration
-                    currentMeasureDuration = (numerator * 4f * beatLength) / denominator;
+                    _currentMeasureDuration = (numerator * 4f * _beatLength) / denominator;
                     
-                    Debug.Log($"TJA: Time signature change to {numerator}/{denominator} at measure {currentMeasure}, new duration: {currentMeasureDuration:F3}s");
+                    Debug.Log($"TJA: Time signature change to {numerator}/{denominator} at measure {_currentMeasure}, new duration: {_currentMeasureDuration:F3}s");
                 }
             }
         }
@@ -444,8 +444,8 @@ namespace AshTaiko
             if (parts.Length >= 2 && float.TryParse(parts[1], out float delaySeconds))
             {
                 // Apply delay to current timing
-                currentTime += delaySeconds;
-                Debug.Log($"TJA: Delay of {delaySeconds:F3}s applied, new time: {currentTime:F3}s");
+                _currentTime += delaySeconds;
+                Debug.Log($"TJA: Delay of {delaySeconds:F3}s applied, new time: {_currentTime:F3}s");
             }
         }
         
@@ -455,59 +455,59 @@ namespace AshTaiko
             string[] parts = line.Split(' ');
             if (parts.Length >= 2 && float.TryParse(parts[1], out float scrollMultiplier))
             {
-                Debug.Log($"TJA: Scroll speed multiplier {scrollMultiplier} at measure {currentMeasure}");
+                Debug.Log($"TJA: Scroll speed multiplier {scrollMultiplier} at measure {_currentMeasure}");
                 // Note: Scroll speed affects visual appearance, not timing
             }
         }
         
         private void ParseGogoStart(string line)
         {
-            Debug.Log($"TJA: Gogo start at measure {currentMeasure}");
+            Debug.Log($"TJA: Gogo start at measure {_currentMeasure}");
         }
         
         private void ParseGogoEnd(string line)
         {
-            Debug.Log($"TJA: Gogo end at measure {currentMeasure}");
+            Debug.Log($"TJA: Gogo end at measure {_currentMeasure}");
         }
         
         private void ParseBarlineOff(string line)
         {
-            Debug.Log($"TJA: Barline off at measure {currentMeasure}");
+            Debug.Log($"TJA: Barline off at measure {_currentMeasure}");
         }
         
         private void ParseBarlineOn(string line)
         {
-            Debug.Log($"TJA: Barline on at measure {currentMeasure}");
+            Debug.Log($"TJA: Barline on at measure {_currentMeasure}");
         }
         
         private void ParseBranchStart(string line)
         {
-            Debug.Log($"TJA: Branch start at measure {currentMeasure}");
+            Debug.Log($"TJA: Branch start at measure {_currentMeasure}");
         }
         
         private void ParseBranchEnd(string line)
         {
-            Debug.Log($"TJA: Branch end at measure {currentMeasure}");
+            Debug.Log($"TJA: Branch end at measure {_currentMeasure}");
         }
         
         private void ParseSection(string line)
         {
-            Debug.Log($"TJA: Section at measure {currentMeasure}");
+            Debug.Log($"TJA: Section at measure {_currentMeasure}");
         }
         
         private void ParseNormalBranch(string line)
         {
-            Debug.Log($"TJA: Normal branch at measure {currentMeasure}");
+            Debug.Log($"TJA: Normal branch at measure {_currentMeasure}");
         }
         
         private void ParseAdvancedBranch(string line)
         {
-            Debug.Log($"TJA: Advanced branch at measure {currentMeasure}");
+            Debug.Log($"TJA: Advanced branch at measure {_currentMeasure}");
         }
         
         private void ParseMasterBranch(string line)
         {
-            Debug.Log($"TJA: Master branch at measure {currentMeasure}");
+            Debug.Log($"TJA: Master branch at measure {_currentMeasure}");
         }
         
         private NoteType ConvertTjaNoteChar(char noteChar)
@@ -552,10 +552,10 @@ namespace AshTaiko
         {
             if (float.TryParse(line.Substring("BPM:".Length).Trim(), out float bpm))
             {
-                currentBPM = bpm;
-                beatLength = 60f / bpm;
-                currentMeasureDuration = (currentTimeSignatureNumerator * 4f * beatLength) / currentTimeSignatureDenominator;
-                Debug.Log($"TJA: BPM = {bpm}, beat length = {beatLength:F3}s, measure duration = {currentMeasureDuration:F3}s");
+                _currentBPM = bpm;
+                _beatLength = 60f / bpm;
+                _currentMeasureDuration = (_currentTimeSignatureNumerator * 4f * _beatLength) / _currentTimeSignatureDenominator;
+                Debug.Log($"TJA: BPM = {bpm}, beat length = {_beatLength:F3}s, measure duration = {_currentMeasureDuration:F3}s");
             }
         }
         
@@ -563,7 +563,7 @@ namespace AshTaiko
         {
             if (float.TryParse(line.Substring("OFFSET:".Length).Trim(), out float offset))
             {
-                currentOffset = offset;
+                _currentOffset = offset;
                 Debug.Log($"TJA: Offset = {offset:F3}s");
             }
         }
@@ -573,22 +573,22 @@ namespace AshTaiko
             string course = line.Substring("COURSE:".Length).Trim();
             
             // Create a new chart for this course
-            currentChart = new ChartData();
-            currentChart.Version = course;
-            currentChart.Difficulty = ParseDifficultyFromCourse(course);
-            currentSong.Charts.Add(currentChart);
+            _currentChart = new ChartData();
+            _currentChart.Version = course;
+            _currentChart.Difficulty = ParseDifficultyFromCourse(course);
+            _currentSong.Charts.Add(_currentChart);
             
             // Reset timing for new chart
-            currentMeasure = 0;
-            currentTime = 0f;
-            currentMeasureDuration = (currentTimeSignatureNumerator * 4f * beatLength) / currentTimeSignatureDenominator;
+            _currentMeasure = 0;
+            _currentTime = 0f;
+            _currentMeasureDuration = (_currentTimeSignatureNumerator * 4f * _beatLength) / _currentTimeSignatureDenominator;
             
-            Debug.Log($"TJA: Created chart '{course}' with difficulty {currentChart.Difficulty}");
+            Debug.Log($"TJA: Created chart '{course}' with difficulty {_currentChart.Difficulty}");
         }
         
         private void ParseLevel(string line)
         {
-            if (currentChart != null && int.TryParse(line.Substring("LEVEL:".Length).Trim(), out int level))
+            if (_currentChart != null && int.TryParse(line.Substring("LEVEL:".Length).Trim(), out int level))
             {
                 Debug.Log($"TJA: Level = {level}");
             }
@@ -596,7 +596,7 @@ namespace AshTaiko
         
         private void ParseBalloon(string line)
         {
-            if (currentChart != null)
+            if (_currentChart != null)
             {
                 string balloonData = line.Substring("BALLOON:".Length).Trim();
                 string[] parts = balloonData.Split(',');
@@ -673,13 +673,13 @@ namespace AshTaiko
         {
             Debug.Log($"=== TJA TIMING SYSTEM EXPLANATION ===");
             Debug.Log($"Chart: {chart.Version}");
-            Debug.Log($"BPM: {currentBPM}");
-            Debug.Log($"Beat Length: {beatLength:F3}s");
-            Debug.Log($"Measure Duration: {currentMeasureDuration:F3}s");
-            Debug.Log($"TJA Offset: {currentOffset:F3}s");
+            Debug.Log($"BPM: {_currentBPM}");
+            Debug.Log($"Beat Length: {_beatLength:F3}s");
+            Debug.Log($"Measure Duration: {_currentMeasureDuration:F3}s");
+            Debug.Log($"TJA Offset: {_currentOffset:F3}s");
             Debug.Log($"");
             Debug.Log($"TJA Offset Interpretation:");
-            Debug.Log($"- TJA offset {currentOffset:F3}s means notes are delayed by {Mathf.Abs(currentOffset):F3}s");
+            Debug.Log($"- TJA offset {_currentOffset:F3}s means notes are delayed by {Mathf.Abs(_currentOffset):F3}s");
             Debug.Log($"- In our system: negative times = notes appear earlier, positive times = notes appear later");
             Debug.Log($"- So we apply: noteTime = baseTime - offset (reversing the TJA offset)");
             Debug.Log($"");

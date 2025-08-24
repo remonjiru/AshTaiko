@@ -8,35 +8,35 @@ namespace AshTaiko
 {
     public class OsuImporter
     {
-        private string[] fileLines;
-        private int currentLine;
-        private string currentSection;
+        private string[] _fileLines;
+        private int _currentLine;
+        private string _currentSection;
         
         public SongEntry ImportSong(string filePath)
         {
             try
             {
                 Debug.Log($"Starting import of: {filePath}");
-                fileLines = File.ReadAllLines(filePath);
-                currentLine = 0;
+                _fileLines = File.ReadAllLines(filePath);
+                _currentLine = 0;
                 
                 SongEntry song = new SongEntry();
                 
                 // Parse the file section by section
-                while (currentLine < fileLines.Length)
+                while (_currentLine < _fileLines.Length)
                 {
-                    string line = fileLines[currentLine].Trim();
+                    string line = _fileLines[_currentLine].Trim();
                     
                     if (line.StartsWith("[") && line.EndsWith("]"))
                     {
-                        currentSection = line.Substring(1, line.Length - 2);
-                        Debug.Log($"Parsing section: {currentSection}");
-                        currentLine++;
-                        ParseSection(song, currentSection);
+                        _currentSection = line.Substring(1, line.Length - 2);
+                        Debug.Log($"Parsing section: {_currentSection}");
+                        _currentLine++;
+                        ParseSection(song, _currentSection);
                     }
                     else
                     {
-                        currentLine++;
+                        _currentLine++;
                     }
                 }
                 
@@ -91,9 +91,9 @@ namespace AshTaiko
         {
             int mode = 0; // Default to standard mode
             
-            while (currentLine < fileLines.Length)
+            while (_currentLine < _fileLines.Length)
             {
-                string line = fileLines[currentLine].Trim();
+                string line = _fileLines[_currentLine].Trim();
                 
                 if (line.StartsWith("[") || string.IsNullOrEmpty(line))
                     break;
@@ -118,7 +118,7 @@ namespace AshTaiko
                     }
                 }
                 
-                currentLine++;
+                _currentLine++;
             }
             
             // Store the mode for later use
@@ -127,9 +127,9 @@ namespace AshTaiko
         
         private void ParseMetadataSection(SongEntry song)
         {
-            while (currentLine < fileLines.Length)
+            while (_currentLine < _fileLines.Length)
             {
-                string line = fileLines[currentLine].Trim();
+                string line = _fileLines[_currentLine].Trim();
                 
                 if (line.StartsWith("[") || string.IsNullOrEmpty(line))
                     break;
@@ -172,7 +172,7 @@ namespace AshTaiko
                     song.Charts.Add(chart);
                 }
                 
-                currentLine++;
+                _currentLine++;
             }
         }
         
@@ -182,9 +182,9 @@ namespace AshTaiko
             
             ChartData currentChart = song.Charts[song.Charts.Count - 1];
             
-            while (currentLine < fileLines.Length)
+            while (_currentLine < _fileLines.Length)
             {
-                string line = fileLines[currentLine].Trim();
+                string line = _fileLines[_currentLine].Trim();
                 
                 if (line.StartsWith("[") || string.IsNullOrEmpty(line))
                     break;
@@ -225,15 +225,15 @@ namespace AshTaiko
                     }
                 }
                 
-                currentLine++;
+                _currentLine++;
             }
         }
         
         private void ParseEventsSection(SongEntry song)
         {
-            while (currentLine < fileLines.Length)
+            while (_currentLine < _fileLines.Length)
             {
-                string line = fileLines[currentLine].Trim();
+                string line = _fileLines[_currentLine].Trim();
                 
                 if (line.StartsWith("[") || string.IsNullOrEmpty(line))
                     break;
@@ -249,7 +249,7 @@ namespace AshTaiko
                     }
                 }
                 
-                currentLine++;
+                _currentLine++;
             }
         }
         
@@ -259,9 +259,9 @@ namespace AshTaiko
             
             ChartData currentChart = song.Charts[song.Charts.Count - 1];
             
-            while (currentLine < fileLines.Length)
+            while (_currentLine < _fileLines.Length)
             {
-                string line = fileLines[currentLine].Trim();
+                string line = _fileLines[_currentLine].Trim();
                 
                 if (line.StartsWith("[") || string.IsNullOrEmpty(line))
                     break;
@@ -276,7 +276,7 @@ namespace AshTaiko
                     }
                 }
                 
-                currentLine++;
+                _currentLine++;
             }
         }
         
@@ -291,9 +291,9 @@ namespace AshTaiko
             int totalLines = 0;
             int skippedLines = 0;
             
-            while (currentLine < fileLines.Length)
+            while (_currentLine < _fileLines.Length)
             {
-                string line = fileLines[currentLine].Trim();
+                string line = _fileLines[_currentLine].Trim();
                 
                 if (line.StartsWith("[") || string.IsNullOrEmpty(line))
                     break;
@@ -322,7 +322,7 @@ namespace AshTaiko
                     skippedLines++;
                 }
                 
-                currentLine++;
+                _currentLine++;
             }
             
             // Calculate chart statistics
@@ -573,12 +573,12 @@ namespace AshTaiko
         
         private void SkipSection()
         {
-            while (currentLine < fileLines.Length)
+            while (_currentLine < _fileLines.Length)
             {
-                string line = fileLines[currentLine].Trim();
+                string line = _fileLines[_currentLine].Trim();
                 if (line.StartsWith("[") || string.IsNullOrEmpty(line))
                     break;
-                currentLine++;
+                _currentLine++;
             }
         }
     }

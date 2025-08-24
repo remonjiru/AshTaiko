@@ -4,21 +4,24 @@ namespace AshTaiko
 {
     public class MenuBackgroundParallax : MonoBehaviour
     {
-        public float offsetMultiplier = 1f;
-        public float smoothTime = .3f;
+        [SerializeField]
+        private float _offsetMultiplier = 1f;
+        
+        [SerializeField]
+        private float _smoothTime = 0.3f;
 
-        private Vector3 startPosition;
-        private Vector3 velocity;
+        private Vector3 _startPosition;
+        private Vector3 _velocity;
 
         private void Start()
         {
-            startPosition = new Vector3(transform.position.x, transform.position.y, 0);
+            _startPosition = new Vector3(transform.position.x, transform.position.y, 0);
         }
 
         private void Update()
         {
             Vector2 offset = Camera.main.ScreenToViewportPoint(UnityEngine.Input.mousePosition);
-            transform.position = Vector3.SmoothDamp(transform.position, startPosition + (Vector3)(offset * offsetMultiplier), ref velocity, smoothTime);
+            transform.position = Vector3.SmoothDamp(transform.position, _startPosition + (Vector3)(offset * _offsetMultiplier), ref _velocity, _smoothTime);
         }
     }
 }

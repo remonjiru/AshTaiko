@@ -4,76 +4,120 @@ namespace AshTaiko
 {
     public class Note : MonoBehaviour
     {
-        public float hitTime;
-        public float spawnTime;
-        public float preemptTime;
-        public float travelDistance;
-        public Vector3 judgementCirclePosition;
-        private Vector3 currentPosition;
-        public float scrollSpeed = 1f;
-        public bool isHit = false;
-        public HitObject hitObject;
-        public NoteType noteType; // Store the type of this note
-                                  // Visual references for each type
-
-        public GameObject donVisual;
-        public GameObject kaVisual;
-        public GameObject donBigVisual;
-        public GameObject kaBigVisual;
-        public GameObject drumrollHeadVisual;
-        public GameObject drumrollEndVisual;
-        public GameObject drumrollBridgeVisual;
+        [SerializeField]
+        private float _hitTime;
+        
+        [SerializeField]
+        private float _spawnTime;
+        
+        [SerializeField]
+        private float _preemptTime;
+        
+        [SerializeField]
+        private float _travelDistance;
+        
+        [SerializeField]
+        private Vector3 _judgementCirclePosition;
+        
+        private Vector3 _currentPosition;
+        
+        [SerializeField]
+        private float _scrollSpeed = 1f;
+        
+        private bool _isHit = false;
+        
+        [SerializeField]
+        private HitObject _hitObject;
+        
+        [SerializeField]
+        private NoteType _noteType; // Store the type of this note
+        
+        // Visual references for each type
+        [SerializeField]
+        private GameObject _donVisual;
+        
+        [SerializeField]
+        private GameObject _kaVisual;
+        
+        [SerializeField]
+        private GameObject _donBigVisual;
+        
+        [SerializeField]
+        private GameObject _kaBigVisual;
+        
+        [SerializeField]
+        private GameObject _drumrollHeadVisual;
+        
+        [SerializeField]
+        private GameObject _drumrollEndVisual;
+        
+        [SerializeField]
+        private GameObject _drumrollBridgeVisual;
+        
         // For drumroll stretching
-        public Note drumrollEndNote; // Set by GameManager if this is a drumroll head
+        [SerializeField]
+        private Note _drumrollEndNote; // Set by GameManager if this is a drumroll head
 
         [SerializeField]
         private SpriteRenderer _spriteRenderer;
 
+        // Public properties for access
+        public float HitTime => _hitTime;
+        public float SpawnTime => _spawnTime;
+        public float PreemptTime => _preemptTime;
+        public float TravelDistance => _travelDistance;
+        public Vector3 JudgementCirclePosition { get => _judgementCirclePosition; set => _judgementCirclePosition = value; }
+        public float ScrollSpeed => _scrollSpeed;
+        public bool IsHit { get => _isHit; set => _isHit = value; }
+        public HitObject HitObject => _hitObject;
+        public NoteType NoteType => _noteType;
+        public Note DrumrollEndNote { get => _drumrollEndNote; set => _drumrollEndNote = value; }
+
         public void Initialize(float hitTime, float preemptTime, float travelDistance, float scrollSpeed, HitObject hitObject)
         {
-            this.hitTime = hitTime;
-            this.spawnTime = GameManager.Instance.SongTime;
-            this.preemptTime = preemptTime;
-            this.travelDistance = travelDistance;
-            transform.position = judgementCirclePosition + Vector3.right * travelDistance;
-            currentPosition = transform.position;
-            this.scrollSpeed = scrollSpeed;
-            this.hitObject = hitObject;
-            this.noteType = hitObject.Type; // Set the note type (Don, Ka, etc.)
+            this._hitTime = hitTime;
+            this._spawnTime = GameManager.Instance.SongTime;
+            this._preemptTime = preemptTime;
+            this._travelDistance = travelDistance;
+            transform.position = JudgementCirclePosition + Vector3.right * TravelDistance;
+            _currentPosition = transform.position;
+            this._scrollSpeed = scrollSpeed;
+            this._hitObject = hitObject;
+            this._noteType = hitObject.Type; // Set the note type (Don, Ka, etc.)
             SetVisuals();
         }
 
         private void SetVisuals()
         {
             // Disable all visuals first
-            if (donVisual) donVisual.SetActive(false);
-            if (kaVisual) kaVisual.SetActive(false);
-            if (donBigVisual) donBigVisual.SetActive(false);
-            if (kaBigVisual) kaBigVisual.SetActive(false);
-            if (drumrollHeadVisual) drumrollHeadVisual.SetActive(false);
-            if (drumrollEndVisual) drumrollEndVisual.SetActive(false);
-            if (drumrollBridgeVisual) drumrollBridgeVisual.SetActive(false);
+            if (_donVisual) _donVisual.SetActive(false);
+            if (_kaVisual) _kaVisual.SetActive(false);
+            if (_donBigVisual) _donBigVisual.SetActive(false);
+            if (_kaBigVisual) _kaBigVisual.SetActive(false);
+            if (_drumrollHeadVisual) _drumrollHeadVisual.SetActive(false);
+            if (_drumrollEndVisual) _drumrollEndVisual.SetActive(false);
+            if (_drumrollBridgeVisual) _drumrollBridgeVisual.SetActive(false);
 
-            switch (noteType)
+            switch (NoteType)
             {
                 case NoteType.Don:
-                    if (donVisual) donVisual.SetActive(true);
+                    if (_donVisual) _donVisual.SetActive(true);
                     break;
                 case NoteType.Ka:
-                    if (kaVisual) kaVisual.SetActive(true);
+                    if (_kaVisual) _kaVisual.SetActive(true);
                     break;
                 case NoteType.DonBig:
-                    if (donBigVisual) donBigVisual.SetActive(true);
+                    if (_donBigVisual) _donBigVisual.SetActive(true);
                     break;
                 case NoteType.KaBig:
-                    if (kaBigVisual) kaBigVisual.SetActive(true);
+                    if (_kaBigVisual) _kaBigVisual.SetActive(true);
                     break;
                 case NoteType.Drumroll:
                 case NoteType.DrumrollBig:
-                    if (drumrollHeadVisual) drumrollHeadVisual.SetActive(true);
+                    if (_drumrollHeadVisual) _drumrollHeadVisual.SetActive(true);
                     break;
                 case NoteType.DrumrollBalloonEnd:
-                    if (drumrollEndVisual) drumrollEndVisual.SetActive(true);
+                    if (_drumrollEndVisual) _drumrollEndVisual.SetActive(true);
                     break;
             }
         }
@@ -83,35 +127,35 @@ namespace AshTaiko
             // Debug: Check if component is disabled
             if (!enabled)
             {
-                Debug.LogWarning($"Note component at {hitTime}s is DISABLED! This will make it unhittable!");
+                Debug.LogWarning($"Note component at {HitTime}s is DISABLED! This will make it unhittable!");
                 return;
             }
             
             float currentTime = GameManager.Instance.GetSmoothedSongTime();
-            float timeLeft = hitTime - currentTime;
-            float effectivePreempt = preemptTime / scrollSpeed; // faster scroll = shorter preempt
+            float timeLeft = HitTime - currentTime;
+            float effectivePreempt = PreemptTime / ScrollSpeed; // faster scroll = shorter preempt
 
             float t = 1f - timeLeft / effectivePreempt;
 
             // Interpolate from spawn position to hit bar
-            Vector3 targetPosition = Vector3.LerpUnclamped(judgementCirclePosition + Vector3.right * travelDistance, judgementCirclePosition, t);
+            Vector3 targetPosition = Vector3.LerpUnclamped(JudgementCirclePosition + Vector3.right * TravelDistance, JudgementCirclePosition, t);
             transform.position = targetPosition;
 
-            float distancePastHitBar = judgementCirclePosition.x - transform.position.x;
+            float distancePastHitBar = JudgementCirclePosition.x - transform.position.x;
 
             // Debug note destruction (only log occasionally to avoid spam)
             if (Time.frameCount % 60 == 0 && distancePastHitBar > 5f)
             {
-                Debug.Log($"Note {hitTime}s: distance={distancePastHitBar:F1}, isHit={isHit}, type={noteType}, enabled={enabled}");
+                Debug.Log($"Note {HitTime}s: distance={distancePastHitBar:F1}, isHit={IsHit}, type={NoteType}, enabled={enabled}");
             }
 
             // Only destroy notes if they've been properly judged or are way past the hit window
-            if (noteType == NoteType.Drumroll || noteType == NoteType.DrumrollBig)
+            if (NoteType == NoteType.Drumroll || NoteType == NoteType.DrumrollBig)
             {
                 // For drumrolls, only destroy if we have an end note and are way past
-                if (distancePastHitBar > 10f && drumrollEndNote != null) // Increased from 5f to 10f
+                if (distancePastHitBar > 10f && DrumrollEndNote != null) // Increased from 5f to 10f
                 {
-                    Debug.Log($"Destroying drumroll note at {hitTime}s (distance: {distancePastHitBar:F1})");
+                    Debug.Log($"Destroying drumroll note at {HitTime}s (distance: {distancePastHitBar:F1})");
                     Destroy(gameObject);
                 }
                 return;
@@ -119,14 +163,14 @@ namespace AshTaiko
             
             // For regular notes, only destroy if they're way past the hit window
             // This prevents premature destruction due to timing issues
-            if (distancePastHitBar > 10f && isHit) // Only destroy if already judged AND way past
+            if (distancePastHitBar > 10f && IsHit) // Only destroy if already judged AND way past
             {
-                Debug.Log($"Destroying judged note at {hitTime}s (distance: {distancePastHitBar:F1})");
+                Debug.Log($"Destroying judged note at {HitTime}s (distance: {distancePastHitBar:F1})");
                 Destroy(gameObject);
             }
             else if (distancePastHitBar > 20f) // Emergency cleanup for notes that are very far past
             {
-                Debug.LogWarning($"Note at {hitTime}s destroyed due to extreme distance: {distancePastHitBar:F1} units past hit bar");
+                Debug.LogWarning($"Note at {HitTime}s destroyed due to extreme distance: {distancePastHitBar:F1} units past hit bar");
                 Destroy(gameObject);
             }
         }
@@ -136,18 +180,18 @@ namespace AshTaiko
         public void CheckNoteStatus()
         {
             float currentTime = GameManager.Instance.GetSmoothedSongTime();
-            float timeLeft = hitTime - currentTime;
-            float distancePastHitBar = judgementCirclePosition.x - transform.position.x;
+            float timeLeft = HitTime - currentTime;
+            float distancePastHitBar = JudgementCirclePosition.x - transform.position.x;
             
             Debug.Log($"=== NOTE STATUS CHECK ===");
-            Debug.Log($"Note at time: {hitTime}s");
+            Debug.Log($"Note at time: {HitTime}s");
             Debug.Log($"Current song time: {currentTime:F3}s");
             Debug.Log($"Time until hit: {timeLeft:F3}s");
             Debug.Log($"Distance past hit bar: {distancePastHitBar:F1} units");
-            Debug.Log($"Is hit: {isHit}");
-            Debug.Log($"Note type: {noteType}");
+            Debug.Log($"Is hit: {IsHit}");
+            Debug.Log($"Note type: {NoteType}");
             Debug.Log($"Position: {transform.position}");
-            Debug.Log($"Judgement circle: {judgementCirclePosition}");
+            Debug.Log($"Judgement circle: {JudgementCirclePosition}");
             Debug.Log($"Active: {gameObject.activeInHierarchy}");
             Debug.Log($"Enabled: {enabled}");
             Debug.Log($"================================");
@@ -157,8 +201,8 @@ namespace AshTaiko
         [ContextMenu("Force Hit Note")]
         public void ForceHitNote()
         {
-            isHit = true;
-            Debug.Log($"Note at {hitTime}s forced to hit state");
+            _isHit = true;
+            Debug.Log($"Note at {HitTime}s forced to hit state");
         }
     }
 

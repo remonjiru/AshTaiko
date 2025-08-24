@@ -10,6 +10,7 @@ namespace AshTaiko
         [Header("Gameplay")]
         [SerializeField]
         private Transform _receptacle;
+        
         [SerializeField]
         private Transform _startPosition;
 
@@ -17,10 +18,10 @@ namespace AshTaiko
         private Transform _endPosition;
 
         [SerializeField]
-        private Vector3 offscreenOffsetStart;
+        private Vector3 _offscreenOffsetStart;
+        
         [SerializeField]
-        private Vector3 offscreenOffsetEnd;
-
+        private Vector3 _offscreenOffsetEnd;
 
         private void Awake()
         {
@@ -29,8 +30,9 @@ namespace AshTaiko
 
         public Vector3 GetStart()
         {
-            return _startPosition.position + offscreenOffsetStart;
+            return _startPosition.position + _offscreenOffsetStart;
         }
+        
         public Vector3 GetReceptacle()
         {
             return _receptacle.position;
