@@ -2,20 +2,17 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections;
+using System.Linq;
 
 namespace AshTaiko.Menu
 {
-    /*
-        SongInfoDisplay handles the display of song information including metadata,
-        calculated statistics, and cover images. This class provides comprehensive
-        song details to help users make informed decisions.
-        
-        Data Structure Design:
-        Uses UI component references for efficient display updates.
-        Implements image loading with coroutines for non-blocking operations.
-        Stores calculated song statistics for performance optimization.
-    */
-
+    /// <summary>
+    /// Handles the display of song information including metadata, calculated statistics, and cover images.
+    /// This class provides comprehensive song details to help users make informed decisions.
+    /// Uses UI component references for efficient display updates.
+    /// Implements image loading with coroutines for non-blocking operations.
+    /// Stores calculated song statistics for performance optimization.
+    /// </summary>
     public class SongInfoDisplay : MonoBehaviour
     {
         #region UI References
@@ -34,6 +31,8 @@ namespace AshTaiko.Menu
         [SerializeField] 
         private TextMeshProUGUI _songFormatText;
         [SerializeField] 
+        private TextMeshProUGUI _songNoteCountText;
+        [SerializeField] 
         private Image _songCoverImage;
         
         [Header("Image Display Settings")]
@@ -46,10 +45,10 @@ namespace AshTaiko.Menu
 
         #region Private Fields
 
-        /*
-            Current song data for display and calculations.
-            Using nullable references ensures safe access and prevents null reference exceptions.
-        */
+        /// <summary>
+        /// Current song data for display and calculations.
+        /// Using nullable references ensures safe access and prevents null reference exceptions.
+        /// </summary>
         private SongEntry _currentSong;
         private ChartData _currentChart;
 
@@ -63,10 +62,10 @@ namespace AshTaiko.Menu
             ValidateUIComponents();
         }
 
-        /*
-            ValidateUIComponents checks that all required UI components are properly assigned.
-            This helps catch configuration issues early in development.
-        */
+        /// <summary>
+        /// Checks that all required UI components are properly assigned.
+        /// This helps catch configuration issues early in development.
+        /// </summary>
         private void ValidateUIComponents()
         {
             if (_songTitleText == null) Debug.LogWarning("SongTitleText is not assigned!");
@@ -75,6 +74,7 @@ namespace AshTaiko.Menu
             if (_songLengthText == null) Debug.LogWarning("SongLengthText is not assigned!");
             if (_songBPMText == null) Debug.LogWarning("SongBPMText is not assigned!");
             if (_songFormatText == null) Debug.LogWarning("SongFormatText is not assigned!");
+            if (_songNoteCountText == null) Debug.LogWarning("SongNoteCountText is not assigned!");
             if (_songCoverImage == null) Debug.LogWarning("SongCoverImage is not assigned!");
         }
 
@@ -82,10 +82,12 @@ namespace AshTaiko.Menu
 
         #region Public Interface
 
-        /*
-            UpdateSongInfo updates the display with information about the selected song and chart.
-            This method provides comprehensive song details for user decision making.
-        */
+        /// <summary>
+        /// Updates the display with information about the selected song and chart.
+        /// This method provides comprehensive song details for user decision making.
+        /// </summary>
+        /// <param name="song">The song entry to display information for.</param>
+        /// <param name="chart">The chart data to display information for.</param>
         public void UpdateSongInfo(SongEntry song, ChartData chart)
         {
             _currentSong = song;
@@ -107,10 +109,10 @@ namespace AshTaiko.Menu
             UpdateSongCoverImage();
         }
 
-        /*
-            ClearSongInfoDisplay resets all song information display fields.
-            This provides a clean state when no song is selected.
-        */
+        /// <summary>
+        /// Resets all song information display fields.
+        /// This provides a clean state when no song is selected.
+        /// </summary>
         public void ClearSongInfoDisplay()
         {
             if (_songTitleText != null)
@@ -130,6 +132,9 @@ namespace AshTaiko.Menu
             
             if (_songFormatText != null)
                 _songFormatText.text = "";
+                
+            if (_songNoteCountText != null)
+                _songNoteCountText.text = "";
 
             if (_songCoverImage != null)
             {
@@ -142,10 +147,10 @@ namespace AshTaiko.Menu
 
         #region Private Methods
 
-        /*
-            UpdateBasicSongInfo populates the basic song metadata fields.
-            This includes title, artist, creator, and other static information.
-        */
+        /// <summary>
+        /// Populates the basic song metadata fields.
+        /// This includes title, artist, creator, and other static information.
+        /// </summary>
         private void UpdateBasicSongInfo()
         {
             if (_songTitleText != null)
@@ -174,12 +179,25 @@ namespace AshTaiko.Menu
                 string format = GetFormatDisplayName(_currentSong.Format);
                 _songFormatText.text = $"Format: {format}";
             }
+            
+            // Update note count information
+            if (_currentChart != null)
+            {
+                // If we have a specific chart selected, show its note count
+                UpdateNoteCountDisplay();
+            }
+            else if (_songNoteCountText != null && _currentSong.Charts != null && _currentSong.Charts.Count > 0)
+            {
+                // Otherwise show total note count across all charts
+                int totalNoteCount = _currentSong.Charts.Sum(c => c.HitObjects?.Count ?? 0);
+                _songNoteCountText.text = $"Notes: {totalNoteCount:N0}";
+            }
         }
 
-        /*
-            UpdateCalculatedSongInfo calculates and displays dynamic song information.
-            This includes BPM calculation from timing points and difficulty statistics.
-        */
+        /// <summary>
+        /// Calculates and displays dynamic song information.
+        /// This includes BPM calculation from timing points and difficulty statistics.
+        /// </summary>
         private void UpdateCalculatedSongInfo()
         {
             if (_currentChart == null) return;
@@ -195,10 +213,12 @@ namespace AshTaiko.Menu
             UpdateSongStatistics();
         }
 
-        /*
-            CalculateAverageBPM computes the average BPM from timing points in the chart.
-            This provides users with tempo information to help with song selection.
-        */
+        /// <summary>
+        /// Computes the average BPM from timing points in the chart.
+        /// This provides users with tempo information to help with song selection.
+        /// </summary>
+        /// <param name="chart">The chart data to calculate BPM from.</param>
+        /// <returns>The average BPM value.</returns>
         private float CalculateAverageBPM(ChartData chart)
         {
             if (chart.TimingPoints == null || chart.TimingPoints.Count == 0)
@@ -223,10 +243,10 @@ namespace AshTaiko.Menu
             return validPoints > 0 ? totalBPM / validPoints : 120f;
         }
 
-        /*
-            UpdateSongStatistics displays additional information about the selected song.
-            This includes note counts, timing point information, and difficulty analysis.
-        */
+        /// <summary>
+        /// Displays additional information about the selected song.
+        /// This includes note counts, timing point information, and difficulty analysis.
+        /// </summary>
         private void UpdateSongStatistics()
         {
             if (_currentChart == null) return;
@@ -234,13 +254,28 @@ namespace AshTaiko.Menu
             if (_currentSong != null)
             {
                 string format = GetFormatDisplayName(_currentSong.Format);
+                
+                // Update note count when chart is selected
+                UpdateNoteCountDisplay();
             }
         }
+        
+        /// <summary>
+        /// Updates the note count display with the current chart's note count.
+        /// This provides real-time feedback when switching between different difficulty charts.
+        /// </summary>
+        private void UpdateNoteCountDisplay()
+        {
+            if (_songNoteCountText == null || _currentChart == null) return;
+            
+            int noteCount = _currentChart.HitObjects?.Count ?? 0;
+            _songNoteCountText.text = $"Notes: {noteCount:N0}";
+        }
 
-        /*
-            UpdateSongCoverImage loads and displays the song's background image.
-            This provides visual context and makes the selection interface more engaging.
-        */
+        /// <summary>
+        /// Loads and displays the song's background image.
+        /// This provides visual context and makes the selection interface more engaging.
+        /// </summary>
         private void UpdateSongCoverImage()
         {
             if (_songCoverImage == null) return;
@@ -259,10 +294,11 @@ namespace AshTaiko.Menu
             }
         }
 
-        /*
-            LoadSongCoverImage loads the song cover image from the file system.
-            This method handles image loading with proper error handling and fallbacks.
-        */
+        /// <summary>
+        /// Loads the song cover image from the file system.
+        /// This method handles image loading with proper error handling and fallbacks.
+        /// </summary>
+        /// <param name="imagePath">The path to the image file to load.</param>
         private void LoadSongCoverImage(string imagePath)
         {
             if (string.IsNullOrEmpty(imagePath))
@@ -275,8 +311,6 @@ namespace AshTaiko.Menu
             if (!System.IO.File.Exists(imagePath))
             {
                 Debug.LogWarning($"Image file not found: {imagePath}");
-                Debug.LogWarning($"Current working directory: {System.IO.Directory.GetCurrentDirectory()}");
-                Debug.LogWarning($"Application data path: {Application.dataPath}");
                 SetDefaultCoverImage();
                 return;
             }
@@ -285,10 +319,12 @@ namespace AshTaiko.Menu
             StartCoroutine(LoadImageCoroutine(imagePath));
         }
 
-        /*
-            LoadImageCoroutine loads an image file asynchronously to prevent UI blocking.
-            This provides smooth user experience during image loading operations.
-        */
+        /// <summary>
+        /// Loads an image file asynchronously to prevent UI blocking.
+        /// This provides smooth user experience during image loading operations.
+        /// </summary>
+        /// <param name="imagePath">The path to the image file to load.</param>
+        /// <returns>IEnumerator for coroutine execution.</returns>
         private System.Collections.IEnumerator LoadImageCoroutine(string imagePath)
         {
             // Convert file path to Unity-compatible format
@@ -321,10 +357,10 @@ namespace AshTaiko.Menu
             }
         }
 
-        /*
-            SetDefaultCoverImage provides a fallback when no cover image is available.
-            This ensures the UI always has a consistent appearance.
-        */
+        /// <summary>
+        /// Provides a fallback when no cover image is available.
+        /// This ensures the UI always has a consistent appearance.
+        /// </summary>
         private void SetDefaultCoverImage()
         {
             if (_songCoverImage != null)
@@ -337,11 +373,12 @@ namespace AshTaiko.Menu
             }
         }
         
-        /*
-            ConfigureImageForTexture sets up the Image component to display the texture
-            without stretching, maintaining aspect ratio and filling the entire component.
-            This creates a "fill and crop" effect similar to CSS object-fit: cover.
-        */
+        /// <summary>
+        /// Sets up the Image component to display the texture without stretching,
+        /// maintaining aspect ratio and filling the entire component.
+        /// This creates a "fill and crop" effect similar to CSS object-fit: cover.
+        /// </summary>
+        /// <param name="texture">The texture to configure the image for.</param>
         private void ConfigureImageForTexture(Texture2D texture)
         {
             if (_songCoverImage == null || texture == null) return;
@@ -354,11 +391,11 @@ namespace AshTaiko.Menu
             ConfigureImageWithFillAndCrop(texture);
         }
         
-        /*
-            ConfigureImageWithFillAndCrop sets up the image to fill the entire component
-            while maintaining aspect ratio. This may crop parts of the image but ensures
-            no stretching occurs.
-        */
+        /// <summary>
+        /// Sets up the image to fill the entire component while maintaining aspect ratio.
+        /// This may crop parts of the image but ensures no stretching occurs.
+        /// </summary>
+        /// <param name="texture">The texture to configure.</param>
         private void ConfigureImageWithFillAndCrop(Texture2D texture)
         {
             if (_songCoverImage == null || texture == null) return;
@@ -394,15 +431,15 @@ namespace AshTaiko.Menu
             // Center the image
             imageRect.anchoredPosition = Vector2.zero;
             
-            Debug.Log($"Configured image: texture {texture.width}x{texture.height} (aspect: {textureAspect:F2}), " +
+            Debug.Log($"Image configured: texture {texture.width}x{texture.height} (aspect: {textureAspect:F2}), " +
                      $"parent {parentSize.x:F0}x{parentSize.y:F0} (aspect: {parentAspect:F2}), " +
                      $"new size {newSize.x:F0}x{newSize.y:F0}");
         }
         
-        /*
-            ResetImageToDefault resets the Image component to its default size and settings
-            when no image is loaded or when clearing the display.
-        */
+        /// <summary>
+        /// Resets the Image component to its default size and settings
+        /// when no image is loaded or when clearing the display.
+        /// </summary>
         private void ResetImageToDefault()
         {
             if (_songCoverImage == null) return;
@@ -425,10 +462,12 @@ namespace AshTaiko.Menu
             }
         }
 
-        /*
-            FormatTime converts seconds to a human-readable MM:SS format.
-            This provides consistent time display across the UI.
-        */
+        /// <summary>
+        /// Converts seconds to a human-readable MM:SS format.
+        /// This provides consistent time display across the UI.
+        /// </summary>
+        /// <param name="timeInSeconds">The time in seconds to format.</param>
+        /// <returns>A formatted time string in MM:SS format.</returns>
         private string FormatTime(float timeInSeconds)
         {
             int minutes = Mathf.FloorToInt(timeInSeconds / 60f);

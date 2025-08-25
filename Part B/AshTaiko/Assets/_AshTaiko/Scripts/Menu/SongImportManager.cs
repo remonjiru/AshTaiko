@@ -142,37 +142,31 @@ namespace AshTaiko.Menu
                 
                 if (songs != null && songs.Count > 0)
                 {
-                    Debug.Log($"Successfully imported {songs.Count} songs from OSZ file");
+                    Debug.Log($"Imported {songs.Count} songs from OSZ file");
                     
-                                         // Add songs to database
-                     foreach (var song in songs)
-                     {
-                         if (song != null)
-                         {
-                             Debug.Log($"Processing song: {song.Title} - {song.Artist} with {song.Charts?.Count ?? 0} charts");
-                             
-                             // Check if song already exists
-                             var existingSong = _chartDatabase.GetDatabase().Songs.FirstOrDefault(s => 
-                                 string.Equals(s.Title, song.Title, StringComparison.OrdinalIgnoreCase) &&
-                                 string.Equals(s.Artist, song.Artist, StringComparison.OrdinalIgnoreCase)
-                             );
-                             
-                             if (existingSong != null)
-                             {
-                                 Debug.Log($"Song already exists: {song.Title} - {song.Artist}, merging charts");
-                                 // Merge charts logic would go here
-                             }
-                             else
-                             {
-                                 _chartDatabase.GetDatabase().AddSong(song);
-                                 Debug.Log($"Added new song: {song.Title} - {song.Artist} with {song.Charts?.Count ?? 0} charts");
-                                 
-                                 // Log chart summary
-                                 int chartCount = song.Charts?.Count ?? 0;
-                                 Debug.Log($"  Added {chartCount} charts to song");
-                             }
-                         }
-                     }
+                    // Add songs to database
+                    foreach (var song in songs)
+                    {
+                        if (song != null)
+                        {
+                            // Check if song already exists
+                            var existingSong = _chartDatabase.GetDatabase().Songs.FirstOrDefault(s => 
+                                string.Equals(s.Title, song.Title, StringComparison.OrdinalIgnoreCase) &&
+                                string.Equals(s.Artist, song.Artist, StringComparison.OrdinalIgnoreCase)
+                            );
+                            
+                            if (existingSong != null)
+                            {
+                                Debug.Log($"Song already exists: {song.Title} - {song.Artist}, merging charts");
+                                // Merge charts logic would go here
+                            }
+                            else
+                            {
+                                _chartDatabase.GetDatabase().AddSong(song);
+                                Debug.Log($"Added new song: {song.Title} - {song.Artist} ({song.Charts?.Count ?? 0} charts)");
+                            }
+                        }
+                    }
                     
                     // Save database
                     #if UNITY_EDITOR
@@ -185,12 +179,9 @@ namespace AshTaiko.Menu
                     var songListManager = FindObjectOfType<SongListManager>();
                     if (songListManager != null)
                     {
-                        Debug.Log("Refreshing song list...");
                         songListManager.RefreshSongList();
-                        
-                        // Force reload from database
                         songListManager.LoadSongDatabase();
-                        Debug.Log("Forced database reload after import");
+                        Debug.Log("Song list refreshed and database reloaded");
                     }
                     else
                     {
@@ -207,7 +198,6 @@ namespace AshTaiko.Menu
             catch (System.Exception e)
             {
                 Debug.LogError($"Failed to import OSZ file: {e.Message}");
-                Debug.LogError($"Stack trace: {e.StackTrace}");
             }
         }
         
@@ -235,7 +225,7 @@ namespace AshTaiko.Menu
                 
                 if (song != null)
                 {
-                    Debug.Log($"Successfully imported TJA song: {song.Title} - {song.Artist}");
+                    Debug.Log($"Imported TJA song: {song.Title} - {song.Artist}");
                     
                     // Check if song already exists
                     var existingSong = _chartDatabase.GetDatabase().Songs.FirstOrDefault(s => 
@@ -265,12 +255,9 @@ namespace AshTaiko.Menu
                     var songListManager = FindObjectOfType<SongListManager>();
                     if (songListManager != null)
                     {
-                        Debug.Log("Refreshing song list...");
                         songListManager.RefreshSongList();
-                        
-                        // Force reload from database
                         songListManager.LoadSongDatabase();
-                        Debug.Log("Forced database reload after import");
+                        Debug.Log("Song list refreshed and database reloaded");
                     }
                     else
                     {
@@ -287,7 +274,6 @@ namespace AshTaiko.Menu
             catch (System.Exception e)
             {
                 Debug.LogError($"Failed to import TJA file: {e.Message}");
-                Debug.LogError($"Stack trace: {e.StackTrace}");
             }
         }
         

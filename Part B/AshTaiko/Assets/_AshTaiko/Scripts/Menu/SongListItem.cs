@@ -164,11 +164,12 @@ namespace AshTaiko.Menu
             return _songIndex;
         }
         
-        /*
-            ConfigureImageForTexture sets up the Image component to display the texture
-            without stretching, maintaining aspect ratio and filling the entire component.
-            This creates a "fill and crop" effect similar to CSS object-fit: cover.
-        */
+        /// <summary>
+        /// Sets up the Image component to display the texture without stretching,
+        /// maintaining aspect ratio and filling the entire component.
+        /// This creates a "fill and crop" effect similar to CSS object-fit: cover.
+        /// </summary>
+        /// <param name="texture">The texture to configure the image for.</param>
         public void ConfigureImageForTexture(Texture2D texture)
         {
             if (_previewImage == null || texture == null) return;
@@ -181,11 +182,11 @@ namespace AshTaiko.Menu
             ConfigureImageWithFillAndCrop(texture);
         }
         
-        /*
-            ConfigureImageWithFillAndCrop sets up the image to fill the entire component
-            while maintaining aspect ratio. This may crop parts of the image but ensures
-            no stretching occurs.
-        */
+        /// <summary>
+        /// Sets up the image to fill the entire component while maintaining aspect ratio.
+        /// This may crop parts of the image but ensures no stretching occurs.
+        /// </summary>
+        /// <param name="texture">The texture to configure.</param>
         private void ConfigureImageWithFillAndCrop(Texture2D texture)
         {
             if (_previewImage == null || texture == null) return;

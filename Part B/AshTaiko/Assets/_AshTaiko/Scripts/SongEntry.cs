@@ -5,23 +5,82 @@ using UnityEngine;
 
 namespace AshTaiko
 {
+    /// <summary>
+    /// Represents a song entry containing metadata, audio references, and multiple difficulty charts.
+    /// This class serves as the central data structure for storing imported song information
+    /// from various formats (osu!, TJA, etc.) and provides methods for accessing song assets.
+    /// </summary>
     [Serializable]
     public class SongEntry
     {
-        public string UniqueId; // Unique identifier for the song
+        /// <summary>
+        /// Unique identifier for the song, automatically generated using GUID.
+        /// </summary>
+        public string UniqueId;
+        
+        /// <summary>
+        /// Primary title of the song in the default language.
+        /// </summary>
         public string Title;
+        
+        /// <summary>
+        /// Unicode version of the song title for international character support.
+        /// </summary>
         public string TitleUnicode;
+        
+        /// <summary>
+        /// Primary artist name in the default language.
+        /// </summary>
         public string Artist;
+        
+        /// <summary>
+        /// Unicode version of the artist name for international character support.
+        /// </summary>
         public string ArtistUnicode;
+        
+        /// <summary>
+        /// Name of the chart creator/mapper.
+        /// </summary>
         public string Creator;
+        
+        /// <summary>
+        /// Source material or original work the song is based on.
+        /// </summary>
         public string Source;
+        
+        /// <summary>
+        /// List of tags for categorizing and searching songs.
+        /// </summary>
         public List<string> Tags = new List<string>();
+        
+        /// <summary>
+        /// Path to the audio file for this song.
+        /// </summary>
         public string AudioFilename;
+        
+        /// <summary>
+        /// Path to the background/cover image for this song.
+        /// </summary>
         public string BackgroundImage;
+        
+        /// <summary>
+        /// Time in seconds to start preview playback from.
+        /// </summary>
         public float PreviewTime;
+        
+        /// <summary>
+        /// Original format of the imported song file.
+        /// </summary>
         public SongFormat Format;
+        
+        /// <summary>
+        /// Collection of difficulty charts available for this song.
+        /// </summary>
         public List<ChartData> Charts = new List<ChartData>();
         
+        /// <summary>
+        /// Initializes a new SongEntry with default values and generates a unique identifier.
+        /// </summary>
         public SongEntry()
         {
             UniqueId = Guid.NewGuid().ToString();
@@ -29,6 +88,11 @@ namespace AshTaiko
             Tags = new List<string>();
         }
         
+        /// <summary>
+        /// Retrieves a chart by difficulty level.
+        /// </summary>
+        /// <param name="difficulty">The difficulty level to search for.</param>
+        /// <returns>The chart with the specified difficulty, or null if not found.</returns>
         public ChartData GetChart(Difficulty difficulty)
         {
             if (Charts == null)
@@ -40,6 +104,11 @@ namespace AshTaiko
             return Charts.FirstOrDefault(c => c.Difficulty == difficulty);
         }
         
+        /// <summary>
+        /// Retrieves a chart by version name.
+        /// </summary>
+        /// <param name="version">The version name to search for.</param>
+        /// <returns>The chart with the specified version, or null if not found.</returns>
         public ChartData GetChart(string version)
         {
             if (Charts == null)
@@ -51,11 +120,12 @@ namespace AshTaiko
             return Charts.FirstOrDefault(c => c.Version == version);
         }
         
-        /*
-            GetBestAvailableImage returns the best available image path for this song.
-            Priority: BackgroundImage > null
-            This provides a consistent way to access song visual representation.
-        */
+        /// <summary>
+        /// Returns the best available image path for this song.
+        /// Priority: BackgroundImage > null
+        /// This provides a consistent way to access song visual representation.
+        /// </summary>
+        /// <returns>The image path if available, otherwise null.</returns>
         public string GetBestAvailableImage()
         {
             if (!string.IsNullOrEmpty(BackgroundImage))
@@ -64,11 +134,12 @@ namespace AshTaiko
             return null;
         }
         
-        /*
-            GetBestAvailableImagePath returns the full absolute path to the best available image.
-            This method handles both relative and absolute paths, converting relative paths
-            to absolute paths based on the song's location.
-        */
+        /// <summary>
+        /// Returns the full absolute path to the best available image.
+        /// This method handles both relative and absolute paths, converting relative paths
+        /// to absolute paths based on the song's location.
+        /// </summary>
+        /// <returns>The full absolute path to the image, or null if no image is available.</returns>
         public string GetBestAvailableImagePath()
         {
             if (string.IsNullOrEmpty(BackgroundImage))
@@ -83,10 +154,12 @@ namespace AshTaiko
             return FindImageInSongDirectories(BackgroundImage);
         }
         
-        /*
-            FindImageInSongDirectories searches for an image file in common song directories.
-            This handles the case where we have a relative path but need to find the actual file.
-        */
+        /// <summary>
+        /// Searches for an image file in common song directories.
+        /// This handles the case where we have a relative path but need to find the actual file.
+        /// </summary>
+        /// <param name="imageFileName">The filename of the image to search for.</param>
+        /// <returns>The full path to the found image, or the original path if not found.</returns>
         private string FindImageInSongDirectories(string imageFileName)
         {
             // Common song directories to search
@@ -104,7 +177,6 @@ namespace AshTaiko
                     string[] foundFiles = System.IO.Directory.GetFiles(directory, imageFileName, System.IO.SearchOption.AllDirectories);
                     if (foundFiles.Length > 0)
                     {
-                        Debug.Log($"Found image '{imageFileName}' at: {foundFiles[0]}");
                         return foundFiles[0]; // Return the first match
                     }
                 }
@@ -127,7 +199,6 @@ namespace AshTaiko
                         string[] foundFiles = System.IO.Directory.GetFiles(directory, variation, System.IO.SearchOption.AllDirectories);
                         if (foundFiles.Length > 0)
                         {
-                            Debug.Log($"Found image '{variation}' (case variation of '{imageFileName}') at: {foundFiles[0]}");
                             return foundFiles[0];
                         }
                     }
@@ -139,37 +210,26 @@ namespace AshTaiko
             return BackgroundImage;
         }
         
-        /*
-            HasImage checks if this song has any image available.
-        */
+        /// <summary>
+        /// Checks if this song has any image available.
+        /// </summary>
+        /// <returns>True if an image is available, false otherwise.</returns>
         public bool HasImage()
         {
             return !string.IsNullOrEmpty(GetBestAvailableImage());
         }
         
-        /*
-            DebugImagePath provides detailed information about the image path for debugging.
-            This helps developers understand how image paths are being resolved.
-        */
+        /// <summary>
+        /// Provides detailed information about the image path for debugging.
+        /// This helps developers understand how image paths are being resolved.
+        /// </summary>
         public void DebugImagePath()
         {
-            Debug.Log($"=== IMAGE PATH DEBUG INFO ===");
-            Debug.Log($"Song: {Title} - {Artist}");
-            Debug.Log($"Raw BackgroundImage: {BackgroundImage}");
-            Debug.Log($"IsPathRooted: {System.IO.Path.IsPathRooted(BackgroundImage)}");
-            
             if (!string.IsNullOrEmpty(BackgroundImage))
             {
                 string fullPath = GetBestAvailableImagePath();
-                Debug.Log($"Resolved Full Path: {fullPath}");
-                Debug.Log($"File Exists: {System.IO.File.Exists(fullPath)}");
-                
-                if (!System.IO.File.Exists(fullPath))
-                {
-                    Debug.LogWarning($"Image file not found at resolved path!");
-                }
+                Debug.Log($"Image path debug: {BackgroundImage} -> {fullPath} (exists: {System.IO.File.Exists(fullPath)})");
             }
-            Debug.Log($"================================");
         }
         
         #if UNITY_EDITOR

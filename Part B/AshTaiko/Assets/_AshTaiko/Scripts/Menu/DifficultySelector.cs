@@ -5,16 +5,13 @@ using TMPro;
 
 namespace AshTaiko.Menu
 {
-    /*
-        DifficultySelector handles the difficulty selection interface for songs.
-        This class manages the creation, display, and interaction with difficulty buttons.
-        
-        Data Structure Design:
-        Uses Lists for dynamic difficulty button collections to allow runtime generation.
-        Implements event-driven architecture for difficulty selection and UI updates.
-        Stores difficulty button references for proper cleanup and memory management.
-    */
-
+    /// <summary>
+    /// Handles the difficulty selection interface for songs.
+    /// This class manages the creation, display, and interaction with difficulty buttons.
+    /// Uses Lists for dynamic difficulty button collections to allow runtime generation.
+    /// Implements event-driven architecture for difficulty selection and UI updates.
+    /// Stores difficulty button references for proper cleanup and memory management.
+    /// </summary>
     public class DifficultySelector : MonoBehaviour
     {
         #region UI References
@@ -35,10 +32,10 @@ namespace AshTaiko.Menu
 
         #region Private Fields
 
-        /*
-            Difficulty button management using Lists for dynamic UI element creation.
-            This allows for runtime generation of difficulty selection buttons based on available charts.
-        */
+        /// <summary>
+        /// Difficulty button management using Lists for dynamic UI element creation.
+        /// This allows for runtime generation of difficulty selection buttons based on available charts.
+        /// </summary>
         private List<Button> _difficultyButtons = new List<Button>();
         private List<ChartData> _buttonCharts = new List<ChartData>(); // Maps buttons to charts
         private ChartData _selectedChart;
@@ -48,22 +45,22 @@ namespace AshTaiko.Menu
 
         #region Events
 
-        /*
-            DifficultySelected event provides decoupled communication for difficulty selection.
-            This allows other components to react to difficulty selection without direct dependencies.
-        */
+        /// <summary>
+        /// DifficultySelected event provides decoupled communication for difficulty selection.
+        /// This allows other components to react to difficulty selection without direct dependencies.
+        /// </summary>
         public System.Action<ChartData> OnDifficultySelected;
         
-        /*
-            PlayButtonClicked event provides communication for when the play button is clicked.
-            This allows the parent system to handle game launching.
-        */
+        /// <summary>
+        /// PlayButtonClicked event provides communication for when the play button is clicked.
+        /// This allows the parent system to handle game launching.
+        /// </summary>
         public System.Action<SongEntry, ChartData> OnPlayButtonClicked;
         
-        /*
-            BackButtonClicked event provides communication for when the back button is clicked.
-            This allows the parent system to handle closing the difficulty panel.
-        */
+        /// <summary>
+        /// BackButtonClicked event provides communication for when the back button is clicked.
+        /// This allows the parent system to handle closing the difficulty panel.
+        /// </summary>
         public System.Action OnBackButtonClicked;
 
         #endregion
@@ -103,11 +100,6 @@ namespace AshTaiko.Menu
 
         #region Difficulty Button Management
 
-        /*
-            UpdateDifficultyButtons creates interactive difficulty selection buttons for the selected song.
-            This system dynamically generates buttons based on available chart difficulties, providing
-            a flexible interface that adapts to any song's chart configuration.
-        */
         /// <summary>
         /// Creates interactive difficulty selection buttons for the selected song.
         /// This system dynamically generates buttons based on available chart difficulties.
@@ -149,10 +141,11 @@ namespace AshTaiko.Menu
             }
         }
 
-        /*
-            CreateDifficultyButton instantiates and configures a single difficulty selection button.
-            Each button displays the difficulty name and connects to the selection system.
-        */
+        /// <summary>
+        /// Instantiates and configures a single difficulty selection button.
+        /// Each button displays the difficulty name and connects to the selection system.
+        /// </summary>
+        /// <param name="chart">The chart data to create a button for.</param>
         private void CreateDifficultyButton(ChartData chart)
         {
             GameObject buttonObj = Instantiate(_difficultyButtonPrefab, _difficultyButtonContainer);
@@ -163,8 +156,6 @@ namespace AshTaiko.Menu
             {
                 // Set button text - only show the chart version
                 buttonText.text = chart.Version;
-
-
 
                 // Add click listener
                 button.onClick.AddListener(() => OnDifficultyButtonClicked(chart));
@@ -285,10 +276,6 @@ namespace AshTaiko.Menu
 
         #region Utility Methods
 
-
-
-
-
         #endregion
 
         #region Public Interface
@@ -377,10 +364,12 @@ namespace AshTaiko.Menu
             }
         }
 
-        /*
-            IsChartSelected checks if a specific chart is currently selected.
-            This is useful for UI state management and validation.
-        */
+        /// <summary>
+        /// Checks if a specific chart is currently selected.
+        /// This is useful for UI state management and validation.
+        /// </summary>
+        /// <param name="chart">The chart to check selection for.</param>
+        /// <returns>True if the chart is selected, false otherwise.</returns>
         public bool IsChartSelected(ChartData chart)
         {
             return _selectedChart != null && _selectedChart.Version == chart.Version;

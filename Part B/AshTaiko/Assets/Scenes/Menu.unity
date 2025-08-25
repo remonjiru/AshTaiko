@@ -7788,6 +7788,7 @@ MonoBehaviour:
   _songLengthText: {fileID: 7043296844332559566}
   _songBPMText: {fileID: 7580833339866039629}
   _songFormatText: {fileID: 1813219381284369619}
+  _songNoteCountText: {fileID: 8900210005768998815}
   _songCoverImage: {fileID: 9007504229757266209}
   _preserveAspectRatio: 1
   _imageType: 0

@@ -2,6 +2,11 @@ using UnityEngine;
 
 namespace AshTaiko
 {
+    /// <summary>
+    /// Represents a visual note object that moves across the screen towards the judgement circle.
+    /// This component handles note movement, visual representation, and lifecycle management
+    /// for different note types (Don, Ka, Drumroll, etc.) in the taiko rhythm game.
+    /// </summary>
     public class Note : MonoBehaviour
     {
         [SerializeField]
@@ -29,8 +34,11 @@ namespace AshTaiko
         [SerializeField]
         private HitObject _hitObject;
         
+        /// <summary>
+        /// The type of this note (Don, Ka, Drumroll, etc.).
+        /// </summary>
         [SerializeField]
-        private NoteType _noteType; // Store the type of this note
+        private NoteType _noteType;
         
         // Visual references for each type
         [SerializeField]
@@ -54,9 +62,11 @@ namespace AshTaiko
         [SerializeField]
         private GameObject _drumrollBridgeVisual;
         
-        // For drumroll stretching
+        /// <summary>
+        /// Reference to the drumroll end note, set by GameManager if this is a drumroll head.
+        /// </summary>
         [SerializeField]
-        private Note _drumrollEndNote; // Set by GameManager if this is a drumroll head
+        private Note _drumrollEndNote;
 
         [SerializeField]
         private SpriteRenderer _spriteRenderer;
@@ -73,6 +83,15 @@ namespace AshTaiko
         public NoteType NoteType => _noteType;
         public Note DrumrollEndNote { get => _drumrollEndNote; set => _drumrollEndNote = value; }
 
+        /// <summary>
+        /// Initializes the note with timing and movement parameters.
+        /// Sets up the note's position, timing, and visual representation.
+        /// </summary>
+        /// <param name="hitTime">Time in seconds when the note should be hit.</param>
+        /// <param name="preemptTime">Time in seconds before hit time when the note spawns.</param>
+        /// <param name="travelDistance">Distance the note travels from spawn to hit position.</param>
+        /// <param name="scrollSpeed">Speed multiplier for note movement.</param>
+        /// <param name="hitObject">The underlying hit object data for this note.</param>
         public void Initialize(float hitTime, float preemptTime, float travelDistance, float scrollSpeed, HitObject hitObject)
         {
             this._hitTime = hitTime;
@@ -87,6 +106,10 @@ namespace AshTaiko
             SetVisuals();
         }
 
+        /// <summary>
+        /// Sets the appropriate visual representation based on the note type.
+        /// Disables all visuals first, then enables only the relevant one.
+        /// </summary>
         private void SetVisuals()
         {
             // Disable all visuals first
@@ -122,6 +145,10 @@ namespace AshTaiko
             }
         }
 
+        /// <summary>
+        /// Updates note position and handles lifecycle management.
+        /// Moves the note towards the judgement circle and destroys it when appropriate.
+        /// </summary>
         void LateUpdate()
         {
             // Debug: Check if component is disabled
@@ -190,7 +217,9 @@ namespace AshTaiko
             }
         }
         
-        // Debug method to check note status
+        /// <summary>
+        /// Debug method to check note status and display current state information.
+        /// </summary>
         [ContextMenu("Check Note Status")]
         public void CheckNoteStatus()
         {
@@ -212,7 +241,9 @@ namespace AshTaiko
             Debug.Log($"================================");
         }
         
-        // Method to force note to be hit (for debugging)
+        /// <summary>
+        /// Method to force note to be hit (for debugging purposes).
+        /// </summary>
         [ContextMenu("Force Hit Note")]
         public void ForceHitNote()
         {
@@ -221,17 +252,60 @@ namespace AshTaiko
         }
     }
 
+    /// <summary>
+    /// Enumeration of all possible note types in the taiko rhythm game.
+    /// Each type has different visual representation and gameplay behavior.
+    /// </summary>
     public enum NoteType
     {
+        /// <summary>
+        /// Empty space with no note.
+        /// </summary>
         Blank = 0,
+        
+        /// <summary>
+        /// Regular Don note (red circle).
+        /// </summary>
         Don = 1,
+        
+        /// <summary>
+        /// Regular Ka note (blue circle).
+        /// </summary>
         Ka = 2,
+        
+        /// <summary>
+        /// Large Don note requiring both drum hits.
+        /// </summary>
         DonBig = 3,
+        
+        /// <summary>
+        /// Large Ka note requiring both drum hits.
+        /// </summary>
         KaBig = 4,
+        
+        /// <summary>
+        /// Drumroll note requiring rapid hits.
+        /// </summary>
         Drumroll = 5,
+        
+        /// <summary>
+        /// Large drumroll note requiring rapid hits.
+        /// </summary>
         DrumrollBig = 6,
+        
+        /// <summary>
+        /// Balloon note requiring hits until it pops.
+        /// </summary>
         Balloon = 7,
+        
+        /// <summary>
+        /// End marker for drumroll or balloon notes.
+        /// </summary>
         DrumrollBalloonEnd = 8,
+        
+        /// <summary>
+        /// Large balloon note requiring more hits.
+        /// </summary>
         BalloonBig = 9,
     }
 }

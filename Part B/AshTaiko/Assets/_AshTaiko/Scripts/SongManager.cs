@@ -3,17 +3,45 @@ using UnityEngine;
 
 namespace AshTaiko
 {
+    /// <summary>
+    /// Manages audio playback and timing synchronization for songs.
+    /// Provides high-precision timing information and controls for audio playback,
+    /// including pause/resume functionality and scheduled playback.
+    /// </summary>
     public class SongManager : MonoBehaviour
     {
         [SerializeField]
         private AudioSource _audioSource;
 
+        /// <summary>
+        /// Current playback time in seconds, accounting for pauses.
+        /// </summary>
         private double _songTime;
+        
+        /// <summary>
+        /// DSP time when playback started.
+        /// </summary>
         private double _startDspTime;
+        
+        /// <summary>
+        /// DSP time when pause started.
+        /// </summary>
         private double _pauseStartDspTime;
+        
+        /// <summary>
+        /// Total time spent paused during playback.
+        /// </summary>
         private double _totalPausedTime = 0.0;
+        
+        /// <summary>
+        /// Whether playback is currently paused.
+        /// </summary>
         private bool _isPaused = false;
 
+        /// <summary>
+        /// Schedules audio playback to start after a specified delay.
+        /// </summary>
+        /// <param name="seconds">Delay in seconds before playback starts.</param>
         public void PlayInSeconds(double seconds)
         {
             if (_audioSource != null && _audioSource.clip != null)
@@ -24,7 +52,7 @@ namespace AshTaiko
                 _startDspTime = scheduledTime;
                 _songTime = AudioSettings.dspTime - _startDspTime;
                 
-                Debug.Log($"SongManager: Audio scheduled to play at DSP time: {scheduledTime:F3}s");
+                Debug.Log($"SongManager: Audio scheduled to play in {seconds:F1}s");
             }
             else
             {
@@ -36,6 +64,9 @@ namespace AshTaiko
             _isPaused = false;
         }
         
+        /// <summary>
+        /// Starts audio playback immediately.
+        /// </summary>
         public void PlayImmediately()
         {
             _audioSource.Play();
@@ -46,6 +77,10 @@ namespace AshTaiko
             _isPaused = false;
         }
 
+        /// <summary>
+        /// Gets the total length of the current audio clip in seconds.
+        /// </summary>
+        /// <returns>Length in seconds, or 0 if no clip is loaded.</returns>
         public float GetSongLength()
         {
             if (_audioSource.clip == null)
@@ -53,6 +88,10 @@ namespace AshTaiko
             return _audioSource.clip.length;
         }
         
+        /// <summary>
+        /// Gets the current playback position in seconds.
+        /// </summary>
+        /// <returns>Current position in seconds, or 0 if no clip is loaded.</returns>
         public float GetSongProgress()
         {
             if (_audioSource.clip == null)
@@ -60,6 +99,10 @@ namespace AshTaiko
             return _audioSource.time;
         }
 
+        /// <summary>
+        /// Gets the total song length formatted as MM:SS string.
+        /// </summary>
+        /// <returns>Formatted time string, or "00:00" if no clip is loaded.</returns>
         public string GetSongLengthString()
         {
             if (_audioSource.clip == null)
@@ -69,6 +112,10 @@ namespace AshTaiko
             return string.Format("{0:00}:{1:00}", ts.Minutes, ts.Seconds);
         }
 
+        /// <summary>
+        /// Gets the current playback position formatted as MM:SS string.
+        /// </summary>
+        /// <returns>Formatted time string, or "00:00" if no clip is loaded.</returns>
         public string GetSongPositionString()
         {
             if (_audioSource.clip == null)
@@ -78,6 +125,10 @@ namespace AshTaiko
             return string.Format("{0:00}:{1:00}", ts.Minutes, ts.Seconds);
         }
         
+        /// <summary>
+        /// Sets the audio clip for playback.
+        /// </summary>
+        /// <param name="clip">The AudioClip to set.</param>
         public void SetAudioClip(AudioClip clip)
         {
             if (_audioSource != null)
@@ -95,6 +146,10 @@ namespace AshTaiko
             _isPaused = false;
         }
         
+        /// <summary>
+        /// Gets the currently loaded audio clip.
+        /// </summary>
+        /// <returns>The current AudioClip, or null if none is loaded.</returns>
         public AudioClip GetCurrentAudioClip()
         {
             return _audioSource.clip;

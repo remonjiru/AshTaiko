@@ -7,17 +7,14 @@ using System.Linq;
 
 namespace AshTaiko.Menu
 {
-    /*
-        SongSelectionManager serves as the main orchestrator for the song selection screen.
-        This class coordinates between SongListManager, DifficultySelector, SongInfoDisplay,
-        and LeaderboardManager to provide a cohesive user experience.
-        
-        Architecture Design:
-        Implements composition over inheritance by delegating specific responsibilities
-        to specialized manager classes. This promotes loose coupling and easier testing.
-        Uses event-driven communication between components for clean separation of concerns.
-    */
-
+    /// <summary>
+    /// Serves as the main orchestrator for the song selection screen.
+    /// This class coordinates between SongListManager, DifficultySelector, SongInfoDisplay,
+    /// and LeaderboardManager to provide a cohesive user experience.
+    /// Implements composition over inheritance by delegating specific responsibilities
+    /// to specialized manager classes. This promotes loose coupling and easier testing.
+    /// Uses event-driven communication between components for clean separation of concerns.
+    /// </summary>
     public class SongSelectionManager : MonoBehaviour
     {
         #region Component References
@@ -50,10 +47,10 @@ namespace AshTaiko.Menu
 
         #region Private Fields
 
-        /*
-            Current selection state tracking for coordination between components.
-            These fields maintain the overall state of the song selection process.
-        */
+        /// <summary>
+        /// Current selection state tracking for coordination between components.
+        /// These fields maintain the overall state of the song selection process.
+        /// </summary>
         private SongEntry _selectedSong;
         private ChartData _selectedChart;
 
@@ -77,10 +74,10 @@ namespace AshTaiko.Menu
 
         #region Initialization
 
-        /*
-            ValidateComponentReferences ensures all required components are properly assigned.
-            This prevents runtime errors and provides clear feedback during development.
-        */
+        /// <summary>
+        /// Ensures all required components are properly assigned.
+        /// This prevents runtime errors and provides clear feedback during development.
+        /// </summary>
         private void ValidateComponentReferences()
         {
             if (_songListManager == null)
@@ -108,10 +105,10 @@ namespace AshTaiko.Menu
                 Debug.LogWarning("SongSelectionManager: BackgroundOverlay reference is missing - dimming system will be disabled");
         }
 
-        /*
-            InitializeComponents sets up the initial state of all component managers.
-            This ensures proper coordination between different parts of the system.
-        */
+        /// <summary>
+        /// Sets up the initial state of all component managers.
+        /// This ensures proper coordination between different parts of the system.
+        /// </summary>
         private void InitializeComponents()
         {
             if (_songListManager != null)
@@ -127,10 +124,10 @@ namespace AshTaiko.Menu
                 _leaderboardManager.ClearLeaderboard();
         }
 
-        /*
-            SetupEventHandlers connects all component events to appropriate response methods.
-            This creates the communication network between different managers.
-        */
+        /// <summary>
+        /// Connects all component events to appropriate response methods.
+        /// This creates the communication network between different managers.
+        /// </summary>
         private void SetupEventHandlers()
         {
             // Song list events
@@ -153,10 +150,10 @@ namespace AshTaiko.Menu
                 _backButton.onClick.AddListener(OnBackButtonClicked);
         }
 
-        /*
-            LoadInitialData populates the song list and sets up initial UI state.
-            This provides immediate user interaction without waiting for user input.
-        */
+        /// <summary>
+        /// Populates the song list and sets up initial UI state.
+        /// This provides immediate user interaction without waiting for user input.
+        /// </summary>
         private void LoadInitialData()
         {
             if (_songListManager != null)
@@ -172,10 +169,11 @@ namespace AshTaiko.Menu
 
         #region Event Handlers
 
-        /*
-            OnSongSelected responds to song selection events from the SongListManager.
-            This method coordinates the update of difficulty buttons, song info, and leaderboard.
-        */
+        /// <summary>
+        /// Responds to song selection events from the SongListManager.
+        /// This method coordinates the update of difficulty buttons, song info, and leaderboard.
+        /// </summary>
+        /// <param name="song">The song that was selected.</param>
         private void OnSongSelected(SongEntry song)
         {
             if (song == null)
@@ -220,10 +218,11 @@ namespace AshTaiko.Menu
             // Play button is now handled by the difficulty selector
         }
 
-        /*
-            OnDifficultySelected responds to difficulty selection events from the DifficultySelector.
-            This method updates the song info display and leaderboard with chart-specific data.
-        */
+        /// <summary>
+        /// Responds to difficulty selection events from the DifficultySelector.
+        /// This method updates the song info display and leaderboard with chart-specific data.
+        /// </summary>
+        /// <param name="chart">The chart that was selected.</param>
         private void OnDifficultySelected(ChartData chart)
         {
             if (chart == null)
@@ -259,8 +258,6 @@ namespace AshTaiko.Menu
             if (song == null || chart == null)
             {
                 Debug.LogWarning("Cannot start game: Song or difficulty not selected");
-                Debug.LogWarning($"Selected song: {song?.Title ?? "null"}");
-                Debug.LogWarning($"Selected chart: {chart?.Version ?? "null"}");
                 return;
             }
 
@@ -274,10 +271,6 @@ namespace AshTaiko.Menu
             LoadSongIntoGame();
         }
         
-        /*
-            OnDifficultyBackButtonClicked responds to back button clicks from the DifficultySelector.
-            This method closes the difficulty panel while keeping the song selected.
-        */
         /// <summary>
         /// Responds to back button clicks from the DifficultySelector.
         /// This method closes the difficulty panel while keeping the song selected.
@@ -314,10 +307,10 @@ namespace AshTaiko.Menu
             }
         }
 
-        /*
-            OnBackButtonClicked handles navigation back to the main menu.
-            This provides a clear exit path for users.
-        */
+        /// <summary>
+        /// Handles navigation back to the main menu.
+        /// This provides a clear exit path for users.
+        /// </summary>
         private void OnBackButtonClicked()
         {
             // Return to main menu
@@ -328,16 +321,15 @@ namespace AshTaiko.Menu
 
         #region Game Management
 
-        /*
-            LoadSongIntoGame prepares the game scene with the selected song data.
-            This method coordinates the transition from menu to gameplay.
-        */
+        /// <summary>
+        /// Prepares the game scene with the selected song data.
+        /// This method coordinates the transition from menu to gameplay.
+        /// </summary>
         private void LoadSongIntoGame()
         {
             Debug.Log("=== LOADING SONG INTO GAME ===");
             Debug.Log($"Selected song: {_selectedSong?.Title ?? "null"} - {_selectedSong?.Artist ?? "null"}");
             Debug.Log($"Selected chart: {_selectedChart?.Version ?? "null"} - {_selectedChart?.Difficulty}");
-            Debug.Log($"Audio filename: {_selectedSong?.AudioFilename ?? "null"}");
             
             // Store the selected song data in a static variable that persists across scenes
             // The GameManager in the GameScene will access this data
@@ -349,10 +341,10 @@ namespace AshTaiko.Menu
             LoadGameScene();
         }
 
-        /*
-            ReturnToMainMenu handles navigation back to the main menu UI.
-            This provides a consistent navigation pattern within the same scene.
-        */
+        /// <summary>
+        /// Handles navigation back to the main menu UI.
+        /// This provides a consistent navigation pattern within the same scene.
+        /// </summary>
         private void ReturnToMainMenu()
         {
             // Return to main menu UI (same scene)
@@ -363,34 +355,34 @@ namespace AshTaiko.Menu
 
         #region UI State Management
 
-
-
         #endregion
 
         #region Public Interface
 
-        /*
-            GetSelectedSong provides external access to the currently selected song.
-            This allows other systems to query the current selection state.
-        */
+        /// <summary>
+        /// Provides external access to the currently selected song.
+        /// This allows other systems to query the current selection state.
+        /// </summary>
+        /// <returns>The currently selected song, or null if none is selected.</returns>
         public SongEntry GetSelectedSong()
         {
             return _selectedSong;
         }
 
-        /*
-            GetSelectedChart provides external access to the currently selected chart.
-            This allows other systems to query the current selection state.
-        */
+        /// <summary>
+        /// Provides external access to the currently selected chart.
+        /// This allows other systems to query the current selection state.
+        /// </summary>
+        /// <returns>The currently selected chart, or null if none is selected.</returns>
         public ChartData GetSelectedChart()
         {
             return _selectedChart;
         }
 
-        /*
-            RefreshDatabase triggers a reload of the song database.
-            This allows for runtime updates when new songs are added.
-        */
+        /// <summary>
+        /// Triggers a reload of the song database.
+        /// This allows for runtime updates when new songs are added.
+        /// </summary>
         public void RefreshDatabase()
         {
             if (_songListManager != null)
@@ -399,10 +391,10 @@ namespace AshTaiko.Menu
             }
         }
 
-        /*
-            ClearSelection resets all selection state and UI components.
-            This provides a clean slate for new user interactions.
-        */
+        /// <summary>
+        /// Resets all selection state and UI components.
+        /// This provides a clean slate for new user interactions.
+        /// </summary>
         public void ClearSelection()
         {
             _selectedSong = null;

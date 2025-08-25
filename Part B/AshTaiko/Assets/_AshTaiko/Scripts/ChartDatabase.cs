@@ -6,6 +6,11 @@ using System.Linq;
 
 namespace AshTaiko
 {
+    /// <summary>
+    /// Manages the central chart database for the taiko rhythm game.
+    /// Handles importing songs from various formats (osu!, TJA, .osz), merging duplicate songs,
+    /// and providing access to the song collection. Uses a singleton pattern for global access.
+    /// </summary>
     public class ChartDatabase : MonoBehaviour
     {
         [SerializeField] 
@@ -14,8 +19,14 @@ namespace AshTaiko
         [SerializeField] 
         private string songsDirectory = "Songs";
         
+        /// <summary>
+        /// Singleton instance providing global access to the chart database.
+        /// </summary>
         public static ChartDatabase Instance { get; private set; }
         
+        /// <summary>
+        /// Sets up the singleton instance and loads the database.
+        /// </summary>
         private void Awake()
         {
             if (Instance == null)
@@ -30,6 +41,9 @@ namespace AshTaiko
             }
         }
         
+        /// <summary>
+        /// Loads the existing database from Resources or creates a new one.
+        /// </summary>
         private void LoadDatabase()
         {
             // Try to load existing database from Resources
@@ -47,6 +61,10 @@ namespace AshTaiko
             }
         }
         
+        /// <summary>
+        /// Scans the Songs directory for chart files and imports them.
+        /// Supports .osz, .osu, and .tja file formats.
+        /// </summary>
         public void ScanForSongs()
         {
             if (database == null)
@@ -87,23 +105,21 @@ namespace AshTaiko
             SaveDatabase();
         }
         
+        /// <summary>
+        /// Imports an individual osu! beatmap file.
+        /// </summary>
+        /// <param name="filePath">Path to the .osu file to import.</param>
         private void ImportOsuFile(string filePath)
         {
             try
             {
-                Debug.Log($"Starting import of osu! file: {filePath}");
+                Debug.Log($"Importing osu! file: {filePath}");
                 OsuImporter importer = new OsuImporter();
                 SongEntry song = importer.ImportSong(filePath);
                 
                 if (song != null)
                 {
-                    Debug.Log($"Successfully imported song: {song.Title} - {song.Artist}");
-                    Debug.Log($"Charts: {song.Charts.Count}");
-                    if (song.Charts.Count > 0)
-                    {
-                        var chart = song.Charts[0];
-                        Debug.Log($"Chart '{chart.Version}': {chart.HitObjects.Count} hit objects, {chart.TimingPoints.Count} timing points");
-                    }
+                    Debug.Log($"Imported: {song.Title} - {song.Artist} ({song.Charts.Count} charts)");
                     
                     // Check if this song already exists in the database
                     SongEntry existingSong = FindExistingSong(song.Title, song.Artist);
@@ -113,13 +129,13 @@ namespace AshTaiko
                         int chartsBefore = existingSong.Charts.Count;
                         MergeCharts(existingSong, song);
                         int chartsAfter = existingSong.Charts.Count;
-                        Debug.Log($"Merged charts into existing song: {existingSong.Title} - {existingSong.Artist} ({chartsBefore} -> {chartsAfter} charts)");
+                        Debug.Log($"Merged charts: {existingSong.Title} ({chartsBefore} -> {chartsAfter} charts)");
                     }
                     else
                     {
                         // Add as new song
                         database.AddSong(song);
-                        Debug.Log($"Added new song to database: {song.Title} - {song.Artist} with {song.Charts.Count} charts");
+                        Debug.Log($"Added new song: {song.Title} - {song.Artist}");
                     }
                 }
                 else
@@ -130,7 +146,6 @@ namespace AshTaiko
             catch (Exception e)
             {
                 Debug.LogError($"Failed to import osu! file {filePath}: {e.Message}");
-                Debug.LogError($"Stack trace: {e.StackTrace}");
             }
         }
         
@@ -142,13 +157,13 @@ namespace AshTaiko
         {
             try
             {
-                Debug.Log($"Starting import of .osz file: {oszFilePath}");
+                Debug.Log($"Importing .osz file: {oszFilePath}");
                 OszImporter importer = new OszImporter();
                 List<SongEntry> songs = importer.ImportOszFile(oszFilePath);
                 
                 if (songs != null && songs.Count > 0)
                 {
-                    Debug.Log($"Successfully imported {songs.Count} songs from .osz file: {oszFilePath}");
+                    Debug.Log($"Imported {songs.Count} songs from .osz file");
                     
                     foreach (SongEntry song in songs)
                     {
@@ -162,13 +177,13 @@ namespace AshTaiko
                                 int chartsBefore = existingSong.Charts.Count;
                                 MergeCharts(existingSong, song);
                                 int chartsAfter = existingSong.Charts.Count;
-                                Debug.Log($"Merged charts into existing song: {existingSong.Title} - {existingSong.Artist} ({chartsBefore} -> {chartsAfter} charts)");
+                                Debug.Log($"Merged charts: {existingSong.Title} ({chartsBefore} -> {chartsAfter} charts)");
                             }
                             else
                             {
                                 // Add as new song
                                 database.AddSong(song);
-                                Debug.Log($"Added new song to database: {song.Title} - {song.Artist} with {song.Charts.Count} charts");
+                                Debug.Log($"Added new song: {song.Title} - {song.Artist}");
                             }
                         }
                     }
@@ -181,10 +196,13 @@ namespace AshTaiko
             catch (Exception e)
             {
                 Debug.LogError($"Failed to import .osz file {oszFilePath}: {e.Message}");
-                Debug.LogError($"Stack trace: {e.StackTrace}");
             }
         }
         
+        /// <summary>
+        /// Imports a TJA chart file.
+        /// </summary>
+        /// <param name="filePath">Path to the .tja file to import.</param>
         private void ImportTjaFile(string filePath)
         {
             try
@@ -195,7 +213,7 @@ namespace AshTaiko
                 if (song != null)
                 {
                     database.AddSong(song);
-                    Debug.Log($"Imported TJA song: {song.Title} - {song.Artist}");
+                    Debug.Log($"Imported TJA: {song.Title} - {song.Artist}");
                 }
             }
             catch (Exception e)
@@ -204,6 +222,9 @@ namespace AshTaiko
             }
         }
         
+        /// <summary>
+        /// Saves the database to disk using Unity's asset system.
+        /// </summary>
         private void SaveDatabase()
         {
             if (database != null)
@@ -217,6 +238,10 @@ namespace AshTaiko
             }
         }
         
+        /// <summary>
+        /// Gets a random song from the database.
+        /// </summary>
+        /// <returns>A random SongEntry, or null if the database is empty.</returns>
         public SongEntry GetRandomSong()
         {
             if (database == null || database.Songs.Count == 0) return null;
@@ -225,6 +250,11 @@ namespace AshTaiko
             return database.Songs[randomIndex];
         }
         
+        /// <summary>
+        /// Gets a song by its index in the database.
+        /// </summary>
+        /// <param name="index">The index of the song to retrieve.</param>
+        /// <returns>The SongEntry at the specified index, or null if the index is invalid.</returns>
         public SongEntry GetSongByIndex(int index)
         {
             if (database == null || index < 0 || index >= database.Songs.Count)
@@ -234,6 +264,10 @@ namespace AshTaiko
             return database.Songs[index];
         }
         
+        /// <summary>
+        /// Gets the total number of songs in the database.
+        /// </summary>
+        /// <returns>The number of songs, or 0 if the database is null.</returns>
         public int GetSongCount()
         {
             if (database == null)
@@ -244,11 +278,19 @@ namespace AshTaiko
             return database.Songs.Count;
         }
         
+        /// <summary>
+        /// Gets the underlying SongDatabase instance.
+        /// </summary>
+        /// <returns>The SongDatabase instance.</returns>
         public SongDatabase GetDatabase()
         {
             return database;
         }
         
+        /// <summary>
+        /// Gets a read-only list of all songs in the database.
+        /// </summary>
+        /// <returns>A read-only list of songs, or an empty list if the database is null.</returns>
         public IReadOnlyList<SongEntry> GetSongs()
         {
             if (database == null)
@@ -259,7 +301,12 @@ namespace AshTaiko
             return database.Songs;
         }
         
-        // Helper method to find an existing song by title and artist
+        /// <summary>
+        /// Finds an existing song by title and artist using case-insensitive comparison.
+        /// </summary>
+        /// <param name="title">The song title to search for.</param>
+        /// <param name="artist">The artist name to search for.</param>
+        /// <returns>The matching SongEntry, or null if no match is found.</returns>
         private SongEntry FindExistingSong(string title, string artist)
         {
             if (database == null || database.Songs == null) return null;
@@ -272,7 +319,12 @@ namespace AshTaiko
             );
         }
         
-        // Helper method to merge charts from a new song into an existing one
+        /// <summary>
+        /// Merges charts from a new song into an existing one, avoiding duplicates.
+        /// Also merges metadata like audio files, background images, and tags.
+        /// </summary>
+        /// <param name="existingSong">The existing song to merge into.</param>
+        /// <param name="newSong">The new song to merge from.</param>
         private void MergeCharts(SongEntry existingSong, SongEntry newSong)
         {
             if (existingSong == null || newSong == null) return;
@@ -320,7 +372,10 @@ namespace AshTaiko
             }
         }
         
-        // Public method to manually merge songs (useful for fixing existing databases)
+        /// <summary>
+        /// Manually merges duplicate songs in the database.
+        /// Useful for fixing existing databases with duplicate entries.
+        /// </summary>
         public void MergeSongsManually()
         {
             if (database == null || database.Songs == null) return;
@@ -346,15 +401,11 @@ namespace AshTaiko
                     if (string.Equals(song1.Title, song2.Title, StringComparison.OrdinalIgnoreCase) &&
                         string.Equals(song1.Artist, song2.Artist, StringComparison.OrdinalIgnoreCase))
                     {
-                        Debug.Log($"Found duplicate song: {song1.Title} - {song1.Artist}");
-                        Debug.Log($"  Song 1: {song1.Charts?.Count ?? 0} charts");
-                        Debug.Log($"  Song 2: {song2.Charts?.Count ?? 0} charts");
+                        Debug.Log($"Found duplicate: {song1.Title} - {song1.Artist} ({song1.Charts?.Count ?? 0} + {song2.Charts?.Count ?? 0} charts)");
                         
                         // Merge song2 into song1
                         MergeCharts(song1, song2);
                         songsToRemove.Add(song2);
-                        
-                        Debug.Log($"Merged into song 1: {song1.Charts?.Count ?? 0} total charts");
                     }
                 }
             }
@@ -369,7 +420,9 @@ namespace AshTaiko
             Debug.Log($"Manual merge complete: {originalSongCount} -> {finalSongCount} songs, merged {songsToRemove.Count} songs");
         }
         
-        // Context menu method to log database status
+        /// <summary>
+        /// Logs the current database status for debugging purposes.
+        /// </summary>
         [ContextMenu("Log Database Status")]
         private void LogDatabaseStatus()
         {
@@ -383,7 +436,9 @@ namespace AshTaiko
             }
         }
         
-        // Context menu method to manually merge songs
+        /// <summary>
+        /// Triggers manual song merging from the Unity context menu.
+        /// </summary>
         [ContextMenu("Merge Duplicate Songs")]
         private void MergeSongsFromContextMenu()
         {

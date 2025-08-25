@@ -5,16 +5,13 @@ using TMPro;
 
 namespace AshTaiko.Menu
 {
-    /*
-        LeaderboardManager handles the display and management of song leaderboards.
-        This class provides player performance tracking and competitive elements.
-        
-        Data Structure Design:
-        Uses Lists for dynamic leaderboard entry collections to allow runtime updates.
-        Implements event-driven architecture for leaderboard updates and score display.
-        Stores leaderboard data with proper cleanup and memory management.
-    */
-
+    /// <summary>
+    /// Handles the display and management of song leaderboards.
+    /// This class provides player performance tracking and competitive elements.
+    /// Uses Lists for dynamic leaderboard entry collections to allow runtime updates.
+    /// Implements event-driven architecture for leaderboard updates and score display.
+    /// Stores leaderboard data with proper cleanup and memory management.
+    /// </summary>
     public class LeaderboardManager : MonoBehaviour
     {
         #region UI References
@@ -29,20 +26,22 @@ namespace AshTaiko.Menu
 
         #region Private Fields
 
-        /*
-            Leaderboard entry management using Lists for dynamic UI element creation.
-            This allows for runtime generation of leaderboard entries based on available score data.
-        */
+        /// <summary>
+        /// Leaderboard entry management using Lists for dynamic UI element creation.
+        /// This allows for runtime generation of leaderboard entries based on available score data.
+        /// </summary>
         private List<GameObject> _leaderboardEntries = new List<GameObject>();
 
         #endregion
 
         #region Public Interface
 
-        /*
-            UpdateLeaderboard displays player performance data for the selected song and difficulty.
-            This system provides motivation and competitive elements by showing high scores and rankings.
-        */
+        /// <summary>
+        /// Displays player performance data for the selected song and difficulty.
+        /// This system provides motivation and competitive elements by showing high scores and rankings.
+        /// </summary>
+        /// <param name="song">The song to display leaderboard for.</param>
+        /// <param name="chart">The chart/difficulty to display leaderboard for.</param>
         public void UpdateLeaderboard(SongEntry song, ChartData chart)
         {
             if (_leaderboardContent == null || _leaderboardEntryPrefab == null) return;
@@ -72,10 +71,10 @@ namespace AshTaiko.Menu
             }
         }
 
-        /*
-            ClearLeaderboard removes all existing leaderboard entries and cleans up references.
-            This prevents memory leaks and ensures clean UI state management.
-        */
+        /// <summary>
+        /// Removes all existing leaderboard entries and cleans up references.
+        /// This prevents memory leaks and ensures clean UI state management.
+        /// </summary>
         public void ClearLeaderboard()
         {
             foreach (var entry in _leaderboardEntries)
@@ -92,10 +91,10 @@ namespace AshTaiko.Menu
 
         #region Private Methods
 
-        /*
-            ShowNoScoresMessage displays a message when no scores are available for the selected song.
-            This provides clear feedback to users about the current leaderboard state.
-        */
+        /// <summary>
+        /// Displays a message when no scores are available for the selected song.
+        /// This provides clear feedback to users about the current leaderboard state.
+        /// </summary>
         private void ShowNoScoresMessage()
         {
             if (_leaderboardContent == null) return;
@@ -120,10 +119,12 @@ namespace AshTaiko.Menu
             _leaderboardEntries.Add(messageObj);
         }
 
-        /*
-            CreateLeaderboardEntry instantiates and configures a single leaderboard entry.
-            Each entry displays player performance information in a structured format.
-        */
+        /// <summary>
+        /// Instantiates and configures a single leaderboard entry.
+        /// Each entry displays player performance information in a structured format.
+        /// </summary>
+        /// <param name="entry">The leaderboard entry data to display.</param>
+        /// <param name="rank">The rank position of this entry.</param>
         private void CreateLeaderboardEntry(LeaderboardEntry entry, int rank)
         {
             GameObject entryObj = Instantiate(_leaderboardEntryPrefab, _leaderboardContent);
@@ -149,10 +150,13 @@ namespace AshTaiko.Menu
             _leaderboardEntries.Add(entryObj);
         }
 
-        /*
-            GetLeaderboardData retrieves leaderboard information for a specific song and difficulty.
-            This method provides sample data for demonstration purposes.
-        */
+        /// <summary>
+        /// Retrieves leaderboard information for a specific song and difficulty.
+        /// This method provides sample data for demonstration purposes.
+        /// </summary>
+        /// <param name="songId">The unique identifier of the song.</param>
+        /// <param name="chartVersion">The version/difficulty of the chart.</param>
+        /// <returns>A list of leaderboard entries for the specified song and chart.</returns>
         private List<LeaderboardEntry> GetLeaderboardData(string songId, string chartVersion)
         {
             // For now, return sample data
@@ -193,10 +197,12 @@ namespace AshTaiko.Menu
             return leaderboardData;
         }
 
-        /*
-            FormatScore converts raw score values to human-readable format with separators.
-            This improves readability for large score values.
-        */
+        /// <summary>
+        /// Converts raw score values to human-readable format with separators.
+        /// This improves readability for large score values.
+        /// </summary>
+        /// <param name="score">The raw score value to format.</param>
+        /// <returns>A formatted string representation of the score.</returns>
         private string FormatScore(int score)
         {
             return score.ToString("N0");
@@ -206,10 +212,10 @@ namespace AshTaiko.Menu
 
         #region Data Structures
 
-        /*
-            LeaderboardEntry represents a single player's performance record.
-            This structure stores all relevant information for leaderboard display.
-        */
+        /// <summary>
+        /// Represents a single player's performance record.
+        /// This structure stores all relevant information for leaderboard display.
+        /// </summary>
         [System.Serializable]
         public class LeaderboardEntry
         {

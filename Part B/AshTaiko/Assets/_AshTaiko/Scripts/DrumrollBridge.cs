@@ -3,6 +3,11 @@ using UnityEngine;
 
 namespace AshTaiko
 {
+    /// <summary>
+    /// Creates a visual bridge between drumroll start and end notes.
+    /// Dynamically scales and positions itself to connect the two notes,
+    /// providing visual feedback for drumroll duration and position.
+    /// </summary>
     public class DrumrollBridge : MonoBehaviour
     {
         [SerializeField]
@@ -11,11 +16,26 @@ namespace AshTaiko
         [SerializeField]
         private Note _endNote;
 
+        /// <summary>
+        /// Tracks whether the end note has existed at some point.
+        /// Used to prevent premature destruction of the bridge.
+        /// </summary>
         private bool _hasExisted;
 
+        /// <summary>
+        /// The drumroll start note.
+        /// </summary>
         public Note headNote { get => _headNote; set => _headNote = value; }
+        
+        /// <summary>
+        /// The drumroll end note.
+        /// </summary>
         public Note endNote { get => _endNote; set => _endNote = value; }
 
+        /// <summary>
+        /// Updates the bridge position and scale to connect the head and end notes.
+        /// Destroys the bridge if both notes are missing.
+        /// </summary>
         void LateUpdate()
         {
             if (_headNote == null && _endNote == null) Destroy(gameObject);

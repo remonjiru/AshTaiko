@@ -6,12 +6,33 @@ using UnityEngine;
 
 namespace AshTaiko
 {
+    /// <summary>
+    /// Handles import of osu! beatmap (.osu) files.
+    /// Parses osu! format metadata, timing points, and hit objects to create
+    /// SongEntry and ChartData objects compatible with the game engine.
+    /// </summary>
     public class OsuImporter
     {
+        /// <summary>
+        /// Raw file lines read from the osu! file.
+        /// </summary>
         private string[] fileLines;
+        
+        /// <summary>
+        /// Current line index during parsing.
+        /// </summary>
         private int currentLine;
+        
+        /// <summary>
+        /// Current section being parsed (General, Metadata, etc.).
+        /// </summary>
         private string currentSection;
         
+        /// <summary>
+        /// Imports an osu! beatmap file and converts it to a SongEntry with ChartData.
+        /// </summary>
+        /// <param name="filePath">Path to the .osu file to import.</param>
+        /// <returns>SongEntry containing the imported song data, or null if import failed.</returns>
         public SongEntry ImportSong(string filePath)
         {
             try
@@ -59,6 +80,11 @@ namespace AshTaiko
             }
         }
         
+        /// <summary>
+        /// Routes parsing to the appropriate section handler based on section name.
+        /// </summary>
+        /// <param name="song">The song entry being constructed.</param>
+        /// <param name="sectionName">Name of the section to parse.</param>
         private void ParseSection(SongEntry song, string sectionName)
         {
             switch (sectionName)
@@ -330,12 +356,6 @@ namespace AshTaiko
             
             // Calculate chart statistics
             CalculateChartStatistics(currentChart);
-            
-            Debug.Log($"Hit object parsing summary:");
-            Debug.Log($"  - Total lines processed: {totalLines}");
-            Debug.Log($"  - Lines skipped (comments/empty): {skippedLines}");
-            Debug.Log($"  - Hit objects successfully parsed: {hitObjectCount}");
-            Debug.Log($"  - Final chart has {currentChart.HitObjects.Count} hit objects");
         }
         
         private TimingPoint ParseTimingPoint(string line)

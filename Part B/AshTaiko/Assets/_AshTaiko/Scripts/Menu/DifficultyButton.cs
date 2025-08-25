@@ -4,16 +4,13 @@ using TMPro;
 
 namespace AshTaiko.Menu
 {
-    /*
-        DifficultyButton represents a single difficulty selection button in the song selection interface.
-        This component provides visual feedback and handles user interaction for difficulty selection.
-        
-        Data Structure Design:
-        Uses Button component for standard Unity button functionality and event handling.
-        Implements visual state management with color changes and text updates.
-        Stores difficulty information for easy access by the parent SongSelectionManager.
-    */
-
+    /// <summary>
+    /// Represents a single difficulty selection button in the song selection interface.
+    /// This component provides visual feedback and handles user interaction for difficulty selection.
+    /// Uses Button component for standard Unity button functionality and event handling.
+    /// Implements visual state management with color changes and text updates.
+    /// Stores difficulty information for easy access by the parent SongSelectionManager.
+    /// </summary>
     public class DifficultyButton : MonoBehaviour
     {
         [Header("UI Components")]
@@ -64,19 +61,15 @@ namespace AshTaiko.Menu
             }
         }
 
-        /*
-            Initialize sets up the difficulty button with chart data and visual configuration.
-            This method is called by the SongSelectionManager when creating difficulty buttons.
-        */
+        /// <summary>
+        /// Sets up the difficulty button with chart data and visual configuration.
+        /// This method is called by the SongSelectionManager when creating difficulty buttons.
+        /// </summary>
+        /// <param name="chart">The chart data associated with this difficulty.</param>
+        /// <param name="difficultyColor">The color to use for this difficulty level.</param>
         public void Initialize(ChartData chart, Color difficultyColor)
         {
             _associatedChart = chart;
-            
-            if (_buttonText != null)
-            {
-                string difficultyName = GetDifficultyDisplayName(chart.Difficulty);
-                _buttonText.text = $"{chart.Version}\n({difficultyName})";
-            }
 
             // Set button colors
             if (_button != null)
@@ -96,20 +89,21 @@ namespace AshTaiko.Menu
             }
         }
 
-        /*
-            SetSelected updates the visual state of the button to show selection.
-            This provides clear feedback about which difficulty is currently selected.
-        */
+        /// <summary>
+        /// Updates the visual state of the button to show selection.
+        /// This provides clear feedback about which difficulty is currently selected.
+        /// </summary>
+        /// <param name="selected">Whether this button should appear selected.</param>
         public void SetSelected(bool selected)
         {
             _isSelected = selected;
             UpdateVisualState();
         }
 
-        /*
-            UpdateVisualState applies the appropriate visual styling based on selection state.
-            This ensures consistent visual feedback across all difficulty buttons.
-        */
+        /// <summary>
+        /// Applies the appropriate visual styling based on selection state.
+        /// This ensures consistent visual feedback across all difficulty buttons.
+        /// </summary>
         private void UpdateVisualState()
         {
             if (_buttonText != null)
@@ -126,10 +120,10 @@ namespace AshTaiko.Menu
             }
         }
 
-        /*
-            OnButtonClicked handles user interaction with the difficulty button.
-            This triggers the difficulty selection event for the parent system.
-        */
+        /// <summary>
+        /// Handles user interaction with the difficulty button.
+        /// This triggers the difficulty selection event for the parent system.
+        /// </summary>
         private void OnButtonClicked()
         {
             if (_associatedChart != null)
@@ -138,37 +132,21 @@ namespace AshTaiko.Menu
             }
         }
 
-        /*
-            GetDifficultyDisplayName converts difficulty enums to human-readable names.
-            This provides consistent difficulty labeling across the interface.
-        */
-        private string GetDifficultyDisplayName(Difficulty difficulty)
-        {
-            switch (difficulty)
-            {
-                case Difficulty.Easy: return "Easy";
-                case Difficulty.Normal: return "Normal";
-                case Difficulty.Hard: return "Hard";
-                case Difficulty.Insane: return "Oni/Insane";
-                case Difficulty.Expert: return "Expert";
-                case Difficulty.Master: return "Master";
-                default: return difficulty.ToString();
-            }
-        }
-
-        /*
-            GetAssociatedChart provides access to the chart data associated with this button.
-            This allows other components to access difficulty information.
-        */
+        /// <summary>
+        /// Provides access to the chart data associated with this button.
+        /// This allows other components to access difficulty information.
+        /// </summary>
+        /// <returns>The chart data associated with this button.</returns>
         public ChartData GetAssociatedChart()
         {
             return _associatedChart;
         }
 
-        /*
-            IsSelected provides the current selection state of the button.
-            This allows other components to check the button's visual state.
-        */
+        /// <summary>
+        /// Provides the current selection state of the button.
+        /// This allows other components to check the button's visual state.
+        /// </summary>
+        /// <returns>True if the button is currently selected, false otherwise.</returns>
         public bool IsSelected()
         {
             return _isSelected;

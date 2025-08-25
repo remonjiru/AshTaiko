@@ -6,6 +6,11 @@ using DG.Tweening;
 
 namespace AshTaiko
 {
+    /// <summary>
+    /// Manages the user interface elements and their updates during gameplay.
+    /// Handles display of score, combo, accuracy, song information, and other
+    /// UI elements that need to be updated in real-time.
+    /// </summary>
     public class UIManager : MonoBehaviour
     {
         [SerializeField]
@@ -39,8 +44,14 @@ namespace AshTaiko
         [SerializeField]
         private TextMeshProUGUI _chartVersionText;
 
+        /// <summary>
+        /// Interpolated score value for smooth score display updates.
+        /// </summary>
         private int lerpedScore;
 
+        /// <summary>
+        /// Sets up event subscriptions and initializes UI state.
+        /// </summary>
         private void Awake()
         {
             _gaugeFill.fillAmount = 0;
@@ -50,12 +61,18 @@ namespace AshTaiko
             _gameManager.OnSongChanged += OnSongChanged;
         }
         
+        /// <summary>
+        /// Initializes the UI with current song information if available.
+        /// </summary>
         private void Start()
         {
             // Initialize UI with current song information if available
             InitializeSongInfo();
         }
         
+        /// <summary>
+        /// Initializes song information display with current song and chart data.
+        /// </summary>
         private void InitializeSongInfo()
         {
             var currentSong = _gameManager.GetCurrentSong();
@@ -71,6 +88,9 @@ namespace AshTaiko
             }
         }
         
+        /// <summary>
+        /// Clears all song information displays and shows placeholder text.
+        /// </summary>
         private void ClearSongInfo()
         {
             if (_songTitleText != null)
@@ -92,11 +112,19 @@ namespace AshTaiko
             }
         }
 
+        /// <summary>
+        /// Updates the accuracy display when accuracy changes.
+        /// </summary>
+        /// <param name="accuracy">The new accuracy value as a percentage.</param>
         private void OnAccuracyChange(float accuracy)
         {
             _accuracyText.text = accuracy.ToString("F2") + "%";
         }
 
+        /// <summary>
+        /// Updates the score display when score changes.
+        /// </summary>
+        /// <param name="score">The new score value.</param>
         private void OnScoreChange(int score)
         {
             DOTween.To(() => lerpedScore, x => lerpedScore = x, score, 0.2f).OnUpdate(UpdateText);
@@ -127,13 +155,13 @@ namespace AshTaiko
 
         private void OnSongChanged(SongEntry song, ChartData chart)
         {
-            if (song == null || chart == null) 
+            if (song == null || chart == null)
             {
                 ClearSongInfo();
                 return;
             }
             
-            // Update song information with null checks
+            // Update text displays
             if (_songTitleText != null)
                 _songTitleText.text = song.Title ?? "Unknown Title";
             
@@ -141,66 +169,62 @@ namespace AshTaiko
                 _songArtistText.text = song.Artist ?? "Unknown Artist";
             
             if (_songCreatorText != null)
-                _songCreatorText.text = song.Creator ?? "Unknown Creator";
+                _songCreatorText.text = song.Creator ?? "";
             
             if (_chartVersionText != null)
-                _chartVersionText.text = $"Chart: {chart.Version} ({chart.Difficulty})";
+                _chartVersionText.text = chart.Version ?? "";
             
-            // Load song cover image if available
-            if (_songCoverImage != null)
-            {
-                if (song.HasImage())
-                {
-                    string imagePath = song.GetBestAvailableImagePath();
-                    LoadSongCover(imagePath);
-                }
-                else
-                {
-                    // Set a default cover or clear the image
-                    _songCoverImage.sprite = null;
-                    _songCoverImage.color = new Color(0.2f, 0.2f, 0.2f, 0.5f); // Dark gray placeholder
-                }
-            }
+            // Load and display song cover image
+            LoadSongCoverImage(song);
             
             Debug.Log($"Song info updated: {song.Title} - {song.Artist} ({chart.Version})");
         }
         
-        private void LoadSongCover(string imagePath)
+        private void LoadSongCoverImage(SongEntry song)
         {
-            // Start loading the image asynchronously
-            StartCoroutine(LoadImageCoroutine(imagePath));
-        }
-        
-        private System.Collections.IEnumerator LoadImageCoroutine(string imagePath)
-        {
-            if (string.IsNullOrEmpty(imagePath)) yield break;
+            if (_songCoverImage == null || song == null) return;
+            
+            string imagePath = song.GetBestAvailableImagePath();
+            if (string.IsNullOrEmpty(imagePath))
+            {
+                // No image available, use placeholder
+                _songCoverImage.sprite = null;
+                _songCoverImage.color = new Color(0.1f, 0.1f, 0.3f, 0.3f);
+                return;
+            }
             
             // Check if file exists
             if (!System.IO.File.Exists(imagePath))
             {
                 Debug.LogWarning($"Song cover image not found: {imagePath}");
-                SetDefaultCover();
-                yield break;
+                _songCoverImage.sprite = null;
+                _songCoverImage.color = new Color(0.1f, 0.1f, 0.3f, 0.3f);
+                return;
             }
             
-            // Load image using UnityWebRequest
-            string fullPath = "file://" + imagePath;
-            using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequestTexture.GetTexture(fullPath))
+            // Load image from file
+            StartCoroutine(LoadImageFromPath(imagePath));
+        }
+        
+        private System.Collections.IEnumerator LoadImageFromPath(string imagePath)
+        {
+            // Convert file path to URL format
+            string url = "file://" + imagePath;
+            
+            using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequestTexture.GetTexture(url))
             {
                 yield return www.SendWebRequest();
                 
                 if (www.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
                 {
-                    Texture2D texture = UnityEngine.Networking.DownloadHandlerTexture.GetContent(www);
+                    UnityEngine.Texture2D texture = UnityEngine.Networking.DownloadHandlerTexture.GetContent(www);
                     if (texture != null)
                     {
-                        // Create a temporary sprite first (will be replaced with cropped version)
-                        Sprite tempSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-                        _songCoverImage.sprite = tempSprite;
-                        _songCoverImage.color = Color.white; // Reset to normal color
+                        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+                        _songCoverImage.sprite = sprite;
+                        _songCoverImage.color = Color.white;
                         
-                        // Configure the image to fit nicely without stretching
-                        // This will create a new cropped sprite and replace the temporary one
+                        // Configure image display
                         ConfigureImageForTexture(texture);
                         
                         Debug.Log($"Song cover loaded: {imagePath}");
@@ -208,13 +232,11 @@ namespace AshTaiko
                     else
                     {
                         Debug.LogError($"Failed to get texture from song cover: {imagePath}");
-                        SetDefaultCover();
                     }
                 }
                 else
                 {
                     Debug.LogError($"Failed to load song cover: {www.error}");
-                    SetDefaultCover();
                 }
             }
         }

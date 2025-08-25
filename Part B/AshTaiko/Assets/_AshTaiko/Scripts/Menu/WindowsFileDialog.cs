@@ -8,9 +8,9 @@ using UnityEditor;
 
 namespace AshTaiko.Menu
 {
+    // Yeah no this one is literally just stack overflow im not sure what like most of this does if im being so honest
     /// <summary>
-    /// Provides native Windows file dialog functionality for song importing.
-    /// This class uses Win32 API calls to show native file selection dialogs.
+    /// Provides file dialog functionality for song importing on Windows
     /// </summary>
     public static class WindowsFileDialog
     {
