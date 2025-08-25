@@ -128,6 +128,15 @@ namespace AshTaiko.Input
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Pause"",
+                    ""type"": ""Button"",
+                    ""id"": ""7b8c7b8c-7b8c-7b8c-7b8c-7b8c7b8c7b8c"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -172,6 +181,17 @@ namespace AshTaiko.Input
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Ka_Left"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7b8c7b8c-7b8c-7b8c-7b8c-7b8c7b8c7b8c"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Pause"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -763,6 +783,7 @@ namespace AshTaiko.Input
             m_Gameplay_Don_Left = m_Gameplay.FindAction("Don_Left", throwIfNotFound: true);
             m_Gameplay_Don_Right = m_Gameplay.FindAction("Don_Right", throwIfNotFound: true);
             m_Gameplay_Ka_Right = m_Gameplay.FindAction("Ka_Right", throwIfNotFound: true);
+            m_Gameplay_Pause = m_Gameplay.FindAction("Pause", throwIfNotFound: true);
             // UI
             m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
             m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -860,6 +881,7 @@ namespace AshTaiko.Input
         private readonly InputAction m_Gameplay_Don_Left;
         private readonly InputAction m_Gameplay_Don_Right;
         private readonly InputAction m_Gameplay_Ka_Right;
+        private readonly InputAction m_Gameplay_Pause;
         /// <summary>
         /// Provides access to input actions defined in input action map "Gameplay".
         /// </summary>
@@ -887,6 +909,10 @@ namespace AshTaiko.Input
             /// Provides access to the underlying input action "Gameplay/Ka_Right".
             /// </summary>
             public InputAction @Ka_Right => m_Wrapper.m_Gameplay_Ka_Right;
+            /// <summary>
+            /// Provides access to the underlying input action "Gameplay/Pause".
+            /// </summary>
+            public InputAction @Pause => m_Wrapper.m_Gameplay_Pause;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
@@ -925,6 +951,9 @@ namespace AshTaiko.Input
                 @Ka_Right.started += instance.OnKa_Right;
                 @Ka_Right.performed += instance.OnKa_Right;
                 @Ka_Right.canceled += instance.OnKa_Right;
+                @Pause.started += instance.OnPause;
+                @Pause.performed += instance.OnPause;
+                @Pause.canceled += instance.OnPause;
             }
 
             /// <summary>
@@ -948,6 +977,9 @@ namespace AshTaiko.Input
                 @Ka_Right.started -= instance.OnKa_Right;
                 @Ka_Right.performed -= instance.OnKa_Right;
                 @Ka_Right.canceled -= instance.OnKa_Right;
+                @Pause.started -= instance.OnPause;
+                @Pause.performed -= instance.OnPause;
+                @Pause.canceled -= instance.OnPause;
             }
 
             /// <summary>
@@ -1276,6 +1308,13 @@ namespace AshTaiko.Input
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnKa_Right(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Pause" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnPause(InputAction.CallbackContext context);
         }
         /// <summary>
         /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

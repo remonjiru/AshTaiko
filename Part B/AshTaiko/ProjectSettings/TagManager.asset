@@ -41,6 +41,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Background
+    uniqueID: 3456206555
+    locked: 0
   - name: Playfield
     uniqueID: 2956009923
     locked: 0
@@ -52,6 +55,9 @@ TagManager:
     locked: 0
   - name: UI
     uniqueID: 140048671
+    locked: 0
+  - name: Pause
+    uniqueID: 2130505751
     locked: 0
   m_RenderingLayers:
   - Default

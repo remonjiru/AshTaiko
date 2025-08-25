@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Events;
-using System.Linq;
 
 namespace AshTaiko.Menu
 {
@@ -12,10 +11,13 @@ namespace AshTaiko.Menu
         [SerializeField] private TextMeshProUGUI _titleText;
         [SerializeField] private TextMeshProUGUI _artistText;
         [SerializeField] private TextMeshProUGUI _creatorText;
-        [SerializeField] private TextMeshProUGUI _lengthText;
-        [SerializeField] private TextMeshProUGUI _difficultyText;
-        [SerializeField] private Image _backgroundImage;
+        [SerializeField] private TextMeshProUGUI _formatText;
+        [SerializeField] private Image _previewImage;
         [SerializeField] private Button _itemButton;
+        
+        [Header("Image Display Settings")]
+        [SerializeField] private bool _preserveAspectRatio = true;
+        [SerializeField] private Image.Type _imageType = Image.Type.Simple;
         
         [Header("Visual States")]
         [SerializeField] private Color _normalColor = Color.white;
@@ -27,6 +29,11 @@ namespace AshTaiko.Menu
         private bool _isSelected = false;
         
         public UnityAction<int> OnSongSelected;
+        
+        /// <summary>
+        /// Event triggered when the song item is hovered.
+        /// </summary>
+        public UnityAction<SongEntry> OnSongHovered;
         
         private void Awake()
         {
@@ -50,54 +57,32 @@ namespace AshTaiko.Menu
             
             // Update text fields
             if (_titleText != null)
-                _titleText.text = _songData.Title;
+                _titleText.text = _songData.Title ?? "Unknown Title";
             
             if (_artistText != null)
-                _artistText.text = _songData.Artist;
+                _artistText.text = _songData.Artist ?? "Unknown Artist";
             
             if (_creatorText != null)
-                _creatorText.text = _songData.Creator;
+                _creatorText.text = _songData.Creator ?? "Unknown Creator";
             
-            // Update length
-            if (_lengthText != null)
+            // Update format information
+            if (_formatText != null)
             {
-                float totalLength = 0;
-                if (_songData.Charts != null && _songData.Charts.Count > 0)
-                {
-                    totalLength = _songData.Charts[0].TotalLength;
-                }
-                _lengthText.text = FormatTime(totalLength);
+                string format = GetFormatDisplayName(_songData.Format);
+                _formatText.text = format;
             }
             
-            // Update difficulty info
-            if (_difficultyText != null)
+            // Update preview image if available
+            if (_previewImage != null && _songData.HasImage())
             {
-                _difficultyText.text = GetDifficultyString();
-            }
-            
-            // Update background image if available
-            if (_backgroundImage != null && !string.IsNullOrEmpty(_songData.BackgroundImage))
-            {
-                // Load background image (you'd need to implement image loading)
-                // _backgroundImage.sprite = LoadSprite(_songData.BackgroundImage);
+                string imagePath = _songData.GetBestAvailableImagePath();
+                // Load preview image (you'd need to implement image loading)
+                // _previewImage.sprite = LoadSprite(imagePath);
+                // ConfigureImageForTexture(texture); // Call this after loading
             }
         }
         
-        private string GetDifficultyString()
-        {
-            if (_songData.Charts == null || _songData.Charts.Count == 0)
-                return "No charts";
-            
-            var difficulties = _songData.Charts.Select(c => c.Difficulty.ToString()).ToArray();
-            return string.Join(", ", difficulties);
-        }
-        
-        private string FormatTime(float timeInSeconds)
-        {
-            int minutes = Mathf.FloorToInt(timeInSeconds / 60f);
-            int seconds = Mathf.FloorToInt(timeInSeconds % 60f);
-            return string.Format("{0:00}:{1:00}", minutes, seconds);
-        }
+
         
         private void OnItemClicked()
         {
@@ -126,6 +111,11 @@ namespace AshTaiko.Menu
             {
                 _creatorText.color = _isSelected ? _selectedColor : _normalColor;
             }
+            
+            if (_formatText != null)
+            {
+                _formatText.color = _isSelected ? _selectedColor : _normalColor;
+            }
         }
         
         public void OnPointerEnter()
@@ -135,7 +125,11 @@ namespace AshTaiko.Menu
                 if (_titleText != null) _titleText.color = _hoverColor;
                 if (_artistText != null) _artistText.color = _hoverColor;
                 if (_creatorText != null) _creatorText.color = _hoverColor;
+                if (_formatText != null) _formatText.color = _hoverColor;
             }
+            
+            // Trigger hover event for background system
+            OnSongHovered?.Invoke(_songData);
         }
         
         public void OnPointerExit()
@@ -144,6 +138,9 @@ namespace AshTaiko.Menu
             {
                 UpdateVisualState();
             }
+            
+            // Trigger hover event with null to indicate no song is hovered
+            OnSongHovered?.Invoke(null);
         }
         
         public SongEntry GetSongData()
@@ -154,6 +151,88 @@ namespace AshTaiko.Menu
         public int GetSongIndex()
         {
             return _songIndex;
+        }
+        
+        /*
+            ConfigureImageForTexture sets up the Image component to display the texture
+            without stretching, maintaining aspect ratio and filling the entire component.
+            This creates a "fill and crop" effect similar to CSS object-fit: cover.
+        */
+        public void ConfigureImageForTexture(Texture2D texture)
+        {
+            if (_previewImage == null || texture == null) return;
+            
+            // Set the image type and preserve aspect ratio
+            _previewImage.type = _imageType;
+            _previewImage.preserveAspect = _preserveAspectRatio;
+            
+            // Configure the image to fill the component while maintaining aspect ratio
+            ConfigureImageWithFillAndCrop(texture);
+        }
+        
+        /*
+            ConfigureImageWithFillAndCrop sets up the image to fill the entire component
+            while maintaining aspect ratio. This may crop parts of the image but ensures
+            no stretching occurs.
+        */
+        private void ConfigureImageWithFillAndCrop(Texture2D texture)
+        {
+            if (_previewImage == null || texture == null) return;
+            
+            // Get the RectTransform of the Image component
+            RectTransform imageRect = _previewImage.rectTransform;
+            if (imageRect == null) return;
+            
+            // Get the parent container's size
+            RectTransform parentRect = imageRect.parent as RectTransform;
+            if (parentRect == null)
+            {
+                // If no parent, use the image's own size
+                imageRect.sizeDelta = new Vector2(texture.width, texture.height);
+                return;
+            }
+            
+            Vector2 parentSize = parentRect.rect.size;
+            float parentAspect = parentSize.x / parentSize.y;
+            float textureAspect = (float)texture.width / texture.height;
+            
+            Vector2 newSize;
+            
+            if (textureAspect > parentAspect)
+            {
+                // Texture is wider than parent - fit to height, crop width
+                newSize = new Vector2(parentSize.y * textureAspect, parentSize.y);
+            }
+            else
+            {
+                // Texture is taller than parent - fit to width, crop height
+                newSize = new Vector2(parentSize.x, parentSize.x / textureAspect);
+            }
+            
+            // Set the size to fill the parent while maintaining aspect ratio
+            imageRect.sizeDelta = newSize;
+            
+            // Center the image
+            imageRect.anchoredPosition = Vector2.zero;
+        }
+        
+        /// <summary>
+        /// Converts the SongFormat enum to a human-readable display name.
+        /// </summary>
+        /// <param name="format">The format enum value to convert.</param>
+        /// <returns>A user-friendly string representation of the format.</returns>
+        private string GetFormatDisplayName(SongFormat format)
+        {
+            switch (format)
+            {
+                case SongFormat.Osu:
+                    return "osu!";
+                case SongFormat.Tja:
+                    return "TJA";
+                case SongFormat.Unknown:
+                default:
+                    return "Unknown";
+            }
         }
     }
 }

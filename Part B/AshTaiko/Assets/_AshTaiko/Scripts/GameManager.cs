@@ -8,24 +8,6 @@ using UnityEngine.Events;
 
 namespace AshTaiko
 {
-    /*
-     * GameManager serves as the central orchestrator for the Taiko rhythm game, managing all core gameplay systems.
-     * This class implements a singleton pattern to provide global access to game state, though this creates tight coupling
-     * that should be refactored to use dependency injection in future iterations.
-     * 
-     * The class handles multiple responsibilities including:
-     * - Timing synchronization between audio playback and visual note movement
-     * - Note spawning and lifecycle management
-     * - Hit detection and scoring systems
-     * - Game state transitions and management
-     * - Integration with chart data and audio systems
-     * 
-     * Data Structure Design:
-     * - Uses Lists for dynamic collections (notes, active notes) to allow runtime addition/removal
-     * - Implements state machine pattern with TimingState enum for managing audio loading phases
-     * - Stores timing data as float values in seconds for precision and Unity compatibility
-     * - Uses double for DSP time calculations to maintain precision during long audio sessions
-     */
     /// <summary>
     /// Central game controller managing timing, note spawning, hit detection, scoring, and gameplay loop.
     /// </summary>
@@ -34,16 +16,14 @@ namespace AshTaiko
         #region Singleton and Core References
 
         /*
-         * Singleton Pattern Implementation:
-         * The singleton pattern provides global access to game state from any component without requiring
-         * explicit references to be passed around. This simplifies component communication but creates
-         * tight coupling that makes testing and modularity difficult.
-         * 
-         * Alternative approaches for future refactoring:
-         * - Dependency injection container for managing component references
-         * - Event-driven architecture using ScriptableObject-based events
-         * - Service locator pattern for component discovery
-         */
+            The singleton pattern provides global access to game state from any component without requiring
+            explicit references to be passed around. This simplifies component communication but creates
+            tight coupling that makes testing and modularity difficult.
+            
+            A future refactor would probably involve changing the singleton pattern
+            to something like dependency injection for managing component references.
+        */
+
         /// <summary>
         /// Global singleton instance providing access to game state from anywhere in the codebase.
         /// </summary>
@@ -54,24 +34,26 @@ namespace AshTaiko
         #region Prefab and Component References
 
         /*
-         * Note Prefab System:
-         * Note prefabs are instantiated at runtime to represent individual chart notes. Using prefabs
-         * allows for efficient object pooling and consistent visual representation across all notes.
-         * The drumroll bridge prefab creates visual connections between drumroll start and end notes.
-         */
+            Note prefabs are instantiated at runtime to represent individual chart notes. Using prefabs
+            allows for efficient object pooling and consistent visual representation across all notes.
+            The drumroll bridge prefab creates visual connections between drumroll start and end notes.
+        */
+
         [Header("Note Prefabs")]
+        // These are assigned in the inspector.
+
         [SerializeField]
         private GameObject _notePrefab;
-        
+
         [SerializeField]
         private GameObject _drumrollBridgePrefab;
 
         /*
-         * Audio System Integration:
-         * SongManager handles audio playback and provides timing information. This separation of concerns
-         * allows the GameManager to focus on gameplay logic while delegating audio management to specialists.
-         * The relationship is loosely coupled through interfaces and events.
-         */
+            SongManager handles audio playback and provides timing information. This separation of concerns
+            allows the GameManager to focus on gameplay logic while delegating audio management to specialists.
+            The relationship is loosely coupled through interfaces and events.
+        */
+
         /// <summary>
         /// Manages audio playback and provides synchronized timing information for gameplay.
         /// </summary>
@@ -79,101 +61,129 @@ namespace AshTaiko
         private SongManager _songManager;
 
         /*
-         * Input System:
-         * Drum component handles player input detection and converts raw input into game events.
-         * This separation allows for easy input system swapping (keyboard, controller, touch) without
-         * affecting core gameplay logic.
-         */
+            Drum component handles player input detection and converts raw input into game events.
+            This separation allows for easy input system swapping (keyboard, controller, touch) without
+            affecting core gameplay logic. This will be implemented later, as time constraints have prevented
+            the implementation of controller input.
+        */
+
         [SerializeField]
         private Drum _drum;
 
         /*
-         * Visual Reference Points:
-         * Transform components provide world space positions for note spawning and hit detection.
-         * Using Transform instead of Vector3 allows for runtime position updates and scene hierarchy integration.
-         */
+            Transform components provide world space positions for note spawning and hit detection.
+            Using Transform instead of Vector3 allows for runtime position updates and makes it
+            easier to visualise in the Unity Editor.
+        */
+        /// <summary>
+        /// The transform of the judgement circle position.
+        /// </summary>
         [SerializeField]
         private Transform _judgementCircle;
 
         /*
-         * Visual Effects:
-         * Hit effects are instantiated at note hit positions to provide player feedback.
-         * GameObject references allow for runtime instantiation and destruction of effect instances.
-         */
+            Hit effects are instantiated at the judgement circle to provide player feedback.
+            GameObject references allow for runtime instantiation and destruction of effect instances.
+        */
+
         [SerializeField]
         private GameObject _hitEffect;
+
+        /*
+            Background system provides immersive gameplay experience with chart-specific backgrounds.
+            The background image is loaded from the chart data and can be dimmed for better gameplay visibility.
+        */
+
+        [Header("Background System")]
+        [SerializeField] private UnityEngine.UI.Image _backgroundImage;
+        [SerializeField] private UnityEngine.UI.Image _backgroundOverlay; // For dimming effect
+        [SerializeField] private float _backgroundDim = 0.7f; // Adjustable dim level (0 = no dim, 1 = black)
+        [SerializeField] private bool _enableBackground = true;
+
+        [Header("Input and Menu System")]
+        [SerializeField] private InputReader _inputReader;
+        [SerializeField] private PauseMenuManager _pauseMenuManager;
 
         #endregion
 
         #region Note Management System
 
-        /*
-         * The notes list stores all chart data as HitObject instances for note spawning.
-         * Using List<T> allows for dynamic chart loading and runtime modification.
-         * The nextNoteIndex tracks the current position in the chart for sequential spawning.
-         */
-        [SerializeField]
+        /// <summary>
+        /// The notes list stores all chart data as HitObject instances for note spawning.
+        /// </summary>
+        /// Using List<T> allows for dynamic chart loading and runtime modification.
         private List<HitObject> _notes = new List<HitObject>();
+
+        //  The nextNoteIndex tracks the current position in the chart for sequential spawning.
         private int _nextNoteIndex = 0;
 
         #endregion
 
         #region Chart and Song Data
 
-        /*
-         * SongEntry contains metadata about the current song (title, artist, audio file).
-         * ChartData contains the actual gameplay data (note timings, difficulty settings).
-         * This separation allows for multiple difficulty charts per song while sharing common metadata.
-         */
+        /// <summary>
+        /// Metadata about the current song (title, artist, audio file).
+        /// </summary>
         private SongEntry _currentSong;
+
+        /// <summary>
+        /// Gameplay data including note timings, difficulty settings, etc.
+        /// </summary>
         private ChartData _currentChart;
+
+        // This separation allows for multiple difficulty charts per song while sharing common metadata.
 
         #endregion
 
         #region Timing System
 
-        /*
-         * Preempt time determines how early notes spawn before their hit time.
-         * Travel distance defines the spawn-to-hit distance for consistent note movement speeds.
-         * Using float values provides sufficient precision for Unity compatibility.
-         */
+        // Using float values provides sufficient precision for Unity compatibility.
+
+        /// <summary>
+        /// Determines how early notes spawn before their hit time in seconds.
+        /// </summary>
         private float _preemptTime = 2.0f;
 
+        /// <summary>
+        /// Defines the spawn-to-hit distance for consistent note movement speeds.
+        /// </summary>
         [SerializeField]
         private float _travelDistance = 15f;
 
-        /*
-         * SongTime represents the current playback position in the chart, synchronized with audio playback.
-         * This value drives all timing-dependent systems including note spawning, hit detection, and scoring.
-         */
+        /// <summary>
+        /// Represents the current playback position in the chart, synchronized with audio playback.
+        /// </summary>
+        /// <remarks>
+        /// This value drives all timing-dependent systems including note spawning, hit detection, and scoring.
+        /// </remarks>
         private float _songTime;
 
         /*
-         * TimingState enum implements a state machine pattern to manage audio loading and synchronization.
-         * State Flow: Uninitialized -> Loading -> Delay -> Playing
-         * The Delay state implements a 3-second countdown before audio starts.
-         */
+            TimingState enum implements a state machine pattern to manage audio loading and synchronization.
+            Flow follows: Uninitialized -> Loading -> Delay -> Playing. 
+            The Delay state represents a variable countdown before audio starts.
+        */
         private enum TimingState
         {
-            Uninitialized,    // No audio loaded yet
-            Loading,          // Audio is loading
-            Delay,            // Audio loaded, waiting for 3s delay
-            Playing           // Audio is playing normally
+            Uninitialized,
+            Loading,
+            Delay,
+            Playing
         }
 
         private TimingState _timingState = TimingState.Uninitialized;
-        
+
         /*
-         * DSP time provides high-precision timing for audio synchronization.
-         * Using double precision prevents timing drift during long audio sessions.
-         * The delay start time enables continuous timing through the delay period.
-         */
+            DSP time provides high-precision timing for audio synchronization.
+            Using double precision prevents timing drift during long audio sessions.
+            The delay start time enables continuous timing through the delay period.
+        */
         private double _delayStartDspTime = 0.0;
 
         /*
-         * This flag prevents automatic song selection from overriding user choices during gameplay.
-         * Boolean type provides simple state tracking with minimal memory overhead.
-         */
+            This flag prevents automatic song selection from overriding user choices during gameplay.
+            Boolean type provides simple state tracking with minimal memory overhead.
+        */
         private bool _songManuallySelected = false;
 
         #endregion
@@ -181,28 +191,50 @@ namespace AshTaiko
         #region Core Properties
 
         /*
-         * Core Timing Property:
-         * SongTime provides read-only access to the current synchronized playback time.
-         * Using a property instead of a public field ensures encapsulation and allows for
-         * future validation or side effects without breaking external code.
-         */
+            SongTime provides read-only access to the current synchronized playback time.
+            Using a property instead of a public field ensures encapsulation and allows for
+            future validation or side effects without breaking external code.
+        */
+
+        /// <summary>
+        /// Represents the current playback position in the chart, synchronized with audio playback.
+        /// </summary>
+        /// <remarks>
+        /// This value drives all timing-dependent systems including note spawning, hit detection, and scoring.
+        /// </remarks>
         public float SongTime
         {
             get => _songTime;
+        }
+
+        /// <summary>
+        /// Gets whether the game is currently paused.
+        /// </summary>
+        public bool IsPaused
+        {
+            get => _isPaused;
+        }
+
+        /// <summary>
+        /// Sets the pause state of the game.
+        /// </summary>
+        /// <param name="paused">True to pause the game, false to resume.</param>
+        public void SetPauseState(bool paused)
+        {
+            _isPaused = paused;
         }
 
         #endregion
 
         #region Timing Methods
 
-        /*
-         * Provides core timing synchronization between visual and audio systems.
-         * Handles timing calculations during the delay period and maintains continuous timing.
-         * During delay, time counts from -3.0s to 0.0s, then continues normally.
-         */
+        /// <summary>
+        /// Provides core timing synchronization between visual and audio systems, handles timing calculations during the delay period 
+        /// and maintains continuous timing. During delay, time counts from a negative value to to 0.0s, then continues normally.
+        /// </summary>
         public float GetSynchronizedSongTime()
         {
-            // Don't try to get audio time if we're not in the right state
+            // Don't try to get audio time if we're not in the right state otherwise Unity will complain
             if (_timingState == TimingState.Uninitialized || _timingState == TimingState.Loading)
             {
                 return _songTime; // Return current song time until system is ready
@@ -211,23 +243,15 @@ namespace AshTaiko
             // Get the actual audio playback time from SongManager
             if (_songManager != null)
             {
-                float audioTime = _songManager.GetCurrentSongTime();
+                // something is telling me to put a switch statement here but its literally one check so it should be okay LMAO
 
                 if (_timingState == TimingState.Delay)
                 {
-                    // We're in the 3-second delay period
-                    // Calculate time based on when the delay actually started
                     double currentDspTime = AudioSettings.dspTime;
                     double timeSinceDelayStart = currentDspTime - _delayStartDspTime;
 
-                    // Return negative time that counts up: -3.0s -> -2.0s -> -1.0s -> 0.0s
+                    // Hardcoded 3 second countdown oopsie sorry mr toet
                     float synchronizedTime = -3f + (float)timeSinceDelayStart;
-
-                    // Debug timing during delay (less frequent to avoid spam)
-                    if (Time.frameCount % 120 == 0)
-                    {
-                        Debug.Log($"Delay timing: DSP={currentDspTime:F3}s, delayStart={_delayStartDspTime:F3}s, timeSinceDelay={timeSinceDelayStart:F3}s, syncTime={synchronizedTime:F3}s");
-                    }
 
                     return synchronizedTime;
                 }
@@ -241,12 +265,6 @@ namespace AshTaiko
                     // This gives us continuous timing: -3.0s -> -2.0s -> -1.0s -> 0.0s -> 1.0s -> 2.0s...
                     float synchronizedTime = -3f + (float)timeSinceDelayStart;
 
-                    // Debug timing during playing (less frequent to avoid spam)
-                    if (Time.frameCount % 120 == 0)
-                    {
-                        Debug.Log($"Playing timing: DSP={currentDspTime:F3}s, delayStart={_delayStartDspTime:F3}s, timeSinceDelay={timeSinceDelayStart:F3}s, syncTime={synchronizedTime:F3}s, audioTime={audioTime:F3}s");
-                    }
-
                     return synchronizedTime;
                 }
             }
@@ -254,14 +272,13 @@ namespace AshTaiko
             return _songTime;
         }
 
-        /*
-         * Converts internal synchronized time to positive display time for UI elements.
-         * Ensures UI never shows negative values during the delay period.
-         */
+        /// <summary>
+        /// Converts internal synchronized time to positive display time for UI elements.
+        /// </summary>
+        //  Ensures UI never shows negative values during the delay period.
         public float GetDisplaySongTime()
         {
             float synchronizedTime = GetSynchronizedSongTime();
-            // Convert negative time (during delay) to positive display time
             return Mathf.Max(0f, synchronizedTime);
         }
 
@@ -270,32 +287,41 @@ namespace AshTaiko
         #region Game State Fields
 
         /*
-         * DSP time smoothing mechanism prevents jitter and provides stable timing.
-         * The smoothing algorithm interpolates between DSP time updates for consistent frame rates.
-         */
+            DSP time smoothing mechanism prevents jitter and provides stable timing.
+            The smoothing algorithm interpolates between DSP time updates for consistent frame rates.
+            Shoutout to that one guy on the Unity forums for this solution.
+        */
         private float _smoothedDsp;
         private double _lastDsp;
+        
+        /// <summary>
+        /// Indicates whether the game is currently paused.
+        /// </summary>
+        private bool _isPaused = false;
 
         /*
-         * Song duration tracking for progress calculations and UI display.
-         * Using float values provides sufficient precision for song duration.
-         */
+            Song duration tracking for progress calculations and UI display.
+            Using float values provides sufficient precision for song duration.
+        */
         private float _songStartTime = 0;
         private float _songEndTime = 0;
 
         /*
-         * Frame timing system tracks timing information for each frame.
-         * Uses both DSP time and Unity time for maximum accuracy.
-         */
+            Frame timing system tracks timing information for each frame.
+            Uses both DSP time and Unity time for maximum accuracy.
+        */
         private double _lastDspTime;
         private double _currentDspTime;
         private float _frameStartTime;
 
-        /*
-         * Active notes list contains all currently spawned notes moving toward the hit bar.
-         * The nextJudgableNoteIndex tracks the next note for hit detection evaluation.
-         */
+        /// <summary>
+        /// List containing all currently spawned notes moving toward the hit bar.
+        /// </summary>
         private List<Note> _activeNotes = new List<Note>();
+
+        /// <summary>
+        /// Index tracking the next note for hit detection evaluation.
+        /// </summary>
         private int _nextJudgableNoteIndex = 0;
 
         #endregion
@@ -303,23 +329,21 @@ namespace AshTaiko
         #region Drumroll System
 
         /*
-         * Drumroll State Management:
-         * Drumrolls are special note sequences that require continuous input from players.
-         * This system tracks the current drumroll state, timing, and player performance
-         * to provide appropriate scoring and visual feedback.
-         * 
-         * Data Structure Design:
-         * - Boolean flags for state tracking: Simple and efficient for binary states
-         * - Float values for timing: Precise timing for drumroll mechanics
-         * - Integer counters for performance tracking: Efficient counting without precision loss
-         * - List for bridge management: Dynamic collection for visual drumroll connections
-         */
+            Drumrolls are special note sequences that require continuous input from players.
+            These sucked to implement
+            This system tracks the current drumroll state, timing, and player performance to 
+            provide appropriate scoring and visual feedback
+        
+            Boolean flags for state tracking provide simple and efficient binary states
+            Float values provide precise timing for drumroll mechanics and align with the SongTime
+            Integer because hits are discrete
+            List for "bridge" management provides dynamic collection for visual drumroll connections
+        */
         private bool _isInDrumroll = false;
         private HitObject _currentDrumroll = null;
         private float _drumrollStartTime = 0f;
         private float _drumrollEndTime = 0f;
         private int _drumrollHits = 0;
-        private float _drumrollHitWindow = 0.15f;
 
         private List<DrumrollBridge> _activeDrumrollBridges = new List<DrumrollBridge>();
 
@@ -328,21 +352,38 @@ namespace AshTaiko
         #region Event System
 
         /*
-         * Event System Architecture:
-         * UnityEvents provide a decoupled communication system between GameManager and UI components.
-         * This design allows UI elements to subscribe to game events without creating direct dependencies,
-         * enabling modular UI development and easy testing.
-         * 
-         * Event Types:
-         * - Score/Combo events: Integer values for discrete gameplay metrics
-         * - Accuracy events: Float values for continuous performance measurement
-         * - Note hit events: Note references for detailed hit information
-         * - Song change events: Song and chart data for UI updates
-         */
+            UnityEvents provide a decoupled communication system between GameManager and UI components.
+            This design allows UI elements to subscribe to game events without creating direct dependencies,
+            enabling modular UI development and easy testing.
+        
+            Score/Combo events provide integer values for discrete metrics.
+            Accuracy events provide float values for continuous performance measurement, and require decimal values. 
+            Note hit events provide note references for detailed hit information. 
+            Song change events provide song and chart data for UI updates.
+        */
+
+        /// <summary>
+        /// Event called when the score is changed containing the new score value.
+        /// </summary>
         public event UnityAction<int> OnScoreChange;
+        /// <summary>
+        /// Event called when the combo is updated containing the new combo value.
+        /// </summary>
         public event UnityAction<int> OnComboChange;
+
+        /// <summary>
+        /// Event called when the accuracy is updated containing the new accuracy value.
+        /// </summary>
         public event UnityAction<float> OnAccuracyChange;
+
+        /// <summary>
+        /// Event called when the accuracy is updated containing the new accuracy value.
+        /// </summary>
         public event UnityAction<Note> OnNoteHit;
+
+        /// <summary>
+        /// Event called when the song is changed containing the new SongEntry and ChartData values.
+        /// </summary>
         public event UnityAction<SongEntry, ChartData> OnSongChanged;
 
         #endregion
@@ -350,120 +391,179 @@ namespace AshTaiko
         #region Scoring System
 
         /*
-         * Tracks player performance through score, combo, and gauge metrics.
-         * Integer types for discrete values, float for continuous measurements.
-         */
+            Tracks player performance through score, combo, and gauge metrics.
+            Integer types for discrete values, float for continuous measurements.
+        */
         private int _score = 0;
         private int _combo = 0;
         private float _gauge;
         private float _maxGauge = 100;
 
-        #endregion
-
-        #region Judgement System
-
         /*
-         * Timing windows for different hit judgements.
-         * Using const values ensures consistent timing across all hit detection.
-         * MISS_WINDOW: 125ms, OKAY_WINDOW: 108ms, GOOD_WINDOW: 42ms
-         */
-        private const float MISS_WINDOW = 0.125f;  // 125ms
-        private const float OKAY_WINDOW = 0.108f;  // 108ms
-        private const float GOOD_WINDOW = 0.042f;  // 42ms
-
-        #endregion
-
-        #region Debug and Development Tools
-
-        /*
-         * Visual feedback during development and debugging sessions.
-         * Debug indicators help verify system behavior and timing accuracy.
-         */
-        [SerializeField]
-        private GameObject _debugDrumrollIndicator;
-
-        [SerializeField]
-        private TextMeshProUGUI _debugJudgementIndicator;
-
-        /*
-         * Performance tracking counters for hit statistics throughout gameplay.
-         * Using integers ensures precise counting without floating-point precision issues.
-         */
+            Performance tracking counters for hit statistics throughout gameplay.
+            Using integers ensures precise counting without floating-point precision issues.
+        */
         private int _hitGoods;
         private int _hitOkays;
         private int _hitBads;
 
         #endregion
 
+        #region Judgement System
+
+        /*
+            Timing windows for different hit judgements.
+            Using const values ensures consistent timing across all hit detection.
+            MISS_WINDOW: 125ms, OKAY_WINDOW: 108ms, GOOD_WINDOW: 42ms.
+        */
+        private const float MISS_WINDOW = 0.125f;  // 125ms
+        private const float OKAY_WINDOW = 0.108f;  // 108ms
+        private const float GOOD_WINDOW = 0.042f;  // 42ms
+        
+        /*
+            Additional delay before destroying missed notes to allow for visual feedback
+            and better player experience.
+        */
+        private const float MISS_DESTRUCTION_DELAY = 2.0f;  // 2 seconds after miss window
+
+        #endregion
+
+        #region Debug and Development Tools
+
+        /*
+            Visual feedback during development and debugging sessions.
+            Debug indicators help verify system behavior and timing accuracy.
+        */
+        [SerializeField]
+        private GameObject _debugDrumrollIndicator;
+
+        [SerializeField]
+        private TextMeshProUGUI _debugJudgementIndicator;
+
+        #endregion
+
         #region Initialization Methods
 
         /*
-         * Establishes the singleton instance before any other systems attempt to access it.
-         * Ensures the GameManager is available throughout the entire component lifecycle.
-         */
+            Establishes the singleton instance before any other systems attempt to access it.
+            Ensures the GameManager is available throughout the entire component lifecycle.
+        */
         private void Awake()
         {
-            Instance = this;
+            // Ensure only one instance of the GameManager exists as per the singleton pattern
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
 
         /*
-         * Initializes all game systems after the component hierarchy is fully established.
-         * Includes audio configuration, event subscriptions, and initial state setup.
-         */
+            Initializes all game systems after the component hierarchy is fully established.
+            Includes audio configuration, event subscriptions, and initial state setup.
+        */
         private void Start()
         {
-            // AudioConfiguration config = AudioSettings.GetConfiguration();
-            // config.dspBufferSize = 256;
-            // AudioSettings.Reset(config);
-
             _songStartTime = (float)AudioSettings.dspTime;
             _drum.OnHit += RegisterHit;
 
-            // Auto-start is now disabled by default - use SongSelectionEditor instead
-            // StartCoroutine(AutoStartWithFirstChart());
+            // Subscribe to pause input
+            if (_inputReader != null)
+            {
+                _inputReader.PauseEvent += OnPauseInput;
+            }
 
-            Debug.Log("🎵 GameManager initialized - use SongSelectionEditor to start games!");
-            Debug.Log("📋 To start a game:");
-            Debug.Log("   1. Go to: AshTaiko > Song Selection Editor");
-            Debug.Log("   2. Select a song and difficulty");
-            Debug.Log("   3. Click '🎮 Start Game'");
-            Debug.Log("🔧 Context menu options available on GameManager for testing");
+            Debug.Log("GameManager initialized.");
+            
+            // Check if we have song data from the menu scene
+            CheckForSongDataFromMenu();
         }
 
         /*
-         * Ensures proper cleanup of event subscriptions when the component is disabled or destroyed.
-         * Prevents memory leaks and invalid event calls from disabled components.
-         */
+            Ensures proper cleanup of event subscriptions when the component is disabled or destroyed.
+            Prevents memory leaks and invalid event calls from disabled components.
+        */
         private void OnDisable()
         {
             _drum.OnHit -= RegisterHit;
+            
+            // Unsubscribe from pause input
+            if (_inputReader != null)
+            {
+                _inputReader.PauseEvent -= OnPauseInput;
+            }
+        }
+
+        #endregion
+
+        #region Scene Transition Methods
+
+        /// <summary>
+        /// Checks if song data was passed from the menu scene and starts the game if available.
+        /// </summary>
+        private void CheckForSongDataFromMenu()
+        {
+            Debug.Log("=== CHECKING FOR SONG DATA FROM MENU ===");
+            Debug.Log($"GameDataManager.HasSongData(): {GameDataManager.HasSongData()}");
+            
+            if (GameDataManager.HasSongData())
+            {
+                var song = GameDataManager.GetSelectedSong();
+                var chart = GameDataManager.GetSelectedChart();
+                
+                Debug.Log($"Song from GameDataManager: {song?.Title ?? "null"} - {song?.Artist ?? "null"}");
+                Debug.Log($"Chart from GameDataManager: {chart?.Version ?? "null"} - {chart?.Difficulty}");
+                Debug.Log($"Audio filename: {song?.AudioFilename ?? "null"}");
+                
+                if (song != null && chart != null)
+                {
+                    Debug.Log($"Starting game with song data from menu: {song.Title} - {chart.Version} ({chart.Difficulty})");
+                    
+                    // Start the game with the selected song and chart
+                    StartGame(song, chart);
+                    
+                    // Clear the stored data since we've used it
+                    GameDataManager.ClearSongData();
+                }
+                else
+                {
+                    Debug.LogWarning("GameDataManager has song data but song or chart is null");
+                }
+            }
+            else
+            {
+                Debug.Log("No song data from menu - GameManager will use default behavior");
+            }
+            
+            Debug.Log("=== END CHECKING FOR SONG DATA ===");
         }
 
         #endregion
 
         #region Core Game Loop
 
-        /*
-         * Provides controlled access to internal components without exposing field references.
-         * Maintains encapsulation while allowing external systems to query component state.
-         */
-        public Transform GetJudgementCircle()
-        {
-            return _judgementCircle;
-        }
 
         /*
-         * Main game loop that executes every frame and manages all real-time gameplay systems.
-         * Includes timing synchronization, state transitions, note management, and performance optimizations.
-         */
+            Main game loop that executes every frame and manages all real-time gameplay systems. This is an internal Unity function that is
+            derived from MonoBehaviour. Includes timing synchronization, state transitions, note management, and performance optimizations.
+        */
         private void Update()
         {
+            // Check if game is paused - if so, skip all gameplay updates
+            if (_isPaused)
+            {
+                return;
+            }
+
             _debugDrumrollIndicator.SetActive(_isInDrumroll);
-            
+
             /*
-             * DSP time synchronization maintains high-precision timing by tracking current and previous values.
-             * The smoothing algorithm prevents timing jitter while maintaining audio synchronization.
-             */
+                DSP time synchronization maintains high-precision timing by tracking current and previous values.
+                The smoothing algorithm prevents timing jitter while maintaining audio synchronization.
+            */
             _lastDspTime = _currentDspTime;
             _currentDspTime = AudioSettings.dspTime;
             _frameStartTime = Time.time;
@@ -480,90 +580,58 @@ namespace AshTaiko
             _smoothedDsp = (float)AudioSettings.dspTime;
 
             /*
-             * Core timing update retrieves synchronized time and stores it as current song time.
-             * This value drives all timing-dependent systems including note spawning, hit detection, and state transitions.
-             */
+                Core timing update retrieves synchronized time and stores it as current song time.
+                This value drives all timing-dependent systems including note spawning, hit detection, and state transitions.
+            */
             float synchronizedTime = GetSynchronizedSongTime();
             _songTime = synchronizedTime;
 
             /*
-             * State Transition Logic:
-             * The system automatically transitions from delay to playing state when
-             * the countdown reaches zero. This transition triggers the start of
-             * normal gameplay timing and note spawning.
-             */
+                The system automatically transitions from delay to playing state when
+                the countdown reaches zero. This transition triggers the start of
+                normal gameplay timing and note spawning.
+            */
             if (_timingState == TimingState.Delay && _songTime >= 0f)
             {
                 _timingState = TimingState.Playing;
-                Debug.Log($"🎵 TRANSITIONING TO PLAYING STATE at songTime={_songTime:F3}s");
-                Debug.Log($"🎵 Delay start DSP: {_delayStartDspTime:F3}s, Current DSP: {AudioSettings.dspTime:F3}s");
-                Debug.Log($"🎵 Time since delay start: {AudioSettings.dspTime - _delayStartDspTime:F3}s");
             }
 
             /*
-             * Performance Optimization:
-             * Note cleanup is performed periodically rather than every frame to reduce
-             * processing overhead. The 15-frame interval provides a good balance between
-             * responsiveness and performance.
-             */
-            if (Time.frameCount % 15 == 0)
+            Note cleanup is performed periodically rather than every frame to reduce
+            processing overhead. This is performed every 30 frames.
+            */
+            if (Time.frameCount % 30 == 0)
             {
                 CleanupDestroyedNotes();
             }
-
-            // Debug timing every frame for troubleshooting
-            if (_nextNoteIndex < _notes.Count && _songTime >= -2f) // Only log when close to audio start
+            
+            // Perform automatic health checks every 300 frames (about 5 seconds at 60fps)
+            if (Time.frameCount % 300 == 0)
             {
-                Debug.Log($"Frame timing: songTime={_songTime:F3}s, audioTime={_songManager?.GetCurrentSongTime():F3}s, nextNote={_notes[_nextNoteIndex].Time}s, state={_timingState}");
-            }
-
-            // Additional timing debug when in playing state
-            if (_timingState == TimingState.Playing && _songTime > 0f && _songTime < 10f) // First 10 seconds of playing
-            {
-                if (Time.frameCount % 60 == 0) // Every 60 frames to avoid spam
+                CheckNoteSystemHealth();
+                
+                // Auto-fix if the system is severely corrupted
+                if (_activeNotes.Count > 0 && (_nextJudgableNoteIndex < 0 || _nextJudgableNoteIndex >= _activeNotes.Count))
                 {
-                    float audioTime = _songManager?.GetCurrentSongTime() ?? 0f;
-                    double currentDspTime = AudioSettings.dspTime;
-                    double timeSinceDelayStart = currentDspTime - _delayStartDspTime;
-                    float calculatedTime = -3f + (float)timeSinceDelayStart;
-
-                    Debug.Log($"🎵 Playing timing check: songTime={_songTime:F3}s, audioTime={audioTime:F3}s, calculated={calculatedTime:F3}s, diff={_songTime - calculatedTime:F3}s");
+                    Debug.LogWarning("Automatic note system corruption detected - performing auto-fix");
+                    CheckAndAutoFixNoteSystem();
                 }
+                
+                // Check for stuck notes that might be causing unhittable note issues
+                DetectAndFixStuckNotes();
             }
 
             // Calculate effective preempt time once (base + 3s delay)
             float effectivePreemptTime = _preemptTime + 3f;
 
-            // Debug timing info
-            if (_nextNoteIndex < _notes.Count)
-            {
-                float nextNoteTime = _notes[_nextNoteIndex].Time;
-                float timeUntilNote = nextNoteTime - _songTime;
-                if (timeUntilNote <= effectivePreemptTime + 1f) // Log when close to spawning
-                {
-                    Debug.Log($"Timing: songTime={_songTime:F3}s, nextNote={nextNoteTime}s, timeUntil={timeUntilNote:F3}s, preempt={_preemptTime:F3}s, effectivePreempt={effectivePreemptTime:F3}s");
-
-                    // Special debug for notes at time 0 during delay period
-                    if (nextNoteTime == 0f && _songTime < 0f)
-                    {
-                        Debug.Log($"*** TIME 0 NOTE DURING DELAY ***");
-                        Debug.Log($"  songTime: {_songTime:F3}s (delay period)");
-                        Debug.Log($"  nextNoteTime: {nextNoteTime:F3}s");
-                        Debug.Log($"  timeUntilNote: {timeUntilNote:F3}s");
-                        Debug.Log($"  effectivePreemptTime: {effectivePreemptTime:F3}s");
-                        Debug.Log($"  Should spawn: {timeUntilNote <= effectivePreemptTime}");
-                    }
-                }
-            }
-
             // Note spawning logic - only spawn notes when timing system is ready
             if (_timingState == TimingState.Delay || _timingState == TimingState.Playing)
             {
                 /*
-                 * Notes are spawned based on their hit time and the effective preempt time.
-                 * The effective preempt time includes the base preempt time plus the 3-second
-                 * delay period, ensuring notes spawn early enough during countdown.
-                 */
+                    Notes are spawned based on their hit time and the effective preempt time.
+                    The effective preempt time includes the base preempt time plus the 3-second
+                    delay period, ensuring notes spawn early enough during countdown.
+                */
                 while (_nextNoteIndex < _notes.Count)
                 {
                     float nextNoteTime = _notes[_nextNoteIndex].Time;
@@ -592,90 +660,94 @@ namespace AshTaiko
                 }
             }
 
-            /*
-             * Miss Detection System:
-             * This system processes notes that have passed their hit window without
-             * being hit by the player. Missed notes are marked as hit, combo is reset,
-             * and visual effects are played to provide player feedback.
-             * 
-             * Processing Strategy:
-             * - Iterates through active notes sequentially
-             * - Skips already judged notes and special note types
-             * - Uses smoothed timing for consistent miss detection
-             * - Handles note destruction and list cleanup safely
-             */
-            while (_nextJudgableNoteIndex < _activeNotes.Count)
-            {
-                Note note = _activeNotes[_nextJudgableNoteIndex];
+            /*            
+                This system processes notes that have passed their hit window without
+                being hit by the player. Missed notes are marked as hit, combo is reset,
+                and visual effects are played to provide player feedback.
+            
+                We now process ALL notes that have passed their hit window, not just
+                notes in sequential order. This prevents notes from slipping through
+                without being judged.
+            */
 
-                // Check if note is valid before processing
+            // Process ALL notes that have passed their hit window, not just sequential ones
+            for (int i = 0; i < _activeNotes.Count; i++)
+            {
+                Note note = _activeNotes[i];
+                
+                // Skip if note is invalid
                 if (!IsNoteValid(note))
                 {
-                    // Remove invalid note from list and continue
-                    _activeNotes.RemoveAt(_nextJudgableNoteIndex);
                     continue;
                 }
 
-                if (note.IsHit) // Already judged
+                // Skip if already judged
+                if (note.IsHit)
                 {
-                    _nextJudgableNoteIndex++;
                     continue;
                 }
 
                 // Skip DrumrollBalloonEnd notes - they don't need to be judged
                 if (note.NoteType == NoteType.DrumrollBalloonEnd)
                 {
-                    _nextJudgableNoteIndex++;
                     continue;
                 }
 
                 float currentTime = GetSmoothedSongTime();
                 if (currentTime > note.HitTime + MISS_WINDOW)
                 {
+                    // Mark note as missed
                     note.IsHit = true;
-                    
+
                     /*
-                     * Miss Effect Processing:
-                     * When a note is missed, the combo is reset and visual effects
-                     * are played to provide immediate feedback to the player.
-                     * The system safely handles cases where notes may be destroyed
-                     * during processing.
-                     */
+                        Combo is reset and visual effects are played
+                        The system safely handles cases where notes may be destroyed during processing
+                    */
                     _combo = 0;
                     OnComboChange?.Invoke(_combo);
 
-                    // Check if note still exists before accessing transform
-                    if (note != null && note.gameObject != null)
-                    {
-                        PlayMissEffect(note.transform.position);
-                    }
-                    else
-                    {
-                        // Use a fallback position if note is destroyed
-                        PlayMissEffect(_judgementCircle.position);
-                    }
-
-                    // Destroy the missed note and remove it from the list
-                    if (note.gameObject != null)
-                    {
-                        Destroy(note.gameObject);
-                    }
-                    _activeNotes.RemoveAt(_nextJudgableNoteIndex);
-                    // Don't increment index since we removed an element
-                }
-                else
-                {
-                    // next note isn't missable, ignore for now
-                    break;
+                    PlayMissEffect(_judgementCircle.position);
+                    
+                    Debug.Log($"Note missed at {note.HitTime}s - will be destroyed in {MISS_DESTRUCTION_DELAY}s");
                 }
             }
+            
+            // Now clean up notes that have been missed for long enough
+            for (int i = _activeNotes.Count - 1; i >= 0; i--)
+            {
+                Note note = _activeNotes[i];
+                
+                if (note == null || !IsNoteValid(note))
+                {
+                    _activeNotes.RemoveAt(i);
+                    continue;
+                }
+
+                // Only destroy notes that have been missed for long enough
+                if (note.IsHit && note.NoteType != NoteType.Drumroll && note.NoteType != NoteType.DrumrollBig)
+                {
+                    float currentTime = GetSmoothedSongTime();
+                    if (currentTime > note.HitTime + MISS_WINDOW + MISS_DESTRUCTION_DELAY)
+                    {
+                        // Destroy the missed note and remove it from the list
+                        if (note.gameObject != null)
+                        {
+                            Destroy(note.gameObject);
+                            Debug.Log($"Destroying missed note at {note.HitTime}s after {MISS_DESTRUCTION_DELAY}s delay");
+                        }
+
+                        _activeNotes.RemoveAt(i);
+                    }
+                }
+            }
+            
+            // Update the next judgable note index to point to the first unjudged note
+            UpdateNextJudgableNoteIndex();
 
             /*
-             * Drumroll End Detection:
-             * Monitors the current drumroll state and automatically ends it when
-             * the drumroll duration expires. This ensures proper state management
-             * and prevents drumrolls from continuing indefinitely.
-             */
+                Monitors the current drumroll state and automatically ends it when
+                the drumroll duration expires. This prevents drumrolls from continuing indefinitely.
+            */
             if (_isInDrumroll)
             {
                 float currentTime = GetSmoothedSongTime();
@@ -695,7 +767,7 @@ namespace AshTaiko
         /// </summary>
         /// <remarks>
         /// This method performs periodic cleanup to prevent null reference exceptions and
-        /// maintain optimal performance. It adjusts the next judgable note index to ensure
+        /// maintain performance. The next judgable note index is also incremented to ensure
         /// proper note processing order.
         /// </remarks>
         private void CleanupDestroyedNotes()
@@ -712,9 +784,17 @@ namespace AshTaiko
             );
 
             // Adjust the next judgable note index if it's out of bounds
-            if (_nextJudgableNoteIndex >= _activeNotes.Count)
+            if (_activeNotes.Count == 0)
             {
-                _nextJudgableNoteIndex = Mathf.Max(0, _activeNotes.Count - 1);
+                _nextJudgableNoteIndex = 0;
+            }
+            else if (_nextJudgableNoteIndex >= _activeNotes.Count)
+            {
+                _nextJudgableNoteIndex = _activeNotes.Count - 1;
+            }
+            else if (_nextJudgableNoteIndex < 0)
+            {
+                _nextJudgableNoteIndex = 0;
             }
 
             // Log cleanup if significant changes occurred
@@ -735,19 +815,48 @@ namespace AshTaiko
         /// </remarks>
         private bool IsNoteValid(Note note)
         {
-            return note != null &&
-                   note.gameObject != null &&
-                   note.enabled &&
-                   note.gameObject.activeInHierarchy;
+            if (note == null)
+            {
+                Debug.LogWarning("Note validation failed: note is null");
+                return false;
+            }
+            
+            if (note.gameObject == null)
+            {
+                Debug.LogWarning($"Note validation failed: GameObject is null for note at {note.HitTime}s");
+                return false;
+            }
+            
+            if (!note.enabled)
+            {
+                Debug.LogWarning($"Note validation failed: Note component is disabled for note at {note.HitTime}s");
+                return false;
+            }
+            
+            if (!note.gameObject.activeInHierarchy)
+            {
+                Debug.LogWarning($"Note validation failed: GameObject is inactive for note at {note.HitTime}s");
+                return false;
+            }
+            
+            // Additional check: ensure the note hasn't been marked for destruction
+            if (note.gameObject == null || note.gameObject.scene.name == null)
+            {
+                Debug.LogWarning($"Note validation failed: GameObject is being destroyed for note at {note.HitTime}s");
+                return false;
+            }
+            
+            return true;
         }
+
 
         /// <summary>
         /// Forces immediate cleanup of all invalid notes in the system.
         /// </summary>
         /// <remarks>
-        /// This method is primarily used for debugging and development purposes.
-        /// It performs a comprehensive cleanup and logs the results for analysis.
-        /// Available through the Unity context menu for easy access during development.
+        /// For debugging and development purposes, available through context menu
+        /// Performs comprehensive cleanup and logs results for analysis.
+        /// This was made available through the Unity context menu for easy access during development.
         /// </remarks>
         [ContextMenu("Force Cleanup All Notes")]
         public void ForceCleanupAllNotes()
@@ -771,14 +880,14 @@ namespace AshTaiko
         /// Performs a comprehensive health check of the note processing system.
         /// </summary>
         /// <remarks>
-        /// This diagnostic method outputs detailed information about the current state
-        /// of the note system, including counts, indices, and timing information.
-        /// Available through the Unity context menu for development and debugging.
+        /// For debugging and development purposes, available through context menu
+        /// Outputs detailed information about the current state of the note system, 
+        /// including counts, indices, and timing information.
         /// </remarks>
         [ContextMenu("Check Note System Health")]
         public void CheckNoteSystemHealth()
         {
-            Debug.Log($"=== NOTE SYSTEM HEALTH CHECK ===");
+            Debug.Log($"NOTE SYSTEM HEALTH CHECK");
             Debug.Log($"Total active notes: {_activeNotes.Count}");
             Debug.Log($"Next judgable note index: {_nextJudgableNoteIndex}");
             Debug.Log($"Timing state: {_timingState}");
@@ -818,15 +927,13 @@ namespace AshTaiko
 
             if (destroyedNotes > 0)
             {
-                Debug.LogWarning($"Found {destroyedNotes} destroyed notes in list - this indicates cleanup issues!");
+                Debug.LogWarning($"Found {destroyedNotes} destroyed notes in list - this indicates cleanup issues.");
             }
 
             if (disabledNotes > 0)
             {
-                Debug.LogWarning($"Found {disabledNotes} disabled notes - this may cause hit detection issues!");
+                Debug.LogWarning($"Found {disabledNotes} disabled notes - this may cause hit detection issues.");
             }
-
-            Debug.Log($"================================");
         }
 
         /// <summary>
@@ -835,8 +942,8 @@ namespace AshTaiko
         /// <param name="noteData">The chart data containing note timing and type information.</param>
         /// <remarks>
         /// This method handles the complete note spawning process including instantiation,
-        /// initialization, positioning, and special drumroll bridge creation for drumroll notes.
-        /// Notes are added to the active notes list for ongoing processing and management.
+        /// initialization, positioning, and drumroll bridge creation for drumroll notes.
+        /// Notes are added to the active notes list for processing and management.
         /// </remarks>
         private void SpawnNote(HitObject noteData)
         {
@@ -850,11 +957,10 @@ namespace AshTaiko
             _activeNotes.Add(note);
 
             /*
-             * Drumroll Bridge Creation:
-             * Drumroll notes require visual bridges to connect start and end points.
-             * This system automatically creates and manages bridge objects for proper
-             * visual representation of drumroll sequences.
-             */
+                Drumroll notes require visual bridges to connect start and end points.
+                This system automatically creates and manages bridge objects for proper
+                visual representation of drumroll sequences.
+            */
             if (noteData.Type == NoteType.Drumroll || noteData.Type == NoteType.DrumrollBig)
             {
                 // Spawn bridge and assign head
@@ -893,8 +999,8 @@ namespace AshTaiko
         /// </summary>
         /// <remarks>
         /// This method performs complete game initialization including chart loading,
-        /// audio preparation, and system state setup. It marks the song as manually
-        /// selected to prevent automatic song selection from interfering with gameplay.
+        /// audio preparation, and system state setup. 
+        /// Marks the song as manually selected to prevent automatic song selection from interfering with gameplay.
         /// </remarks>
         private void InitializeGameState()
         {
@@ -902,7 +1008,6 @@ namespace AshTaiko
             _combo = 0;
             OnScoreChange?.Invoke(_score);
             OnComboChange?.Invoke(_combo);
-            // Note: Audio is now handled by the chart system, not here
         }
 
         /// <summary>
@@ -924,10 +1029,9 @@ namespace AshTaiko
         #region Chart System Methods
 
         /*
-         * Chart System Methods:
-         * These methods handle the loading and management of chart data,
-         * including song selection, chart loading, and game initialization.
-         */
+            These methods handle the loading and management of chart data,
+            including song selection, chart loading, and game initialization.
+        */
 
         /// <summary>
         /// Initializes a new game session with the specified song and chart.
@@ -974,6 +1078,9 @@ namespace AshTaiko
                 Debug.LogWarning("No audio file specified in chart data");
             }
 
+            // Load background image from chart data
+            LoadBackgroundImage();
+
             // Reset game state
             ResetGameState();
 
@@ -1006,93 +1113,19 @@ namespace AshTaiko
             }
 
             LoadChart(chart);
+            
+            // Load background image if we have song data
+            if (_currentSong != null)
+            {
+                LoadBackgroundImage();
+            }
+            
             ResetGameState();
 
             Debug.Log($"Loaded chart only: {chart.Version}");
             Debug.Log($"Chart has {chart.HitObjects.Count} hit objects");
             Debug.Log($"First note at: {(chart.HitObjects.Count > 0 ? chart.HitObjects[0].Time : 0)}s");
             Debug.Log($"Last note at: {(chart.HitObjects.Count > 0 ? chart.HitObjects[chart.HitObjects.Count - 1].Time : 0)}s");
-        }
-
-        /// <summary>
-        /// Loads audio from a song entry for playback.
-        /// </summary>
-        /// <param name="song">The song entry containing the audio file information.</param>
-        /// <remarks>
-        /// This method initiates the audio loading process asynchronously using
-        /// a coroutine. It provides debug logging for development and testing
-        /// purposes to track audio file loading status.
-        /// </remarks>
-        public void LoadAudioFromSong(SongEntry song)
-        {
-            if (!string.IsNullOrEmpty(song.AudioFilename))
-            {
-                Debug.Log($"Loading audio from song: {song.AudioFilename}");
-                StartCoroutine(LoadAndPlayAudio(song.AudioFilename));
-            }
-            else
-            {
-                Debug.LogWarning("Song has no audio file specified");
-            }
-        }
-
-        /// <summary>
-        /// Returns the current status of the audio system.
-        /// </summary>
-        /// <returns>A string describing the current audio system state.</returns>
-        /// <remarks>
-        /// This method provides human-readable status information for debugging
-        /// and development purposes, helping developers understand the current
-        /// state of audio loading and playback.
-        /// </remarks>
-        public string GetAudioStatus()
-        {
-            if (_songManager != null)
-            {
-                AudioClip currentClip = _songManager.GetCurrentAudioClip();
-                if (currentClip != null)
-                {
-                    return $"Audio: {currentClip.name} ({currentClip.length:F1}s) - Playing: {_songManager.IsPlaying()}";
-                }
-                else
-                {
-                    return "No audio loaded";
-                }
-            }
-            return "SongManager not available";
-        }
-
-        /// <summary>
-        /// Returns detailed information about audio file paths and loading status.
-        /// </summary>
-        /// <returns>A string containing audio path and file information.</returns>
-        /// <remarks>
-        /// This method provides comprehensive audio system information for debugging
-        /// file loading issues and path-related problems during development.
-        /// </remarks>
-        public string GetAudioPathInfo()
-        {
-            if (_currentSong != null)
-            {
-                string audioPath = _currentSong.AudioFilename;
-                if (!string.IsNullOrEmpty(audioPath))
-                {
-                    bool exists = System.IO.File.Exists(audioPath);
-                    string directory = System.IO.Path.GetDirectoryName(audioPath);
-                    string filename = System.IO.Path.GetFileName(audioPath);
-
-                    return $"Song: {_currentSong.Title}\n" +
-                           $"Audio Path: {audioPath}\n" +
-                           $"File Exists: {exists}\n" +
-                           $"Directory: {directory}\n" +
-                           $"Filename: {filename}";
-                }
-                else
-                {
-                    return "No audio file specified in song";
-                }
-            }
-            return "No current song loaded";
         }
 
         #endregion
@@ -1104,8 +1137,7 @@ namespace AshTaiko
         /// </summary>
         /// <remarks>
         /// This method is used for testing audio loading functionality without requiring
-        /// a complete song selection. The test path should be modified to point to
-        /// an actual audio file during development. Available through the Unity context menu.
+        /// a complete song selection.
         /// </remarks>
         [ContextMenu("Load Audio From Path")]
         public void LoadAudioFromPath()
@@ -1126,9 +1158,8 @@ namespace AshTaiko
         /// Tests audio loading from the currently selected song for debugging purposes.
         /// </summary>
         /// <remarks>
-        /// This method attempts to load and play audio from the current song entry,
-        /// providing immediate feedback for audio system testing. Available through
-        /// the Unity context menu for development and debugging.
+        /// Attempts to load and play audio from the current song entry,
+        /// providing immediate feedback for audio system testing.
         /// </remarks>
         [ContextMenu("Test Load Current Song Audio")]
         public void TestLoadCurrentSongAudio()
@@ -1146,29 +1177,11 @@ namespace AshTaiko
         }
 
         /// <summary>
-        /// Tests audio loading from a specific hardcoded path for development purposes.
-        /// </summary>
-        /// <remarks>
-        /// This method loads audio from a predefined test path to verify audio system
-        /// functionality. The path should be updated to point to a valid audio file
-        /// in the project directory. Available through the Unity context menu.
-        /// </remarks>
-        [ContextMenu("Test Load Audio From Specific Path")]
-        public void TestLoadAudioFromSpecificPath()
-        {
-            // You can modify this path to test with a known audio file
-            string testPath = @"X:\Projects\AshTaiko\Part B\AshTaiko\Assets\_AshTaiko\Assets\01. St. Chroma.mp3";
-            Debug.Log($"Testing audio load from specific path: {testPath}");
-            StartCoroutine(LoadAndPlayAudio(testPath));
-        }
-
-        /// <summary>
         /// Tests the chart system by loading the first available song for development.
         /// </summary>
         /// <remarks>
         /// This method provides a quick way to test chart loading and gameplay
-        /// systems without requiring manual song selection. Available through
-        /// the Unity context menu for development and testing purposes.
+        /// systems without requiring manual song selection.
         /// </remarks>
         [ContextMenu("Test Chart System With First Song")]
         public void TestChartSystemWithFirstSong()
@@ -1202,20 +1215,11 @@ namespace AshTaiko
         /// <summary>
         /// Automatically starts the game with the first available chart after initialization.
         /// </summary>
-        /// <returns>An IEnumerator for coroutine execution.</returns>
-        /// <remarks>
-        /// This coroutine implements the auto-start functionality for development and
-        /// testing purposes. It waits for system initialization, checks for manual
-        /// song selection, and automatically loads the first available chart with
-        /// preference for Normal difficulty. The method respects manual selection
-        /// flags to prevent interference with user choices.
-        /// </remarks>
         private System.Collections.IEnumerator AutoStartWithFirstChart()
         {
             // Wait a few seconds for everything to initialize
             yield return new WaitForSeconds(2f);
 
-            // Check if a song was manually selected - if so, don't auto-start
             if (_songManuallySelected)
             {
                 Debug.Log("Song was manually selected - skipping auto-start");
@@ -1291,11 +1295,6 @@ namespace AshTaiko
         /// <summary>
         /// Enables automatic game start behavior for the next scene load.
         /// </summary>
-        /// <remarks>
-        /// This method resets the manual selection flag, allowing the auto-start
-        /// system to automatically begin games when scenes are loaded. Available
-        /// through the Unity context menu for development and testing.
-        /// </remarks>
         [ContextMenu("Enable Auto-Start")]
         public void EnableAutoStart()
         {
@@ -1306,11 +1305,6 @@ namespace AshTaiko
         /// <summary>
         /// Disables automatic game start behavior, requiring manual song selection.
         /// </summary>
-        /// <remarks>
-        /// This method sets the manual selection flag, preventing the auto-start
-        /// system from interfering with user choices. Available through the Unity
-        /// context menu for development and testing.
-        /// </remarks>
         [ContextMenu("Disable Auto-Start")]
         public void DisableAutoStart()
         {
@@ -1326,12 +1320,6 @@ namespace AshTaiko
         /// Loads chart data and initializes the note system for gameplay.
         /// </summary>
         /// <param name="chart">The chart data to load.</param>
-        /// <remarks>
-        /// This method prepares the game system for a new chart by clearing
-        /// existing notes, sorting new notes by time, and initializing
-        /// timing and state variables. It ensures clean state transitions
-        /// between different charts.
-        /// </remarks>
         private void LoadChart(ChartData chart)
         {
             _notes.Clear();
@@ -1363,7 +1351,6 @@ namespace AshTaiko
             _songTime = -3f; // Start in delay period
 
             Debug.Log($"Chart loaded: {chart.HitObjects.Count} notes, first at {(chart.HitObjects.Count > 0 ? chart.HitObjects[0].Time : 0)}s");
-            Debug.Log($"Timing initialized: songTime={_songTime}s, will start spawning notes at 0s");
         }
 
         /// <summary>
@@ -1371,12 +1358,6 @@ namespace AshTaiko
         /// </summary>
         /// <param name="audioPath">The file path to the audio file to load.</param>
         /// <returns>An IEnumerator for coroutine execution.</returns>
-        /// <remarks>
-        /// This coroutine handles the complete audio loading process including file validation,
-        /// UnityWebRequest loading, and timing system initialization. It implements a 3-second
-        /// delay system to ensure proper synchronization between visual and audio systems.
-        /// The method uses modern Unity audio loading techniques for compatibility and performance.
-        /// </remarks>
         private System.Collections.IEnumerator LoadAndPlayAudio(string audioPath)
         {
             Debug.Log($"Loading audio from: {audioPath}");
@@ -1396,7 +1377,7 @@ namespace AshTaiko
                 yield break;
             }
 
-            // Load audio file using UnityWebRequest (modern approach)
+            // Load audio file using UnityWebRequest (instead of WWW)
             string fullPath = "file://" + audioPath;
             Debug.Log($"UnityWebRequest path: {fullPath}");
 
@@ -1453,11 +1434,6 @@ namespace AshTaiko
         /// <summary>
         /// Resets all game state variables to their initial values for a new game session.
         /// </summary>
-        /// <remarks>
-        /// This method performs a complete reset of the game state including scoring,
-        /// combo, gauge, timing, and note systems. It ensures clean state transitions
-        /// between different game sessions and prevents state contamination.
-        /// </remarks>
         private void ResetGameState()
         {
             _score = 0;
@@ -1505,10 +1481,6 @@ namespace AshTaiko
         /// Returns the currently selected song entry.
         /// </summary>
         /// <returns>The current song entry or null if none is selected.</returns>
-        /// <remarks>
-        /// This method provides access to the current song metadata for UI display
-        /// and other systems that need song information.
-        /// </remarks>
         public SongEntry GetCurrentSong()
         {
             return _currentSong;
@@ -1518,10 +1490,6 @@ namespace AshTaiko
         /// Returns the currently selected chart data.
         /// </summary>
         /// <returns>The current chart data or null if none is selected.</returns>
-        /// <remarks>
-        /// This method provides access to the current chart data for UI display
-        /// and other systems that need chart information.
-        /// </remarks>
         public ChartData GetCurrentChart()
         {
             return _currentChart;
@@ -1531,10 +1499,6 @@ namespace AshTaiko
         /// Checks if manual song selection is currently active.
         /// </summary>
         /// <returns>True if manual selection is active, false if auto-start is enabled.</returns>
-        /// <remarks>
-        /// This method provides information about the current selection mode
-        /// for UI systems and other components that need to know the selection state.
-        /// </remarks>
         public bool IsManualSelectionActive()
         {
             return _songManuallySelected;
@@ -1544,10 +1508,6 @@ namespace AshTaiko
         /// Returns formatted information about the current song selection for UI display.
         /// </summary>
         /// <returns>A formatted string containing song title, chart version, difficulty, and selection type.</returns>
-        /// <remarks>
-        /// This method provides user-friendly information about the current selection
-        /// including whether it was manually selected or automatically started.
-        /// </remarks>
         public string GetCurrentSongInfo()
         {
             if (_currentSong == null || _currentChart == null)
@@ -1563,10 +1523,6 @@ namespace AshTaiko
         /// Checks if the game system is ready to begin gameplay.
         /// </summary>
         /// <returns>True if all required systems are initialized and ready, false otherwise.</returns>
-        /// <remarks>
-        /// This method evaluates the readiness of all game systems including
-        /// song selection, chart loading, and audio preparation.
-        /// </remarks>
         public bool IsGameReadyToPlay()
         {
             return _currentSong != null && _currentChart != null && _songManager?.GetCurrentAudioClip() != null;
@@ -1576,10 +1532,6 @@ namespace AshTaiko
         /// Returns a string describing the current game readiness status.
         /// </summary>
         /// <returns>A human-readable string describing the current game state.</returns>
-        /// <remarks>
-        /// This method provides user-friendly status information for UI display,
-        /// helping players understand when the game is ready to play.
-        /// </remarks>
         public string GetGameReadinessStatus()
         {
             if (_currentSong == null)
@@ -1602,12 +1554,6 @@ namespace AshTaiko
         /// Sets the selected chart for preview purposes without starting the game.
         /// </summary>
         /// <param name="chart">The chart data to select for preview.</param>
-        /// <remarks>
-        /// This method is primarily used for editor preview functionality where
-        /// developers want to examine chart data without initiating gameplay.
-        /// It updates the current selection and loads chart data but does not
-        /// start audio playback or game systems.
-        /// </remarks>
         public void SetSelectedChart(ChartData chart)
         {
             if (chart == null) return;
@@ -1647,34 +1593,35 @@ namespace AshTaiko
         /// </summary>
         /// <param name="hitType">The type of input hit detected by the drum system.</param>
         /// <remarks>
-        /// This method handles the core hit detection logic including drumroll processing,
-        /// note validation, timing windows, and judgement determination. It processes
-        /// notes sequentially and updates game state based on hit accuracy.
+        /// Core hit detection logic with drumroll processing, note validation, timing windows, and judgement determination. 
+        /// It processes notes sequentially and updates game state based on hit accuracy.
         /// </remarks>
         private void RegisterHit(HitType hitType)
         {
             float currentTime = GetSmoothedSongTime();
-            float hitWindow = MISS_WINDOW; // Use miss window as the maximum hit window
+            float hitWindow = MISS_WINDOW;
 
-            /*
-             * Drumroll Hit Processing:
-             * If currently in a drumroll, handle the hit according to drumroll rules
-             * before processing regular note hits. This ensures proper drumroll scoring
-             * and state management.
-             */
             if (_isInDrumroll)
             {
                 HandleDrumrollHit(hitType, currentTime);
-                // Don't return here - continue to process regular notes
             }
 
-            /*
-             * Regular Note Hit Detection:
-             * Process the next judgable note to determine if the input hit
-             * corresponds to a valid note within the hit window.
-             */
-            while (_nextJudgableNoteIndex < _activeNotes.Count)
+            // Process notes sequentially, but be more careful about index management
+            int processedCount = 0;
+            int maxProcessedPerFrame = 10; // Prevent infinite loops
+            
+            while (_nextJudgableNoteIndex < _activeNotes.Count && processedCount < maxProcessedPerFrame)
             {
+                processedCount++;
+                
+                // Validate index bounds
+                if (_nextJudgableNoteIndex < 0 || _nextJudgableNoteIndex >= _activeNotes.Count)
+                {
+                    Debug.LogWarning($"Invalid note index: {_nextJudgableNoteIndex}, resetting to 0");
+                    _nextJudgableNoteIndex = 0;
+                    break;
+                }
+
                 Note note = _activeNotes[_nextJudgableNoteIndex];
 
                 // Check if note is valid before processing
@@ -1682,6 +1629,7 @@ namespace AshTaiko
                 {
                     // Remove invalid note from list and continue
                     _activeNotes.RemoveAt(_nextJudgableNoteIndex);
+                    // Don't increment index since we removed an element
                     continue;
                 }
 
@@ -1691,16 +1639,16 @@ namespace AshTaiko
                     continue;
                 }
 
-                // Skip DrumrollBalloonEnd notes - they don't need to be judged by input
                 if (note.NoteType == NoteType.DrumrollBalloonEnd)
                 {
                     _nextJudgableNoteIndex++;
                     continue;
                 }
 
-                // If the note is too far in the future, ignore input
+                // Check if note is too early to hit
                 if (currentTime < note.HitTime - hitWindow)
                 {
+                    // Note is too early, stop processing
                     break;
                 }
 
@@ -1716,19 +1664,15 @@ namespace AshTaiko
 
                         note.IsHit = true;
 
-                        // --- Check if this starts a drumroll ---
                         if (note.HitObject.Type == NoteType.Drumroll)
                         {
                             StartDrumroll(note.HitObject, currentTime);
                         }
 
-                        // --- Apply judgement effects ---
                         ApplyJudgementEffects(judgement, note);
 
-                        // --- Special handling for drumroll head notes ---
                         if (note.NoteType == NoteType.Drumroll || note.NoteType == NoteType.DrumrollBig)
                         {
-                            // Don't destroy drumroll head notes - they stay until the end note is hit
                             _nextJudgableNoteIndex++;
                         }
                         else if (note.NoteType == NoteType.DrumrollBalloonEnd)
@@ -1748,42 +1692,64 @@ namespace AshTaiko
                             _activeNotes.RemoveAt(_nextJudgableNoteIndex);
                             // Don't increment index since we removed an element
                         }
+                        
+                        // Note was successfully processed, break to allow for next input
+                        break;
                     }
-                    // if input type dont match
-                    // dont advance index
-                    break;
+                    else
+                    {
+                        // Input type doesn't match, but note is in hit window
+                        // Don't advance index, allow other input types to try
+                        Debug.Log($"Input type mismatch: {hitType} vs {note.HitObject.Type}");
+                        break;
+                    }
                 }
                 else
                 {
-                    // If the note is too late, mark as missed and move to next
-                    note.IsHit = true;
-                    // --- Miss Effect ---
-                    ApplyJudgementEffects(Judgement.Miss, note);
+                    // Note is outside hit window - mark as missed
+                    if (!note.IsHit)
+                    {
+                        note.IsHit = true;
+                        ApplyJudgementEffects(Judgement.Miss, note);
+                        Debug.Log($"Note missed at {note.HitTime}s (time diff: {Mathf.Abs(currentTime - note.HitTime):F3}s)");
+                    }
 
-                    // --- Special handling for drumroll head notes ---
                     if (note.NoteType == NoteType.Drumroll || note.NoteType == NoteType.DrumrollBig)
                     {
-                        // Don't destroy drumroll head notes - they stay until the end note is hit
                         _nextJudgableNoteIndex++;
                     }
                     else if (note.NoteType == NoteType.DrumrollBalloonEnd)
                     {
-                        // Destroy the drumroll head note and bridge when the end note is missed
                         DestroyDrumrollHeadAndBridge(note);
                         Destroy(note.gameObject);
-                        // Remove from active notes list
                         _activeNotes.RemoveAt(_nextJudgableNoteIndex);
                         // Don't increment index since we removed an element
                     }
                     else
                     {
-                        // Destroy normal notes
                         Destroy(note.gameObject);
-                        // Remove from active notes list
                         _activeNotes.RemoveAt(_nextJudgableNoteIndex);
                         // Don't increment index since we removed an element
                     }
                 }
+            }
+            
+            // Safety check: if we processed too many notes, log a warning
+            if (processedCount >= maxProcessedPerFrame)
+            {
+                Debug.LogWarning($"Processed {processedCount} notes in one frame - this may indicate a problem");
+            }
+        }
+
+        /// <summary>
+        /// Handles pause input from the InputReader.
+        /// Toggles pause state and notifies the PauseMenuManager.
+        /// </summary>
+        private void OnPauseInput()
+        {
+            if (_pauseMenuManager != null)
+            {
+                _pauseMenuManager.TogglePause();
             }
         }
 
@@ -1792,22 +1758,16 @@ namespace AshTaiko
         #region Drumroll System
 
         /*
-         * Drumroll System Methods:
-         * These methods manage the complex drumroll gameplay mechanics including
-         * start detection, hit processing, and end conditions. Drumrolls provide
-         * continuous gameplay challenges and bonus scoring opportunities.
-         */
+            These methods manage the complex drumroll gameplay mechanics including
+            start detection, hit processing, and end conditions. Drumrolls provide
+            continuous gameplay challenges and bonus scoring opportunities.
+        */
 
         /// <summary>
         /// Initializes a new drumroll sequence when a drumroll start note is hit.
         /// </summary>
         /// <param name="drumrollStart">The HitObject that initiated the drumroll.</param>
         /// <param name="currentTime">The current game time when the drumroll started.</param>
-        /// <remarks>
-        /// This method sets up the drumroll state, searches for the corresponding
-        /// end note, and initializes all drumroll-related variables for proper
-        /// gameplay tracking and scoring.
-        /// </remarks>
         private void StartDrumroll(HitObject drumrollStart, float currentTime)
         {
             _isInDrumroll = true;
@@ -1815,7 +1775,7 @@ namespace AshTaiko
             _drumrollStartTime = currentTime;
             _drumrollHits = 0;
             _drumrollEndTime = -1f;
-            
+
             // Find the next DrumrollBalloonEnd note in _notes
             for (int i = _nextJudgableNoteIndex + 1; i < _notes.Count; i++)
             {
@@ -1839,19 +1799,14 @@ namespace AshTaiko
         /// </summary>
         /// <param name="hitType">The type of input hit detected.</param>
         /// <param name="currentTime">The current game time.</param>
-        /// <remarks>
-        /// This method handles continuous input during drumrolls, awarding points
-        /// for successful hits and maintaining combo progression. It automatically
-        /// ends the drumroll when the time limit is reached.
-        /// </remarks>
         private void HandleDrumrollHit(HitType hitType, float currentTime)
         {
             // Check if drumroll has ended
             if (currentTime > _drumrollEndTime)
             {
                 EndDrumroll();
-                        return;
-                    }
+                return;
+            }
             // Count the hit if it's the correct type
             if (IsHitTypeMatchingNoteType(hitType, _currentDrumroll.Type))
             {
@@ -1869,17 +1824,11 @@ namespace AshTaiko
         /// <summary>
         /// Finalizes the drumroll sequence and awards bonus points.
         /// </summary>
-        /// <remarks>
-        /// This method calculates bonus points based on drumroll performance,
-        /// resets all drumroll state variables, and updates the score display.
-        /// The bonus calculation rewards players for maintaining consistent
-        /// timing throughout the drumroll sequence.
-        /// </remarks>
         private void EndDrumroll()
         {
             Debug.Log("Drumroll ended! Total hits: " + _drumrollHits);
             // Award bonus points based on drumroll performance
-            int bonusPoints = _drumrollHits * 5; // Adjust bonus calculation
+            int bonusPoints = _drumrollHits * 5;
             _score += bonusPoints;
             OnScoreChange?.Invoke(_score);
             // Reset drumroll state
@@ -1890,35 +1839,6 @@ namespace AshTaiko
             _drumrollHits = 0;
         }
 
-        /// <summary>
-        /// Determines if a player input type matches a note type for hit validation.
-        /// </summary>
-        /// <param name="hitType">The type of input hit detected by the drum system.</param>
-        /// <param name="noteType">The type of note being evaluated.</param>
-        /// <returns>True if the input type is valid for the note type, false otherwise.</returns>
-        /// <remarks>
-        /// This method implements the core input validation logic for the game.
-        /// During drumrolls, both Don and Ka inputs are accepted to provide
-        /// flexible gameplay while maintaining challenge.
-        /// </remarks>
-        private bool IsHitTypeMatchingNoteType(HitType hitType, NoteType noteType)
-        {
-            switch (noteType)
-            {
-                case NoteType.Don:
-                case NoteType.DonBig:
-                    return hitType == HitType.Don;
-                case NoteType.Ka:
-                case NoteType.KaBig:
-                    return hitType == HitType.Ka;
-                case NoteType.Drumroll:
-                case NoteType.DrumrollBig:
-                    // During drumrolls, both Don and Ka inputs are valid
-                    return hitType == HitType.Don || hitType == HitType.Ka;
-                default:
-                    return false;
-            }
-        }
 
         /// <summary>
         /// Destroys a drumroll head note and its associated bridge when the end note is processed.
@@ -1959,22 +1879,46 @@ namespace AshTaiko
         #region Judgement System
 
         /*
-         * Judgement System Methods:
-         * These methods handle the core scoring and feedback system based on
-         * player timing accuracy. The system provides immediate feedback and
-         * maintains scoring consistency throughout gameplay.
-         */
+            These methods handle the core scoring and feedback system based on
+            player timing accuracy. The system provides immediate feedback and
+            maintains scoring consistency throughout gameplay.
+        */
+
+        /// <summary>
+        /// Determines if a player input type matches a note type for hit validation.
+        /// </summary>
+        /// <param name="hitType">The type of input hit detected by the drum system.</param>
+        /// <param name="noteType">The type of note being evaluated.</param>
+        /// <returns>True if the input type is valid for the note type, false otherwise.</returns>
+        /// <remarks>
+        /// This method implements the core input validation logic for the game.
+        /// During drumrolls, both Don and Ka inputs are accepted to provide
+        /// flexible gameplay while maintaining challenge.
+        /// </remarks>
+        private bool IsHitTypeMatchingNoteType(HitType hitType, NoteType noteType)
+        {
+            switch (noteType)
+            {
+                case NoteType.Don:
+                case NoteType.DonBig:
+                    return hitType == HitType.Don;
+                case NoteType.Ka:
+                case NoteType.KaBig:
+                    return hitType == HitType.Ka;
+                case NoteType.Drumroll:
+                case NoteType.DrumrollBig:
+                    // During drumrolls, both Don and Ka inputs are valid
+                    return hitType == HitType.Don || hitType == HitType.Ka;
+                default:
+                    return false;
+            }
+        }
 
         /// <summary>
         /// Determines the judgement quality based on timing accuracy.
         /// </summary>
         /// <param name="timeDifference">The absolute time difference between hit time and actual hit.</param>
         /// <returns>The judgement quality (Good, Okay, or Miss) based on timing windows.</returns>
-        /// <remarks>
-        /// This method implements the core timing judgement logic using predefined
-        /// timing windows. The windows are designed to provide fair and consistent
-        /// scoring while maintaining gameplay challenge.
-        /// </remarks>
         private Judgement GetJudgement(float timeDifference)
         {
             if (timeDifference <= GOOD_WINDOW)
@@ -1993,8 +1937,7 @@ namespace AshTaiko
         /// <param name="judgement">The judgement quality determined by timing accuracy.</param>
         /// <param name="note">The note that was judged.</param>
         /// <remarks>
-        /// This method handles all judgement consequences including score updates,
-        /// combo progression, gauge changes, visual feedback, and event notifications.
+        /// Hndles all judgement effects including score updates, combo progression, gauge changes, visual feedback, and event notifications.
         /// It ensures consistent application of judgement effects across all note types.
         /// </remarks>
         private void ApplyJudgementEffects(Judgement judgement, Note note)
@@ -2010,19 +1953,19 @@ namespace AshTaiko
                     OnNoteHit?.Invoke(note);
                     PlayHitEffect(note.transform.position);
                     Debug.Log("Good!");
-                    AddGauge(2.5f); // Increased from 0.25f for more responsive gauge
+                    AddGauge(2.5f);
                     break;
 
                 case Judgement.Okay:
                     _debugJudgementIndicator.text = "Okay!";
                     _hitOkays++;
                     _combo++;
-                    _score += 50; // Lower score for Okay
+                    _score += 50;
                     OnComboChange?.Invoke(_combo);
                     OnNoteHit?.Invoke(note);
                     PlayHitEffect(note.transform.position);
                     Debug.Log("Okay!");
-                    AddGauge(1.25f); // Increased from 0.125f for more responsive gauge
+                    AddGauge(1.25f);
                     break;
 
                 case Judgement.Miss:
@@ -2046,7 +1989,7 @@ namespace AshTaiko
         /// <remarks>
         /// The judgement system provides three levels of accuracy feedback.
         /// Good represents excellent timing, Okay represents acceptable timing,
-        /// and Miss represents poor timing or missed notes.
+        /// and Miss represents really poor timing or missed notes.
         /// </remarks>
         public enum Judgement
         {
@@ -2059,11 +2002,6 @@ namespace AshTaiko
         /// Modifies the player's gauge value based on performance.
         /// </summary>
         /// <param name="amount">The amount to add to the current gauge value.</param>
-        /// <remarks>
-        /// This method updates the gauge system which provides visual feedback
-        /// on overall performance. The gauge is clamped between 0 and maximum
-        /// values to maintain consistent visual representation.
-        /// </remarks>
         private void AddGauge(float amount)
         {
             float oldGauge = _gauge;
@@ -2078,9 +2016,7 @@ namespace AshTaiko
         /// </summary>
         /// <returns>A percentage value representing overall accuracy.</returns>
         /// <remarks>
-        /// The accuracy calculation uses the standard osu! Taiko formula which
-        /// weights different judgement types appropriately for fair performance
-        /// measurement across various skill levels.
+        /// The accuracy calculation uses the standard osu! Taiko formula which weights different judgement types appropriately for fair performance measurement across various skill levels.
         /// </remarks>
         private float GetAccuracy()
         {
@@ -2099,9 +2035,8 @@ namespace AshTaiko
         /// </summary>
         /// <param name="position">The world position where the effect should appear.</param>
         /// <remarks>
-        /// This method instantiates hit effect prefabs at the specified position
-        /// to provide immediate visual feedback to the player. The effects are
-        /// positioned at the judgement circle for consistent visual placement.
+        /// This method instantiates hit effect prefabs at the specified position to provide immediate visual feedback to the player. 
+        /// The effects are positioned at the judgement circle for consistent visual placement.
         /// </remarks>
         private void PlayHitEffect(Vector3 position)
         {
@@ -2114,10 +2049,6 @@ namespace AshTaiko
         /// Plays visual and audio effects for missed notes.
         /// </summary>
         /// <param name="position">The world position where the effect should appear.</param>
-        /// <remarks>
-        /// This method provides visual feedback when notes are missed, helping
-        /// players understand their performance and timing accuracy.
-        /// </remarks>
         private void PlayMissEffect(Vector3 position)
         {
             // TODO: Instantiate miss effect prefab or play a sound at the given position
@@ -2134,7 +2065,7 @@ namespace AshTaiko
         /// <returns>A value between 0.0 and 1.0 representing the current playback progress.</returns>
         /// <remarks>
         /// This method provides progress information for UI elements like progress bars.
-        /// It safely handles cases where the audio system may not be ready or the
+        /// Safely handles cases where the audio system may not be ready or the
         /// song length is invalid, returning 0.0 in such cases.
         /// </remarks>
         public float GetSongProgressPercentage()
@@ -2156,9 +2087,7 @@ namespace AshTaiko
         /// </summary>
         /// <returns>A formatted timestamp string in "MM:SS / MM:SS" format.</returns>
         /// <remarks>
-        /// This method provides user-friendly time display for UI elements. It safely
-        /// handles cases where the audio system may not be ready, returning a default
-        /// format string in such cases.
+        /// Time display for UI elements. Safely handles cases where the audio system may not be ready.
         /// </remarks>
         public string GetSongTimestamp()
         {
@@ -2174,28 +2103,585 @@ namespace AshTaiko
         /// </summary>
         /// <returns>A value between 0.0 and 1.0 representing the current gauge percentage.</returns>
         /// <remarks>
-        /// This method provides normalized gauge values for UI display and other
-        /// systems that require percentage-based gauge representation.
+        /// This method provides normalized gauge values for UI display and other systems that require percentage-based gauge representation.
         /// </remarks>
         public float GetGaugePercentage()
         {
             return _gauge / _maxGauge;
         }
 
+        #endregion
+
+        #region Background Management
+
         /// <summary>
-        /// Checks if the song progress system is ready to provide timing information.
+        /// Tests the background system by loading a sample image.
         /// </summary>
-        /// <returns>True if the audio system is initialized and ready, false otherwise.</returns>
         /// <remarks>
-        /// This method provides a safe way to check system readiness before
-        /// attempting to access song progress or timing information.
+        /// This method is available through the Unity context menu for testing
+        /// background loading and display functionality.
         /// </remarks>
-        public bool IsSongProgressReady()
+        [ContextMenu("Test Background System")]
+        public void TestBackgroundSystem()
         {
-            return _songManager != null && _songManager.IsAudioReady();
+            if (_currentSong != null && _currentSong.HasImage())
+            {
+                Debug.Log("Testing background system with current song image");
+                LoadBackgroundImage();
+            }
+            else
+            {
+                Debug.LogWarning("No song image available for background testing");
+            }
+        }
+
+        /// <summary>
+        /// Tests different background dim levels.
+        /// </summary>
+        /// <remarks>
+        /// This method cycles through different dim levels to test
+        /// the dimming overlay functionality.
+        /// </remarks>
+        [ContextMenu("Test Background Dim Levels")]
+        public void TestBackgroundDimLevels()
+        {
+            float[] testLevels = { 0.0f, 0.3f, 0.5f, 0.7f, 0.9f };
+            StartCoroutine(TestBackgroundDimCoroutine(testLevels));
+        }
+
+        /// <summary>
+        /// Tests background scaling with different fit modes.
+        /// </summary>
+        /// <remarks>
+        /// This method tests different background scaling approaches
+        /// to help debug scaling issues.
+        /// </remarks>
+        [ContextMenu("Test Background Scaling")]
+        public void TestBackgroundScaling()
+        {
+            if (_currentSong != null && _currentSong.HasImage())
+            {
+                Debug.Log("Testing background scaling...");
+                LoadBackgroundImage();
+            }
+            else
+            {
+                Debug.LogWarning("No song image available for scaling test");
+            }
+        }
+
+        /// <summary>
+        /// Tests note destruction timing and logging.
+        /// </summary>
+        /// <remarks>
+        /// This method helps debug note destruction issues
+        /// by checking current note states and timing.
+        /// </remarks>
+        [ContextMenu("Test Note Destruction Timing")]
+        public void TestNoteDestructionTiming()
+        {
+            Debug.Log("=== NOTE DESTRUCTION TIMING TEST ===");
+            Debug.Log($"Current song time: {_songTime:F3}s");
+            Debug.Log($"Active notes count: {_activeNotes.Count}");
+            Debug.Log($"Next judgable note index: {_nextJudgableNoteIndex}");
+            Debug.Log($"Miss destruction delay: {MISS_DESTRUCTION_DELAY:F1}s");
+            
+            if (_activeNotes.Count > 0)
+            {
+                for (int i = 0; i < Mathf.Min(_activeNotes.Count, 5); i++) // Show first 5 notes
+                {
+                    var note = _activeNotes[i];
+                    if (note != null)
+                    {
+                        float timeUntilMiss = note.HitTime + MISS_WINDOW - _songTime;
+                        float timeUntilDestruction = note.HitTime + MISS_WINDOW + MISS_DESTRUCTION_DELAY - _songTime;
+                        
+                        Debug.Log($"Note {i}: Time={note.HitTime:F3}s, IsHit={note.IsHit}, " +
+                                $"TimeUntilMiss={timeUntilMiss:F3}s, TimeUntilDestruction={timeUntilDestruction:F3}s");
+                    }
+                }
+            }
+            
+            Debug.Log("=====================================");
+        }
+
+        /// <summary>
+        /// Coroutine to test different background dim levels.
+        /// </summary>
+        /// <param name="dimLevels">Array of dim levels to test.</param>
+        /// <returns>IEnumerator for coroutine execution.</returns>
+        private System.Collections.IEnumerator TestBackgroundDimCoroutine(float[] dimLevels)
+        {
+            foreach (float level in dimLevels)
+            {
+                SetBackgroundDim(level);
+                Debug.Log($"Testing background dim level: {level:F2}");
+                yield return new WaitForSeconds(1f);
+            }
+            
+            // Reset to default
+            SetBackgroundDim(0.7f);
+            Debug.Log("Background dim test complete, reset to default: 0.7");
+        }
+
+        /// <summary>
+        /// Loads and displays the background image from the current chart data.
+        /// </summary>
+        /// <remarks>
+        /// This method loads the background image associated with the current song/chart
+        /// and applies it to the background system with proper scaling and dimming.
+        /// </remarks>
+        private void LoadBackgroundImage()
+        {
+            if (!_enableBackground || _backgroundImage == null) return;
+
+            if (_currentSong != null && _currentSong.HasImage())
+            {
+                string imagePath = _currentSong.GetBestAvailableImagePath();
+                if (!string.IsNullOrEmpty(imagePath))
+                {
+                    Debug.Log($"Loading background image: {imagePath}");
+                    StartCoroutine(LoadBackgroundImageCoroutine(imagePath));
+                }
+                else
+                {
+                    Debug.LogWarning("Song has image but path is null or empty");
+                    SetDefaultBackground();
+                }
+            }
+            else
+            {
+                Debug.Log("No background image available for current song");
+                SetDefaultBackground();
+            }
+        }
+
+        /// <summary>
+        /// Coroutine to load background image asynchronously.
+        /// </summary>
+        /// <param name="imagePath">Path to the background image file.</param>
+        /// <returns>IEnumerator for coroutine execution.</returns>
+        private System.Collections.IEnumerator LoadBackgroundImageCoroutine(string imagePath)
+        {
+            if (string.IsNullOrEmpty(imagePath)) yield break;
+
+            // Check if file exists
+            if (!System.IO.File.Exists(imagePath))
+            {
+                Debug.LogWarning($"Background image file not found: {imagePath}");
+                SetDefaultBackground();
+                yield break;
+            }
+
+            // Load image using UnityWebRequest
+            string fullPath = "file://" + imagePath;
+            using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequestTexture.GetTexture(fullPath))
+            {
+                yield return www.SendWebRequest();
+
+                if (www.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
+                {
+                    Texture2D texture = UnityEngine.Networking.DownloadHandlerTexture.GetContent(www);
+                    if (texture != null)
+                    {
+                        // Create sprite from texture
+                        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+                        
+                        // Apply to background image
+                        _backgroundImage.sprite = sprite;
+                        _backgroundImage.color = Color.white;
+                        
+                        // Configure background image for proper display
+                        ConfigureBackgroundImage(texture);
+                        
+                        // Apply dimming overlay
+                        UpdateBackgroundDim();
+                        
+                        Debug.Log($"Background image loaded successfully: {imagePath}");
+                    }
+                    else
+                    {
+                        Debug.LogError($"Failed to get texture from background image: {imagePath}");
+                        SetDefaultBackground();
+                    }
+                }
+                else
+                {
+                    Debug.LogError($"Failed to load background image: {www.error}");
+                    SetDefaultBackground();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Configures the background image for proper display.
+        /// </summary>
+        /// <param name="texture">The loaded background texture.</param>
+        /// <remarks>
+        /// This method sets up the background image to fit within the screen boundaries
+        /// while maintaining aspect ratio and ensuring good gameplay visibility.
+        /// </remarks>
+        private void ConfigureBackgroundImage(Texture2D texture)
+        {
+            if (_backgroundImage == null || texture == null) return;
+
+            // Set the image type for proper scaling
+            _backgroundImage.type = UnityEngine.UI.Image.Type.Simple;
+            _backgroundImage.preserveAspect = false;
+
+            // Get the RectTransform of the background image
+            RectTransform imageRect = _backgroundImage.rectTransform;
+            if (imageRect == null) return;
+
+            // Get the parent container's size (should be full screen)
+            RectTransform parentRect = imageRect.parent as RectTransform;
+            if (parentRect == null) return;
+
+            Vector2 parentSize = parentRect.rect.size;
+            
+            // Calculate how the image should be sized to fit within the screen
+            float textureAspect = (float)texture.width / texture.height;
+            float screenAspect = parentSize.x / parentSize.y;
+            
+            Vector2 newSize;
+            
+            if (textureAspect > screenAspect)
+            {
+                // Texture is wider than screen - fit to width, may crop height
+                newSize = new Vector2(parentSize.x, parentSize.x / textureAspect);
+            }
+            else
+            {
+                // Texture is taller than screen - fit to height, may crop width
+                newSize = new Vector2(parentSize.y * textureAspect, parentSize.y);
+            }
+            
+            // Ensure the image doesn't exceed screen boundaries
+            if (newSize.x > parentSize.x)
+            {
+                newSize.x = parentSize.x;
+                newSize.y = newSize.x / textureAspect;
+            }
+            
+            if (newSize.y > parentSize.y)
+            {
+                newSize.y = parentSize.y;
+                newSize.x = newSize.y * textureAspect;
+            }
+            
+            // Set the size to fit within the screen while maintaining aspect ratio
+            imageRect.sizeDelta = newSize;
+            
+            // Center the image
+            imageRect.anchoredPosition = Vector2.zero;
+            
+            Debug.Log($"Background configured: texture {texture.width}x{texture.height} (aspect: {textureAspect:F2}), " +
+                     $"screen {parentSize.x:F0}x{parentSize.y:F0} (aspect: {screenAspect:F2}), " +
+                     $"new size {newSize.x:F0}x{newSize.y:F0}");
+        }
+
+        /// <summary>
+        /// Sets a default background when no image is available.
+        /// </summary>
+        /// <remarks>
+        /// This method provides a fallback background to ensure the gameplay
+        /// always has a consistent visual appearance.
+        /// </remarks>
+        private void SetDefaultBackground()
+        {
+            if (_backgroundImage == null) return;
+
+            // Clear the sprite and set a default color
+            _backgroundImage.sprite = null;
+            _backgroundImage.color = new Color(0.1f, 0.1f, 0.15f, 1f); // Dark blue-gray
+            
+            // Apply dimming overlay
+            UpdateBackgroundDim();
+            
+            Debug.Log("Default background applied");
+        }
+
+        /// <summary>
+        /// Updates the background dimming overlay.
+        /// </summary>
+        /// <remarks>
+        /// This method applies the dimming effect to ensure gameplay elements
+        /// remain visible over the background image.
+        /// </remarks>
+        private void UpdateBackgroundDim()
+        {
+            if (_backgroundOverlay == null) return;
+
+            // Set the overlay color based on dim level
+            Color overlayColor = new Color(0f, 0f, 0f, _backgroundDim);
+            _backgroundOverlay.color = overlayColor;
+            
+            Debug.Log($"Background dim updated: {_backgroundDim:F2}");
+        }
+
+        /// <summary>
+        /// Sets the background dimming level.
+        /// </summary>
+        /// <param name="dimLevel">Dim level from 0 (no dim) to 1 (black).</param>
+        /// <remarks>
+        /// This method allows runtime adjustment of background dimming
+        /// for optimal gameplay visibility.
+        /// </remarks>
+        public void SetBackgroundDim(float dimLevel)
+        {
+            _backgroundDim = Mathf.Clamp01(dimLevel);
+            UpdateBackgroundDim();
+        }
+
+        /// <summary>
+        /// Gets the current background dimming level.
+        /// </summary>
+        /// <returns>Current dim level from 0 to 1.</returns>
+        public float GetBackgroundDim()
+        {
+            return _backgroundDim;
+        }
+
+        /// <summary>
+        /// Enables or disables the background system.
+        /// </summary>
+        /// <param name="enabled">Whether the background system should be enabled.</param>
+        public void SetBackgroundEnabled(bool enabled)
+        {
+            _enableBackground = enabled;
+            
+            if (_backgroundImage != null)
+            {
+                _backgroundImage.gameObject.SetActive(enabled);
+            }
+            
+            if (_backgroundOverlay != null)
+            {
+                _backgroundOverlay.gameObject.SetActive(enabled);
+            }
+            
+            Debug.Log($"Background system {(enabled ? "enabled" : "disabled")}");
+        }
+
+        /// <summary>
+        /// Gets whether the background system is currently enabled.
+        /// </summary>
+        /// <returns>True if background system is enabled, false otherwise.</returns>
+        public bool IsBackgroundEnabled()
+        {
+            return _enableBackground;
         }
 
         #endregion
+
+        /// <summary>
+        /// Resets the note system to a clean state when it gets corrupted.
+        /// This is a safety mechanism to prevent notes from becoming permanently unhittable.
+        /// </summary>
+        [ContextMenu("Reset Note System")]
+        public void ResetNoteSystem()
+        {
+            Debug.Log("=== RESETTING NOTE SYSTEM ===");
+            
+            // Clear all active notes
+            foreach (var note in _activeNotes)
+            {
+                if (note != null && note.gameObject != null)
+                {
+                    Destroy(note.gameObject);
+                }
+            }
+            _activeNotes.Clear();
+            
+            // Reset indices
+            _nextNoteIndex = 0;
+            _nextJudgableNoteIndex = 0;
+            
+            // Clear drumroll state
+            _isInDrumroll = false;
+            _currentDrumroll = null;
+            _drumrollHits = 0;
+            _drumrollStartTime = 0f;
+            _drumrollEndTime = 0f;
+            
+            // Clear drumroll bridges
+            foreach (var bridge in _activeDrumrollBridges)
+            {
+                if (bridge != null && bridge.gameObject != null)
+                {
+                    Destroy(bridge.gameObject);
+                }
+            }
+            _activeDrumrollBridges.Clear();
+            
+            Debug.Log("Note system reset complete");
+            Debug.Log("=== END RESET ===");
+        }
+
+        /// <summary>
+        /// Checks if the note system is in a healthy state and automatically resets if corrupted.
+        /// This helps prevent notes from becoming permanently unhittable.
+        /// </summary>
+        [ContextMenu("Check and Auto-Fix Note System")]
+        public void CheckAndAutoFixNoteSystem()
+        {
+            Debug.Log("=== CHECKING NOTE SYSTEM HEALTH ===");
+            
+            bool needsReset = false;
+            
+            // Check for invalid indices
+            if (_nextJudgableNoteIndex < 0 || _nextJudgableNoteIndex >= _activeNotes.Count)
+            {
+                Debug.LogWarning($"Invalid note index: {_nextJudgableNoteIndex} (should be 0-{_activeNotes.Count - 1})");
+                needsReset = true;
+            }
+            
+            // Check for null notes in the list
+            int nullNoteCount = 0;
+            int disabledNoteCount = 0;
+            int invalidNoteCount = 0;
+            
+            for (int i = 0; i < _activeNotes.Count; i++)
+            {
+                var note = _activeNotes[i];
+                if (note == null)
+                {
+                    nullNoteCount++;
+                }
+                else if (!note.enabled)
+                {
+                    disabledNoteCount++;
+                }
+                else if (!IsNoteValid(note))
+                {
+                    invalidNoteCount++;
+                }
+            }
+            
+            if (nullNoteCount > 0)
+            {
+                Debug.LogWarning($"Found {nullNoteCount} null notes in active notes list");
+                needsReset = true;
+            }
+            
+            if (disabledNoteCount > 0)
+            {
+                Debug.LogWarning($"Found {disabledNoteCount} disabled notes in active notes list");
+                needsReset = true;
+            }
+            
+            if (invalidNoteCount > 0)
+            {
+                Debug.LogWarning($"Found {invalidNoteCount} invalid notes in active notes list");
+                needsReset = true;
+            }
+            
+            // Check if notes are stuck in the system
+            if (_activeNotes.Count > 0)
+            {
+                var firstNote = _activeNotes[0];
+                if (firstNote != null && firstNote.IsHit)
+                {
+                    float currentTime = GetSmoothedSongTime();
+                    float timeSinceHit = currentTime - firstNote.HitTime;
+                    
+                    if (timeSinceHit > 10f) // If a hit note has been in the system for more than 10 seconds
+                    {
+                        Debug.LogWarning($"Hit note has been in system for {timeSinceHit:F1}s - this indicates a problem");
+                        needsReset = true;
+                    }
+                }
+            }
+            
+            if (needsReset)
+            {
+                Debug.LogWarning("Note system is corrupted - auto-resetting...");
+                ResetNoteSystem();
+            }
+            else
+            {
+                Debug.Log("Note system is healthy");
+            }
+            
+            Debug.Log("=== END HEALTH CHECK ===");
+        }
+
+        /// <summary>
+        /// Manually triggers a note system health check and auto-fix.
+        /// Available through the Unity context menu for development and debugging purposes.
+        /// </summary>
+        [ContextMenu("Auto-Fix Note System")]
+        public void AutoFixNoteSystem()
+        {
+            Debug.Log("Manual note system auto-fix triggered");
+            CheckAndAutoFixNoteSystem();
+        }
+
+        /// <summary>
+        /// Updates the next judgable note index to point to the first unjudged note.
+        /// This ensures the hit detection system always points to the correct note.
+        /// </summary>
+        private void UpdateNextJudgableNoteIndex()
+        {
+            // Find the first unjudged note
+            for (int i = 0; i < _activeNotes.Count; i++)
+            {
+                if (_activeNotes[i] != null && !_activeNotes[i].IsHit)
+                {
+                    _nextJudgableNoteIndex = i;
+                    return;
+                }
+            }
+            
+            // If all notes are judged, set index to -1 (no more notes to judge)
+            _nextJudgableNoteIndex = -1;
+        }
+
+        /// <summary>
+        /// Detects and fixes stuck notes that might be causing unhittable note issues.
+        /// This method looks for notes that are past their hit window but haven't been processed.
+        /// </summary>
+        [ContextMenu("Detect and Fix Stuck Notes")]
+        public void DetectAndFixStuckNotes()
+        {
+            Debug.Log("=== DETECTING STUCK NOTES ===");
+            
+            int stuckNotesFound = 0;
+            float currentTime = GetSmoothedSongTime();
+            
+            for (int i = 0; i < _activeNotes.Count; i++)
+            {
+                var note = _activeNotes[i];
+                if (note == null || !IsNoteValid(note)) continue;
+                
+                // Check if note is past hit window but not marked as hit
+                if (!note.IsHit && currentTime > note.HitTime + MISS_WINDOW)
+                {
+                    stuckNotesFound++;
+                    Debug.LogWarning($"Found stuck note at {note.HitTime}s (current time: {currentTime:F3}s, time past window: {currentTime - note.HitTime - MISS_WINDOW:F3}s)");
+                    
+                    // Mark as missed and apply effects
+                    note.IsHit = true;
+                    _combo = 0;
+                    OnComboChange?.Invoke(_combo);
+                    PlayMissEffect(_judgementCircle.position);
+                }
+            }
+            
+            if (stuckNotesFound > 0)
+            {
+                Debug.LogWarning($"Found and fixed {stuckNotesFound} stuck notes");
+                
+                // Update the next judgable note index
+                UpdateNextJudgableNoteIndex();
+            }
+            else
+            {
+                Debug.Log("No stuck notes found");
+            }
+            
+            Debug.Log("=== END STUCK NOTE DETECTION ===");
+        }
     }
 
     [Serializable]
@@ -2207,9 +2693,8 @@ namespace AshTaiko
             ScrollSpeed = scrollSpeed;
             Type = type;
         }
-        public float Time; // in seconds
-        public float ScrollSpeed = 1f; // multiplier relative to base speed
-        public NoteType Type;   // "don", "ka", "drumroll", etc. 
-        // Drumrolls are now defined by start and end notes, so no Duration here
+        public float Time;
+        public float ScrollSpeed = 1f; 
+        public NoteType Type;
     }
 }

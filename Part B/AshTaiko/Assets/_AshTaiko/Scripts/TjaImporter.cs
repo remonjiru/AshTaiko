@@ -32,6 +32,7 @@ namespace AshTaiko
                 _currentLine = 0;
                 
                 _currentSong = new SongEntry();
+                _currentSong.Format = SongFormat.Tja;
                 _currentChart = null;
                 _currentBPM = 120f;
                 _currentOffset = 0f;
@@ -57,6 +58,9 @@ namespace AshTaiko
                     _currentSong.AudioFilename = Path.Combine(tjaDirectory, _currentSong.AudioFilename);
                     Debug.Log($"TJA: Full audio path = {_currentSong.AudioFilename}");
                 }
+                
+                // Look for background images in the TJA directory
+                FindBackgroundImage(tjaDirectory);
                 
                 // Calculate final statistics for all charts
                 foreach (var chart in _currentSong.Charts)
@@ -693,6 +697,35 @@ namespace AshTaiko
                 Debug.Log($"- Chart duration: {lastNote.Time - firstNote.Time:F3}s");
             }
             Debug.Log($"================================");
+        }
+        
+        /*
+            FindBackgroundImage searches the TJA directory for common image files.
+            TJA files don't have built-in image references, so we look for common
+            image files that might serve as background/cover images.
+        */
+        private void FindBackgroundImage(string tjaDirectory)
+        {
+            if (string.IsNullOrEmpty(tjaDirectory) || !Directory.Exists(tjaDirectory))
+                return;
+                
+            // Common image file names to look for
+            string[] imageNames = {
+                "bg.jpg", "bg.jpeg", "bg.png", "background.jpg", "background.jpeg", "background.png",
+                "cover.jpg", "cover.jpeg", "cover.png", "title.jpg", "title.jpeg", "title.png",
+                "image.jpg", "image.jpeg", "image.png"
+            };
+            
+            foreach (string imageName in imageNames)
+            {
+                string imagePath = Path.Combine(tjaDirectory, imageName);
+                if (File.Exists(imagePath))
+                {
+                    _currentSong.BackgroundImage = imagePath;
+                    Debug.Log($"TJA: Found background image: {imagePath}");
+                    break;
+                }
+            }
         }
     }
 }

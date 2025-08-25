@@ -149,9 +149,10 @@ namespace AshTaiko
             // Load song cover image if available
             if (_songCoverImage != null)
             {
-                if (!string.IsNullOrEmpty(song.BackgroundImage))
+                if (song.HasImage())
                 {
-                    LoadSongCover(song.BackgroundImage);
+                    string imagePath = song.GetBestAvailableImagePath();
+                    LoadSongCover(imagePath);
                 }
                 else
                 {
@@ -193,10 +194,15 @@ namespace AshTaiko
                     Texture2D texture = UnityEngine.Networking.DownloadHandlerTexture.GetContent(www);
                     if (texture != null)
                     {
-                        // Create sprite from texture
-                        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-                        _songCoverImage.sprite = sprite;
+                        // Create a temporary sprite first (will be replaced with cropped version)
+                        Sprite tempSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+                        _songCoverImage.sprite = tempSprite;
                         _songCoverImage.color = Color.white; // Reset to normal color
+                        
+                        // Configure the image to fit nicely without stretching
+                        // This will create a new cropped sprite and replace the temporary one
+                        ConfigureImageForTexture(texture);
+                        
                         Debug.Log($"Song cover loaded: {imagePath}");
                     }
                     else
@@ -219,6 +225,117 @@ namespace AshTaiko
             {
                 _songCoverImage.sprite = null;
                 _songCoverImage.color = new Color(0.3f, 0.3f, 0.3f, 0.6f); // Medium gray placeholder
+                
+                // Reset image settings to default
+                ResetImageToDefault();
+            }
+        }
+        
+        /*
+            ConfigureImageForTexture sets up the Image component to display the texture
+            without stretching, maintaining aspect ratio and filling the entire component.
+            This creates a "fill and crop" effect similar to CSS object-fit: cover.
+        */
+        private void ConfigureImageForTexture(Texture2D texture)
+        {
+            if (_songCoverImage == null || texture == null) return;
+            
+            // The ConfigureImageWithFillAndCrop method will handle all the image configuration
+            // including setting the correct Image type and aspect ratio handling
+            ConfigureImageWithFillAndCrop(texture);
+        }
+        
+        /*
+            ConfigureImageWithFillAndCrop sets up the image to fill the entire component
+            while maintaining aspect ratio. This creates a perfect square image with
+            CSS object-fit: cover behavior - the image fills the square and is centered.
+        */
+        private void ConfigureImageWithFillAndCrop(Texture2D texture)
+        {
+            if (_songCoverImage == null || texture == null) return;
+            
+            // Get the RectTransform of the Image component
+            RectTransform imageRect = _songCoverImage.rectTransform;
+            if (imageRect == null) return;
+            
+            // Get the parent container's size
+            RectTransform parentRect = imageRect.parent as RectTransform;
+            if (parentRect == null) return;
+            
+            Vector2 parentSize = parentRect.rect.size;
+            
+            // Determine the target size - we want a square that fits within the parent
+            float targetSize = Mathf.Min(parentSize.x, parentSize.y);
+            
+            // Keep the Image component itself as a square
+            imageRect.sizeDelta = new Vector2(targetSize, targetSize);
+            
+            // Center the image within the parent container
+            imageRect.anchoredPosition = Vector2.zero;
+            
+            // Set the image type to Simple for better control
+            _songCoverImage.type = Image.Type.Simple;
+            _songCoverImage.preserveAspect = false; // We're handling aspect ratio manually
+            
+            // Calculate the cropping rect to achieve object-fit: cover behavior
+            float textureAspect = (float)texture.width / texture.height;
+            Rect cropRect;
+            
+            if (textureAspect > 1.0f)
+            {
+                // Landscape image - crop width to fit height
+                float visibleWidth = texture.height; // Square aspect ratio
+                float startX = (texture.width - visibleWidth) * 0.5f; // Center the crop
+                cropRect = new Rect(startX, 0, visibleWidth, texture.height);
+            }
+            else
+            {
+                // Portrait or square image - crop height to fit width
+                float visibleHeight = texture.width; // Square aspect ratio
+                float startY = (texture.height - visibleHeight) * 0.5f; // Center the crop
+                cropRect = new Rect(0, startY, texture.width, visibleHeight);
+            }
+            
+            // Update the sprite with the new crop rect
+            if (_songCoverImage.sprite != null)
+            {
+                // Create a new sprite with the cropped area
+                Sprite newSprite = Sprite.Create(texture, cropRect, new Vector2(0.5f, 0.5f));
+                _songCoverImage.sprite = newSprite;
+            }
+            
+            Debug.Log($"Image configured: texture {texture.width}x{texture.height} (aspect: {textureAspect:F2}), " +
+                     $"parent {parentSize.x:F0}x{parentSize.y:F0}, " +
+                     $"target square: {targetSize:F0}x{targetSize:F0}, " +
+                     $"crop rect: {cropRect}");
+        }
+        
+        /*
+            ResetImageToDefault resets the Image component to its default size and settings
+            when no image is loaded or when clearing the display.
+        */
+        private void ResetImageToDefault()
+        {
+            if (_songCoverImage == null) return;
+            
+            // Reset to default Image type and settings
+            _songCoverImage.type = Image.Type.Simple;
+            _songCoverImage.preserveAspect = false; // We handle aspect ratio manually
+            
+            // Reset the size to a square that fits within the parent container
+            RectTransform imageRect = _songCoverImage.rectTransform;
+            if (imageRect != null)
+            {
+                RectTransform parentRect = imageRect.parent as RectTransform;
+                if (parentRect != null)
+                {
+                    // Create a square that fits within the parent
+                    float targetSize = Mathf.Min(parentRect.rect.size.x, parentRect.rect.size.y);
+                    imageRect.sizeDelta = new Vector2(targetSize, targetSize);
+                    imageRect.anchoredPosition = Vector2.zero;
+                    
+                    Debug.Log($"Reset image to default: square {targetSize:F0}x{targetSize:F0}");
+                }
             }
         }
 

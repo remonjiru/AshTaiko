@@ -131,6 +131,13 @@ namespace AshTaiko
                 return;
             }
             
+            // Safety check: ensure we have a valid GameManager reference
+            if (GameManager.Instance == null)
+            {
+                Debug.LogWarning($"Note at {HitTime}s: GameManager.Instance is null!");
+                return;
+            }
+            
             float currentTime = GameManager.Instance.GetSmoothedSongTime();
             float timeLeft = HitTime - currentTime;
             float effectivePreempt = PreemptTime / ScrollSpeed; // faster scroll = shorter preempt
@@ -153,7 +160,7 @@ namespace AshTaiko
             if (NoteType == NoteType.Drumroll || NoteType == NoteType.DrumrollBig)
             {
                 // For drumrolls, only destroy if we have an end note and are way past
-                if (distancePastHitBar > 10f && DrumrollEndNote != null) // Increased from 5f to 10f
+                if (distancePastHitBar > 15f && DrumrollEndNote != null) // Increased from 10f to 15f
                 {
                     Debug.Log($"Destroying drumroll note at {HitTime}s (distance: {distancePastHitBar:F1})");
                     Destroy(gameObject);
@@ -163,15 +170,23 @@ namespace AshTaiko
             
             // For regular notes, only destroy if they're way past the hit window
             // This prevents premature destruction due to timing issues
-            if (distancePastHitBar > 10f && IsHit) // Only destroy if already judged AND way past
+            if (distancePastHitBar > 15f && IsHit) // Only destroy if already judged AND way past (increased from 10f)
             {
                 Debug.Log($"Destroying judged note at {HitTime}s (distance: {distancePastHitBar:F1})");
                 Destroy(gameObject);
             }
-            else if (distancePastHitBar > 20f) // Emergency cleanup for notes that are very far past
+            else if (distancePastHitBar > 30f) // Emergency cleanup for notes that are very far past (increased from 20f)
             {
                 Debug.LogWarning($"Note at {HitTime}s destroyed due to extreme distance: {distancePastHitBar:F1} units past hit bar");
                 Destroy(gameObject);
+            }
+            
+            // Safety check: if note is way past the hit window and not hit, mark it as missed
+            // This is now less aggressive since GameManager handles miss detection properly
+            if (distancePastHitBar > 25f && !IsHit)
+            {
+                Debug.LogWarning($"Note at {HitTime}s is way past hit window but not marked as hit - forcing miss state");
+                IsHit = true;
             }
         }
         

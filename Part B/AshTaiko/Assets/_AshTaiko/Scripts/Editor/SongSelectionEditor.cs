@@ -753,40 +753,14 @@ namespace AshTaiko.Editor
         
         private void SyncWithGameManager()
         {
-            if (!Application.isPlaying) return;
+            // DISABLED: This method was interfering with the new scene transition system
+            // The SongSelectionEditor now only works for testing within the same scene
+            // For actual gameplay, use the song selection screen in the Menu scene
             
-            var gameManager = FindFirstObjectByType<GameManager>();
-            if (gameManager == null) return;
-            
-            var currentSong = gameManager.GetCurrentSong();
-            var currentChart = gameManager.GetCurrentChart();
-            
-            if (currentSong != null && currentChart != null)
+            if (Application.isPlaying)
             {
-                // Try to find this song in our filtered list
-                for (int i = 0; i < filteredSongs.Count; i++)
-                {
-                    if (filteredSongs[i].UniqueId == currentSong.UniqueId)
-                    {
-                        selectedSongIndex = i;
-                        
-                        // Try to find the chart in this song
-                        if (filteredSongs[i].Charts != null)
-                        {
-                            for (int j = 0; j < filteredSongs[i].Charts.Count; j++)
-                            {
-                                if (filteredSongs[i].Charts[j].Version == currentChart.Version)
-                                {
-                                    selectedChartIndex = j;
-                                    break;
-                                }
-                            }
-                        }
-                        
-                        Debug.Log($"Editor selection synced with GameManager: {currentSong.Title} - {currentChart.Version}");
-                        break;
-                    }
-                }
+                Debug.Log("SongSelectionEditor: GameManager sync is disabled to prevent conflicts with the new scene transition system");
+                Debug.Log("Use the song selection screen in the Menu scene for actual gameplay");
             }
         }
 
@@ -801,24 +775,14 @@ namespace AshTaiko.Editor
 
         private void UpdateGameManagerSelection()
         {
+            // DISABLED: This method was interfering with the new scene transition system
+            // The SongSelectionEditor now only works for testing within the same scene
+            // For actual gameplay, use the song selection screen in the Menu scene
+            
             if (Application.isPlaying)
             {
-                var gameManager = FindFirstObjectByType<GameManager>();
-                if (gameManager != null)
-                {
-                    if (selectedSongIndex < filteredSongs.Count)
-                    {
-                        var selectedSong = filteredSongs[selectedSongIndex];
-                        var selectedChart = selectedSong.Charts != null && selectedSong.Charts.Count > 0 && selectedChartIndex < selectedSong.Charts.Count 
-                            ? selectedSong.Charts[selectedChartIndex] 
-                            : null;
-                        
-                        if (selectedChart != null)
-                        {
-                            gameManager.SetSelectedChart(selectedChart);
-                        }
-                    }
-                }
+                Debug.Log("SongSelectionEditor: GameManager selection updates are disabled to prevent conflicts with the new scene transition system");
+                Debug.Log("Use the song selection screen in the Menu scene for actual gameplay");
             }
         }
 

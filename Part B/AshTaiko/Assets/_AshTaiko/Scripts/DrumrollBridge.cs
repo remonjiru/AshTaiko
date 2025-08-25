@@ -13,14 +13,8 @@ namespace AshTaiko
 
         private bool _hasExisted;
 
-        // Public properties for access
         public Note headNote { get => _headNote; set => _headNote = value; }
         public Note endNote { get => _endNote; set => _endNote = value; }
-
-        private void OnEnable()
-        {
-
-        }
 
         void LateUpdate()
         {
@@ -47,8 +41,6 @@ namespace AshTaiko
             // Use absolute value for length
             float length = Mathf.Abs(end.x - start.x);
             transform.localScale = new Vector3(length, transform.localScale.y, transform.localScale.z);
-            // Optionally, flip the bridge if needed (if your sprite/pivot requires it)
-            // You can also set transform.right = (end - start).normalized; for rotation if needed
         }
     }
 }

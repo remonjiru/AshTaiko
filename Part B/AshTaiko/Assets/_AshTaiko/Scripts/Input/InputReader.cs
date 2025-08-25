@@ -32,6 +32,7 @@ namespace AshTaiko
 
         public event UnityAction KaLeftEvent = delegate { };
         public event UnityAction KaRightEvent = delegate { };
+        public event UnityAction PauseEvent = delegate { };
 
         public void OnDon_Left(InputAction.CallbackContext context)
         {
@@ -62,6 +63,14 @@ namespace AshTaiko
             if (context.phase == InputActionPhase.Performed)
             {
                 KaRightEvent?.Invoke();
+            }
+        }
+
+        public void OnPause(InputAction.CallbackContext context)
+        {
+            if (context.phase == InputActionPhase.Performed)
+            {
+                PauseEvent?.Invoke();
             }
         }
     }
