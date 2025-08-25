@@ -51,6 +51,10 @@ namespace AshTaiko
             Debug.Log("Switching to Chart Select.");
             GoToMenu(_chartSelectMenu);
         }
+        public void ExitGame()
+        {
+            Application.Quit();
+        }
 
 
         private void GoToMenu(MenuPage desiredMenu)

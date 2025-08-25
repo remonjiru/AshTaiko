@@ -8,21 +8,32 @@ namespace AshTaiko.Menu
     public class SongListItem : MonoBehaviour
     {
         [Header("UI References")]
-        [SerializeField] private TextMeshProUGUI _titleText;
-        [SerializeField] private TextMeshProUGUI _artistText;
-        [SerializeField] private TextMeshProUGUI _creatorText;
-        [SerializeField] private TextMeshProUGUI _formatText;
-        [SerializeField] private Image _previewImage;
-        [SerializeField] private Button _itemButton;
+        [SerializeField] 
+        private TextMeshProUGUI _titleText;
+        [SerializeField] 
+        private TextMeshProUGUI _artistText;
+        [SerializeField] 
+        private TextMeshProUGUI _creatorText;
+        [SerializeField] 
+        private TextMeshProUGUI _formatText;
+        [SerializeField] 
+        private Image _previewImage;
+        [SerializeField] 
+        private Button _itemButton;
         
         [Header("Image Display Settings")]
-        [SerializeField] private bool _preserveAspectRatio = true;
-        [SerializeField] private Image.Type _imageType = Image.Type.Simple;
+        [SerializeField] 
+        private bool _preserveAspectRatio = true;
+        [SerializeField] 
+        private Image.Type _imageType = Image.Type.Simple;
         
         [Header("Visual States")]
-        [SerializeField] private Color _normalColor = Color.white;
-        [SerializeField] private Color _selectedColor = Color.yellow;
-        [SerializeField] private Color _hoverColor = Color.cyan;
+        [SerializeField] 
+        private Color _normalColor = Color.white;
+        [SerializeField] 
+        private Color _selectedColor = Color.yellow;
+        [SerializeField] 
+        private Color _hoverColor = Color.cyan;
         
         private SongEntry _songData;
         private int _songIndex;

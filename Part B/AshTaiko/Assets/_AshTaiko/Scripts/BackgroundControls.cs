@@ -11,14 +11,20 @@ namespace AshTaiko
     public class BackgroundControls : MonoBehaviour
     {
         [Header("UI Controls")]
-        [SerializeField] private Slider _dimSlider;
-        [SerializeField] private TextMeshProUGUI _dimValueText;
-        [SerializeField] private Button _toggleBackgroundButton;
-        [SerializeField] private TextMeshProUGUI _toggleButtonText;
+        [SerializeField] 
+        private Slider _dimSlider;
+        [SerializeField] 
+        private TextMeshProUGUI _dimValueText;
+        [SerializeField] 
+        private Button _toggleBackgroundButton;
+        [SerializeField] 
+        private TextMeshProUGUI _toggleButtonText;
         
         [Header("Settings")]
-        [SerializeField] private float _defaultDim = 0.7f;
-        [SerializeField] private bool _showControlsByDefault = true;
+        [SerializeField] 
+        private float _defaultDim = 0.7f;
+        [SerializeField] 
+        private bool _showControlsByDefault = true;
         
         private GameManager _gameManager;
         private bool _backgroundEnabled = true;

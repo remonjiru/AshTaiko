@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 using System;
+using System.Linq;
 
 namespace AshTaiko.Menu
 {
@@ -22,18 +23,28 @@ namespace AshTaiko.Menu
         #region Component References
 
         [Header("Component Managers")]
-        [SerializeField] private SongListManager _songListManager;
-        [SerializeField] private DifficultySelector _difficultySelector;
-        [SerializeField] private SongInfoDisplay _songInfoDisplay;
-        [SerializeField] private LeaderboardManager _leaderboardManager;
+        [SerializeField] 
+        private SongListManager _songListManager;
+        [SerializeField] 
+        private DifficultySelector _difficultySelector;
+        [SerializeField] 
+        private SongInfoDisplay _songInfoDisplay;
+        [SerializeField] 
+        private LeaderboardManager _leaderboardManager;
+        [SerializeField] 
+        private SongImportManager _songImportManager;
 
         [Header("Main UI")]
-        [SerializeField] private Button _backButton;
+        [SerializeField] 
+        private Button _backButton;
         
         [Header("Background System")]
-        [SerializeField] private UnityEngine.UI.Image _backgroundImage;
-        [SerializeField] private UnityEngine.UI.Image _backgroundOverlay;
-        [SerializeField] private float _backgroundDim = 0.8f;
+        [SerializeField] 
+        private UnityEngine.UI.Image _backgroundImage;
+        [SerializeField] 
+        private UnityEngine.UI.Image _backgroundOverlay;
+        [SerializeField] 
+        private float _backgroundDim = 0.8f;
 
         #endregion
 
@@ -83,6 +94,9 @@ namespace AshTaiko.Menu
             
             if (_leaderboardManager == null)
                 Debug.LogError("SongSelectionManager: LeaderboardManager reference is missing!");
+            
+            if (_songImportManager == null)
+                Debug.LogWarning("SongSelectionManager: SongImportManager reference is missing - import functionality will be disabled");
             
             if (_backButton == null)
                 Debug.LogError("SongSelectionManager: BackButton reference is missing!");
@@ -147,8 +161,10 @@ namespace AshTaiko.Menu
         {
             if (_songListManager != null)
             {
+                Debug.Log("Loading initial song database...");
                 _songListManager.LoadSongDatabase();
                 _songListManager.RefreshSongList();
+                Debug.Log("Initial song database loaded");
             }
         }
 
@@ -171,6 +187,13 @@ namespace AshTaiko.Menu
             _selectedSong = song;
             _selectedChart = null;
             Debug.Log($"Song selected: {song.Title} - {song.Artist} (Charts: {song.Charts?.Count ?? 0})");
+            
+            // Log chart summary for debugging
+            if (song.Charts != null && song.Charts.Count > 1)
+            {
+                var difficulties = string.Join(", ", song.Charts.Select(c => c.Version));
+                Debug.Log($"  Available difficulties: {difficulties}");
+            }
 
             // Load the song's background image
             LoadSongBackground(song);

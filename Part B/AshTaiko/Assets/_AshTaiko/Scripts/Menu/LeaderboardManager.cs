@@ -20,8 +20,10 @@ namespace AshTaiko.Menu
         #region UI References
 
         [Header("Leaderboard")]
-        [SerializeField] private Transform _leaderboardContent;
-        [SerializeField] private GameObject _leaderboardEntryPrefab;
+        [SerializeField] 
+        private Transform _leaderboardContent;
+        [SerializeField] 
+        private GameObject _leaderboardEntryPrefab;
 
         #endregion
 

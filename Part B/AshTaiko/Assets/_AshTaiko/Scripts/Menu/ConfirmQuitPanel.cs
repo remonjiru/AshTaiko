@@ -12,11 +12,14 @@ namespace AshTaiko
         #region Serialized Fields
 
         [Header("Button References")]
-        [SerializeField] private Button _confirmQuitButton;
-        [SerializeField] private Button _cancelButton;
+        [SerializeField] 
+        private Button _confirmQuitButton;
+        [SerializeField] 
+        private Button _cancelButton;
 
         [Header("Manager Reference")]
-        [SerializeField] private PauseMenuManager _pauseMenuManager;
+        [SerializeField] 
+        private PauseMenuManager _pauseMenuManager;
 
         #endregion
 

@@ -91,12 +91,12 @@ namespace AshTaiko.Input
     ""maps"": [
         {
             ""name"": ""Gameplay"",
-            ""id"": ""df70fa95-8a34-4494-b137-73ab6b9c7d37"",
+            ""id"": ""5419f340-4732-4578-9191-3cb672cf113c"",
             ""actions"": [
                 {
                     ""name"": ""Ka_Left"",
                     ""type"": ""Button"",
-                    ""id"": ""fd2382e8-1138-43b3-9e43-04230d374225"",
+                    ""id"": ""79237f26-7942-4572-9d8b-608f94857676"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -105,7 +105,7 @@ namespace AshTaiko.Input
                 {
                     ""name"": ""Don_Left"",
                     ""type"": ""Button"",
-                    ""id"": ""25a8add0-3ee9-456d-9362-0bbfd24990db"",
+                    ""id"": ""dbdc966e-34c5-4b0d-a843-673c22c7fcda"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -114,7 +114,7 @@ namespace AshTaiko.Input
                 {
                     ""name"": ""Don_Right"",
                     ""type"": ""Button"",
-                    ""id"": ""da842ee5-cefa-44a0-beb3-31773f63957b"",
+                    ""id"": ""da2c5613-54d6-49f9-a717-fe9c59755d2e"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -123,7 +123,7 @@ namespace AshTaiko.Input
                 {
                     ""name"": ""Ka_Right"",
                     ""type"": ""Button"",
-                    ""id"": ""e161f055-a0b8-45c6-9527-b8f85ac2ec9e"",
+                    ""id"": ""d715095b-e71c-49d1-b402-23a4eb961d83"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -132,7 +132,7 @@ namespace AshTaiko.Input
                 {
                     ""name"": ""Pause"",
                     ""type"": ""Button"",
-                    ""id"": ""7b8c7b8c-7b8c-7b8c-7b8c-7b8c7b8c7b8c"",
+                    ""id"": ""a01c3035-6678-47c9-b3ed-15dd90c56fca"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -142,18 +142,29 @@ namespace AshTaiko.Input
             ""bindings"": [
                 {
                     ""name"": """",
-                    ""id"": ""23f2dd92-8e01-4708-96e9-a4aa723e0a89"",
+                    ""id"": ""3d69d8ee-76c9-4ba8-a603-f96c7cbb1a00"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gameplay"",
+                    ""action"": ""Ka_Left"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b8e87472-f39e-4b2b-abca-f58905f2d298"",
                     ""path"": ""<Keyboard>/v"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": "";Gameplay"",
                     ""action"": ""Don_Left"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""e083bd44-3272-4c32-bd7b-8f9b2af42195"",
+                    ""id"": ""2caf83f8-e1ef-4590-8143-0a1792676f28"",
                     ""path"": ""<Keyboard>/n"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -164,7 +175,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""bdfd6f4d-a339-4af5-b627-e3c0ab3cbe9d"",
+                    ""id"": ""4b117c3e-96b2-4524-ac73-9b1033b01386"",
                     ""path"": ""<Keyboard>/j"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -175,18 +186,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""e6c8e471-a92e-4439-86e5-f40a317261c0"",
-                    ""path"": ""<Keyboard>/f"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Ka_Left"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""7b8c7b8c-7b8c-7b8c-7b8c-7b8c7b8c7b8c"",
+                    ""id"": ""36d3d123-e0e2-42d9-8c42-0af7636df8c7"",
                     ""path"": ""<Keyboard>/escape"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -199,12 +199,12 @@ namespace AshTaiko.Input
         },
         {
             ""name"": ""UI"",
-            ""id"": ""272f6d14-89ba-496f-b7ff-215263d3219f"",
+            ""id"": ""8cb31f38-bc77-42a1-b649-328d4f436a85"",
             ""actions"": [
                 {
                     ""name"": ""Navigate"",
                     ""type"": ""PassThrough"",
-                    ""id"": ""c95b2375-e6d9-4b88-9c4c-c5e76515df4b"",
+                    ""id"": ""e706af6b-c604-46b6-8958-c03c0b438349"",
                     ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -213,7 +213,7 @@ namespace AshTaiko.Input
                 {
                     ""name"": ""Submit"",
                     ""type"": ""Button"",
-                    ""id"": ""7607c7b6-cd76-4816-beef-bd0341cfe950"",
+                    ""id"": ""1cd9c6a7-572c-42b0-9bf8-c375ec7b8ba7"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -222,7 +222,7 @@ namespace AshTaiko.Input
                 {
                     ""name"": ""Cancel"",
                     ""type"": ""Button"",
-                    ""id"": ""15cef263-9014-4fd5-94d9-4e4a6234a6ef"",
+                    ""id"": ""d4a0a8f7-2788-44b6-8fd5-2904aece8ee6"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -231,7 +231,7 @@ namespace AshTaiko.Input
                 {
                     ""name"": ""Point"",
                     ""type"": ""PassThrough"",
-                    ""id"": ""32b35790-4ed0-4e9a-aa41-69ac6d629449"",
+                    ""id"": ""93dcbf6d-eb7a-43e0-822d-0455999f7da5"",
                     ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -240,7 +240,7 @@ namespace AshTaiko.Input
                 {
                     ""name"": ""Click"",
                     ""type"": ""PassThrough"",
-                    ""id"": ""3c7022bf-7922-4f7c-a998-c437916075ad"",
+                    ""id"": ""17e8a7ea-c302-4350-a9f3-cc88d3d15363"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -249,7 +249,7 @@ namespace AshTaiko.Input
                 {
                     ""name"": ""RightClick"",
                     ""type"": ""PassThrough"",
-                    ""id"": ""44b200b1-1557-4083-816c-b22cbdf77ddf"",
+                    ""id"": ""48d32870-4c80-4ad2-8f6b-027bfc2a8626"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -258,7 +258,7 @@ namespace AshTaiko.Input
                 {
                     ""name"": ""MiddleClick"",
                     ""type"": ""PassThrough"",
-                    ""id"": ""dad70c86-b58c-4b17-88ad-f5e53adf419e"",
+                    ""id"": ""e7701ea3-d257-4ad2-94d0-2d83817a5594"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -267,7 +267,7 @@ namespace AshTaiko.Input
                 {
                     ""name"": ""ScrollWheel"",
                     ""type"": ""PassThrough"",
-                    ""id"": ""0489e84a-4833-4c40-bfae-cea84b696689"",
+                    ""id"": ""2c256e09-eac7-41b5-a273-d0cb220de5ec"",
                     ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -276,7 +276,7 @@ namespace AshTaiko.Input
                 {
                     ""name"": ""TrackedDevicePosition"",
                     ""type"": ""PassThrough"",
-                    ""id"": ""24908448-c609-4bc3-a128-ea258674378a"",
+                    ""id"": ""5b7ac69c-6458-4bce-9d6e-bff9694660c3"",
                     ""expectedControlType"": ""Vector3"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -285,7 +285,7 @@ namespace AshTaiko.Input
                 {
                     ""name"": ""TrackedDeviceOrientation"",
                     ""type"": ""PassThrough"",
-                    ""id"": ""9caa3d8a-6b2f-4e8e-8bad-6ede561bd9be"",
+                    ""id"": ""cd3f237b-2dff-4f91-8059-15bf87a82043"",
                     ""expectedControlType"": ""Quaternion"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -295,7 +295,7 @@ namespace AshTaiko.Input
             ""bindings"": [
                 {
                     ""name"": ""Gamepad"",
-                    ""id"": ""809f371f-c5e2-4e7a-83a1-d867598f40dd"",
+                    ""id"": ""e6bf7ea5-0251-4459-8562-cceb37a704d2"",
                     ""path"": ""2DVector"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -306,7 +306,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""up"",
-                    ""id"": ""14a5d6e8-4aaf-4119-a9ef-34b8c2c548bf"",
+                    ""id"": ""3fd459d1-0559-4bed-adb5-7ae374876f60"",
                     ""path"": ""<Gamepad>/leftStick/up"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -317,7 +317,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""up"",
-                    ""id"": ""9144cbe6-05e1-4687-a6d7-24f99d23dd81"",
+                    ""id"": ""84fbc857-5e1d-4b87-b0ce-2d347d76a7f1"",
                     ""path"": ""<Gamepad>/rightStick/up"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -328,7 +328,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""down"",
-                    ""id"": ""2db08d65-c5fb-421b-983f-c71163608d67"",
+                    ""id"": ""d810665b-7abd-47a5-8650-10c739f35fe0"",
                     ""path"": ""<Gamepad>/leftStick/down"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -339,7 +339,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""down"",
-                    ""id"": ""58748904-2ea9-4a80-8579-b500e6a76df8"",
+                    ""id"": ""c002ec66-f28a-4fd0-9713-6d637ce03aac"",
                     ""path"": ""<Gamepad>/rightStick/down"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -350,7 +350,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""left"",
-                    ""id"": ""8ba04515-75aa-45de-966d-393d9bbd1c14"",
+                    ""id"": ""6e3974bf-ad1b-4351-9aa6-e0647b085722"",
                     ""path"": ""<Gamepad>/leftStick/left"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -361,7 +361,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""left"",
-                    ""id"": ""712e721c-bdfb-4b23-a86c-a0d9fcfea921"",
+                    ""id"": ""91ca1d21-85a2-495d-84ec-69e7f43887fb"",
                     ""path"": ""<Gamepad>/rightStick/left"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -372,7 +372,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""right"",
-                    ""id"": ""fcd248ae-a788-4676-a12e-f4d81205600b"",
+                    ""id"": ""1cba4f61-c15f-4162-9045-afa7cee28c3b"",
                     ""path"": ""<Gamepad>/leftStick/right"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -383,7 +383,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""right"",
-                    ""id"": ""1f04d9bc-c50b-41a1-bfcc-afb75475ec20"",
+                    ""id"": ""540873ff-e935-4320-b41e-be871ed1fdf9"",
                     ""path"": ""<Gamepad>/rightStick/right"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -394,7 +394,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""fb8277d4-c5cd-4663-9dc7-ee3f0b506d90"",
+                    ""id"": ""1dc6d542-6641-4bd6-8d90-247933ab70c9"",
                     ""path"": ""<Gamepad>/dpad"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -405,7 +405,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""Joystick"",
-                    ""id"": ""e25d9774-381c-4a61-b47c-7b6b299ad9f9"",
+                    ""id"": ""5aa571c3-a972-429f-94ad-7ff34aae8ef0"",
                     ""path"": ""2DVector"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -416,7 +416,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""up"",
-                    ""id"": ""3db53b26-6601-41be-9887-63ac74e79d19"",
+                    ""id"": ""90841c30-5a53-4abb-9f13-97148b872785"",
                     ""path"": ""<Joystick>/stick/up"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -427,7 +427,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""down"",
-                    ""id"": ""0cb3e13e-3d90-4178-8ae6-d9c5501d653f"",
+                    ""id"": ""e601ea40-339d-41f1-9415-ea741a45878d"",
                     ""path"": ""<Joystick>/stick/down"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -438,7 +438,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""left"",
-                    ""id"": ""0392d399-f6dd-4c82-8062-c1e9c0d34835"",
+                    ""id"": ""33a04938-7297-4904-ac18-57601e6c85de"",
                     ""path"": ""<Joystick>/stick/left"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -449,7 +449,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""right"",
-                    ""id"": ""942a66d9-d42f-43d6-8d70-ecb4ba5363bc"",
+                    ""id"": ""ab8ce852-0577-49d8-beef-c08d08b48ab0"",
                     ""path"": ""<Joystick>/stick/right"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -460,7 +460,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""Keyboard"",
-                    ""id"": ""ff527021-f211-4c02-933e-5976594c46ed"",
+                    ""id"": ""f9c83f45-64a9-46c1-aa24-a0c88b8e13e5"",
                     ""path"": ""2DVector"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -471,7 +471,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""up"",
-                    ""id"": ""563fbfdd-0f09-408d-aa75-8642c4f08ef0"",
+                    ""id"": ""a78ebfc3-907f-448c-a986-966ce09d5f75"",
                     ""path"": ""<Keyboard>/w"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -482,7 +482,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""up"",
-                    ""id"": ""eb480147-c587-4a33-85ed-eb0ab9942c43"",
+                    ""id"": ""c291acea-ea53-45a0-a9c2-41afade7d596"",
                     ""path"": ""<Keyboard>/upArrow"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -493,7 +493,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""down"",
-                    ""id"": ""2bf42165-60bc-42ca-8072-8c13ab40239b"",
+                    ""id"": ""60dea0a3-bf86-4d42-b316-7dc671f400de"",
                     ""path"": ""<Keyboard>/s"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -504,7 +504,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""down"",
-                    ""id"": ""85d264ad-e0a0-4565-b7ff-1a37edde51ac"",
+                    ""id"": ""a10e1199-ebf8-42b0-ad48-3cd3c7343a71"",
                     ""path"": ""<Keyboard>/downArrow"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -515,7 +515,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""left"",
-                    ""id"": ""74214943-c580-44e4-98eb-ad7eebe17902"",
+                    ""id"": ""3fa81f13-def4-46a2-a410-b343639cd309"",
                     ""path"": ""<Keyboard>/a"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -526,7 +526,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""left"",
-                    ""id"": ""cea9b045-a000-445b-95b8-0c171af70a3b"",
+                    ""id"": ""61d19a6a-d9a6-462e-bcf5-bd2628a22244"",
                     ""path"": ""<Keyboard>/leftArrow"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -537,7 +537,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""right"",
-                    ""id"": ""8607c725-d935-4808-84b1-8354e29bab63"",
+                    ""id"": ""317a38fc-af13-4cf0-8389-9dd25aac7b19"",
                     ""path"": ""<Keyboard>/d"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -548,7 +548,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": ""right"",
-                    ""id"": ""4cda81dc-9edd-4e03-9d7c-a71a14345d0b"",
+                    ""id"": ""78d03e67-803a-4401-b575-bc42d7d5b0eb"",
                     ""path"": ""<Keyboard>/rightArrow"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -559,7 +559,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""9e92bb26-7e3b-4ec4-b06b-3c8f8e498ddc"",
+                    ""id"": ""c3f46ac7-0632-4cd4-ae3b-31f151b04387"",
                     ""path"": ""*/{Submit}"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -570,7 +570,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""82627dcc-3b13-4ba9-841d-e4b746d6553e"",
+                    ""id"": ""3d23ea42-666c-4f4b-849d-af4dfde4d7fc"",
                     ""path"": ""*/{Cancel}"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -581,7 +581,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""c52c8e0b-8179-41d3-b8a1-d149033bbe86"",
+                    ""id"": ""28542cac-682d-403c-9cf2-6208ac6c937a"",
                     ""path"": ""<Mouse>/position"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -592,7 +592,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""e1394cbc-336e-44ce-9ea8-6007ed6193f7"",
+                    ""id"": ""332aecc6-478a-4084-9a5c-563aec62863b"",
                     ""path"": ""<Pen>/position"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -603,7 +603,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""5693e57a-238a-46ed-b5ae-e64e6e574302"",
+                    ""id"": ""9286c696-b02d-4922-b593-e181545ab95f"",
                     ""path"": ""<Touchscreen>/touch*/position"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -614,7 +614,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""4faf7dc9-b979-4210-aa8c-e808e1ef89f5"",
+                    ""id"": ""f6f61347-c257-48d3-a200-090145c70464"",
                     ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -625,7 +625,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""8d66d5ba-88d7-48e6-b1cd-198bbfef7ace"",
+                    ""id"": ""cfe61538-ee29-487a-9479-efe1990cecb0"",
                     ""path"": ""<Pen>/tip"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -636,7 +636,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""47c2a644-3ebc-4dae-a106-589b7ca75b59"",
+                    ""id"": ""f274a87e-1144-4652-8947-66ab80045563"",
                     ""path"": ""<Touchscreen>/touch*/press"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -647,7 +647,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""bb9e6b34-44bf-4381-ac63-5aa15d19f677"",
+                    ""id"": ""4d36aa8f-ffdc-4e2b-a85b-9bf28b395e51"",
                     ""path"": ""<XRController>/trigger"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -658,7 +658,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""38c99815-14ea-4617-8627-164d27641299"",
+                    ""id"": ""48259541-1084-4fec-b144-dab82da178b3"",
                     ""path"": ""<Mouse>/scroll"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -669,7 +669,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""4c191405-5738-4d4b-a523-c6a301dbf754"",
+                    ""id"": ""57607479-b3c3-4d76-b837-86e963149111"",
                     ""path"": ""<Mouse>/rightButton"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -680,7 +680,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""24066f69-da47-44f3-a07e-0015fb02eb2e"",
+                    ""id"": ""aea19fc4-1bcc-4c1f-b4ce-037d5359eabf"",
                     ""path"": ""<Mouse>/middleButton"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -691,7 +691,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""7236c0d9-6ca3-47cf-a6ee-a97f5b59ea77"",
+                    ""id"": ""8bef017e-a920-4a11-a5ac-273e623f140a"",
                     ""path"": ""<XRController>/devicePosition"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -702,7 +702,7 @@ namespace AshTaiko.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""23e01e3a-f935-4948-8d8b-9bcac77714fb"",
+                    ""id"": ""cbb43149-5fb6-4ec2-ae96-6d91043ce942"",
                     ""path"": ""<XRController>/deviceRotation"",
                     ""interactions"": """",
                     ""processors"": """",

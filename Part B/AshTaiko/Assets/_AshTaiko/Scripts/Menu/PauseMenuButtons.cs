@@ -12,12 +12,18 @@ namespace AshTaiko
         #region Serialized Fields
 
         [Header("Button References")]
-        [SerializeField] private Button _resumeButton;
-        [SerializeField] private Button _mainMenuButton;
-        [SerializeField] private Button _quitButton;
+        [SerializeField] 
+        private Button _resumeButton;
+        [SerializeField] 
+        private Button _retryButton;
+        [SerializeField] 
+        private Button _mainMenuButton;
+        [SerializeField] 
+        private Button _quitButton;
 
         [Header("Manager Reference")]
-        [SerializeField] private PauseMenuManager _pauseMenuManager;
+        [SerializeField] 
+        private PauseMenuManager _pauseMenuManager;
 
         #endregion
 
@@ -40,6 +46,11 @@ namespace AshTaiko
             if (_resumeButton != null)
             {
                 _resumeButton.onClick.AddListener(OnResumeClicked);
+            }
+
+            if (_retryButton != null)
+            {
+                _retryButton.onClick.AddListener(OnRetryClicked);
             }
 
             if (_mainMenuButton != null)
@@ -65,6 +76,17 @@ namespace AshTaiko
             if (_pauseMenuManager != null)
             {
                 _pauseMenuManager.ResumeGame();
+            }
+        }
+
+        /// <summary>
+        /// Handles retry button click.
+        /// </summary>
+        private void OnRetryClicked()
+        {
+            if (_pauseMenuManager != null)
+            {
+                _pauseMenuManager.RetryGame();
             }
         }
 

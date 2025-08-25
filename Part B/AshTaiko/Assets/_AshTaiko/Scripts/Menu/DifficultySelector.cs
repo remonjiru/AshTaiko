@@ -20,11 +20,16 @@ namespace AshTaiko.Menu
         #region UI References
 
         [Header("Difficulty Selection")]
-        [SerializeField] private Transform _difficultyButtonContainer;
-        [SerializeField] private GameObject _difficultyButtonPrefab;
-        [SerializeField] private GameObject _difficultyPanel; // The entire difficulty selection panel
-        [SerializeField] private Button _playButton; // Play button integrated into difficulty panel
-        [SerializeField] private Button _backButton; // Back button to close difficulty panel
+        [SerializeField] 
+        private Transform _difficultyButtonContainer;
+        [SerializeField] 
+        private GameObject _difficultyButtonPrefab;
+        [SerializeField] 
+        private GameObject _difficultyPanel; // The entire difficulty selection panel
+        [SerializeField] 
+        private Button _playButton; // Play button integrated into difficulty panel
+        [SerializeField] 
+        private Button _backButton; // Back button to close difficulty panel
 
         #endregion
 

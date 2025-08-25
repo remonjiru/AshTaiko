@@ -12,12 +12,18 @@ namespace AshTaiko
         #region Serialized Fields
 
         [Header("Menu References")]
-        [SerializeField] private GameObject _pauseMenuPanel;
-        [SerializeField] private GameObject _pauseMenuButtons;
-        [SerializeField] private GameObject _confirmQuitPanel;
+        [SerializeField] 
+        private GameObject _pauseMenuPanel;
+        [SerializeField] 
+        private GameObject _pauseMenuButtons;
+        [SerializeField] 
+        private GameObject _confirmQuitPanel;
         
         [Header("Game References")]
-        [SerializeField] private GameManager _gameManager;
+        [SerializeField] 
+        private GameManager _gameManager;
+        [SerializeField] 
+        private SongManager _songManager;
 
         #endregion
 
@@ -25,6 +31,9 @@ namespace AshTaiko
 
         private bool _isPaused = false;
         private bool _isConfirmQuitOpen = false;
+
+        // Event for when pause menu is shown
+        public event System.Action OnPauseMenuShown;
 
         #endregion
 
@@ -73,6 +82,12 @@ namespace AshTaiko
             _isPaused = true;
             Time.timeScale = 0f;
             
+            // Pause the audio system
+            if (_songManager != null)
+            {
+                _songManager.PauseAudio();
+            }
+            
             // Notify GameManager of pause state
             if (_gameManager != null)
             {
@@ -95,6 +110,9 @@ namespace AshTaiko
             }
             
             _isConfirmQuitOpen = false;
+
+            // Notify that pause menu is shown
+            OnPauseMenuShown?.Invoke();
         }
 
         /// <summary>
@@ -106,6 +124,12 @@ namespace AshTaiko
 
             _isPaused = false;
             Time.timeScale = 1f;
+            
+            // Resume the audio system
+            if (_songManager != null)
+            {
+                _songManager.ResumeAudio();
+            }
             
             // Notify GameManager of resume state
             if (_gameManager != null)
@@ -162,6 +186,37 @@ namespace AshTaiko
         {
             Time.timeScale = 1f;
             SceneManager.LoadScene("Menu");
+        }
+
+        /// <summary>
+        /// Retries the current song/chart.
+        /// </summary>
+        public void RetryGame()
+        {
+            Debug.Log("Retry button clicked - restarting current song");
+            
+            // Resume time scale before restarting
+            Time.timeScale = 1f;
+            
+            // Hide pause menu
+            if (_pauseMenuPanel != null)
+            {
+                _pauseMenuPanel.SetActive(false);
+            }
+            
+            // Reset pause state
+            _isPaused = false;
+            
+            // Notify GameManager to restart the current song
+            if (_gameManager != null)
+            {
+                _gameManager.SetPauseState(false);
+                _gameManager.RestartCurrentSong();
+            }
+            else
+            {
+                Debug.LogError("GameManager reference is null - cannot restart song");
+            }
         }
 
         /// <summary>

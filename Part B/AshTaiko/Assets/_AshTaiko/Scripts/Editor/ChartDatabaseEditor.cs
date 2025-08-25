@@ -47,9 +47,13 @@ namespace AshTaiko.Editor
             EditorGUILayout.Space();
             EditorGUILayout.HelpBox(
                 "1. Click 'Create Song Database' to create a SongDatabase asset\n" +
-                "2. Place your .osu and .tja files in the Songs directory\n" +
+                "2. Place your .osz, .osu, and .tja files in the Songs directory\n" +
                 "3. Click 'Scan for Songs' to import them into the database\n" +
-                "4. Use 'Open Song Selection Editor' for easy song/difficulty selection", 
+                "4. Use 'Open Song Selection Editor' for easy song/difficulty selection\n\n" +
+                "Supported formats:\n" +
+                "• .osz - Compressed osu! beatmap packages\n" +
+                "• .osu - Individual osu! beatmap files\n" +
+                "• .tja - Taiko no Tatsujin chart files", 
                 MessageType.Info
             );
         }

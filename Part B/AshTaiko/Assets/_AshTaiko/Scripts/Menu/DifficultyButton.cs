@@ -17,14 +17,20 @@ namespace AshTaiko.Menu
     public class DifficultyButton : MonoBehaviour
     {
         [Header("UI Components")]
-        [SerializeField] private Button _button;
-        [SerializeField] private TextMeshProUGUI _buttonText;
-        [SerializeField] private Image _backgroundImage;
+        [SerializeField] 
+        private Button _button;
+        [SerializeField] 
+        private TextMeshProUGUI _buttonText;
+        [SerializeField] 
+        private Image _backgroundImage;
         
         [Header("Visual States")]
-        [SerializeField] private Color _normalColor = Color.white;
-        [SerializeField] private Color _selectedColor = Color.yellow;
-        [SerializeField] private Color _hoverColor = Color.cyan;
+        [SerializeField] 
+        private Color _normalColor = Color.white;
+        [SerializeField] 
+        private Color _selectedColor = Color.yellow;
+        [SerializeField] 
+        private Color _hoverColor = Color.cyan;
         
         private ChartData _associatedChart;
         private bool _isSelected = false;

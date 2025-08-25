@@ -5,6 +5,7 @@ using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 namespace AshTaiko
 {
@@ -104,6 +105,7 @@ namespace AshTaiko
         [SerializeField] private InputReader _inputReader;
         [SerializeField] private PauseMenuManager _pauseMenuManager;
 
+
         #endregion
 
         #region Note Management System
@@ -168,7 +170,8 @@ namespace AshTaiko
             Uninitialized,
             Loading,
             Delay,
-            Playing
+            Playing,
+            Completed
         }
 
         private TimingState _timingState = TimingState.Uninitialized;
@@ -224,6 +227,43 @@ namespace AshTaiko
             _isPaused = paused;
         }
 
+        /// <summary>
+        /// Restarts the current song/chart from the beginning.
+        /// Resets all game state and begins playback from the start.
+        /// </summary>
+        public void RestartCurrentSong()
+        {
+            if (_currentSong == null || _currentChart == null)
+            {
+                Debug.LogWarning("Cannot restart: No song or chart loaded");
+                return;
+            }
+
+            Debug.Log("RESTARTING");
+            Debug.Log($"Song: {_currentSong.Title} - {_currentChart.Version}");
+            
+            // Stop current audio playback first
+            if (_songManager != null)
+            {
+                _songManager.StopAudio();
+                _songManager.ResetPauseTracking();
+            }
+            
+            // Reset game state
+            ResetGameState();
+            
+            // Reload the chart data
+            LoadChart(_currentChart);
+            
+            // Start the song from the beginning
+            if (_songManager != null)
+            {
+                _songManager.PlayInSeconds(3.0); // 3 second delay like initial start
+            }
+            
+            Debug.Log("Song restarted successfully");
+        }
+
         #endregion
 
         #region Timing Methods
@@ -234,6 +274,12 @@ namespace AshTaiko
         /// </summary>
         public float GetSynchronizedSongTime()
         {
+            // If game is paused, return the last known song time without advancing
+            if (_isPaused)
+            {
+                return _songTime;
+            }
+
             // Don't try to get audio time if we're not in the right state otherwise Unity will complain
             if (_timingState == TimingState.Uninitialized || _timingState == TimingState.Loading)
             {
@@ -247,25 +293,22 @@ namespace AshTaiko
 
                 if (_timingState == TimingState.Delay)
                 {
+                    // Calculate delay time accounting for paused time
                     double currentDspTime = AudioSettings.dspTime;
                     double timeSinceDelayStart = currentDspTime - _delayStartDspTime;
+                    
+                    // Subtract the total paused time to keep delay timing in sync
+                    double correctedTimeSinceDelayStart = timeSinceDelayStart - _songManager.GetTotalPausedTime();
 
                     // Hardcoded 3 second countdown oopsie sorry mr toet
-                    float synchronizedTime = -3f + (float)timeSinceDelayStart;
+                    float synchronizedTime = -3f + (float)correctedTimeSinceDelayStart;
 
                     return synchronizedTime;
                 }
                 else if (_timingState == TimingState.Playing)
                 {
-                    // Audio is playing normally - use continuous timing from delay period
-                    // Calculate time since the delay started and add the 3-second offset
-                    double currentDspTime = AudioSettings.dspTime;
-                    double timeSinceDelayStart = currentDspTime - _delayStartDspTime;
-
-                    // This gives us continuous timing: -3.0s -> -2.0s -> -1.0s -> 0.0s -> 1.0s -> 2.0s...
-                    float synchronizedTime = -3f + (float)timeSinceDelayStart;
-
-                    return synchronizedTime;
+                    // Use the corrected song time from SongManager that accounts for paused time
+                    return (float)_songManager.GetCorrectedSongTime();
                 }
             }
 
@@ -396,8 +439,15 @@ namespace AshTaiko
         */
         private int _score = 0;
         private int _combo = 0;
+        private int _maxCombo = 0; // Track the highest combo achieved during the song
         private float _gauge;
         private float _maxGauge = 100;
+
+        // Public properties for external access
+        public int Combo => _combo;
+        public int MaxCombo => _maxCombo;
+        public int Score => _score;
+        public float Accuracy => GetAccuracy();
 
         /*
             Performance tracking counters for hit statistics throughout gameplay.
@@ -583,8 +633,12 @@ namespace AshTaiko
                 Core timing update retrieves synchronized time and stores it as current song time.
                 This value drives all timing-dependent systems including note spawning, hit detection, and state transitions.
             */
-            float synchronizedTime = GetSynchronizedSongTime();
-            _songTime = synchronizedTime;
+            // Only update song time if not paused
+            if (!_isPaused)
+            {
+                float synchronizedTime = GetSynchronizedSongTime();
+                _songTime = synchronizedTime;
+            }
 
             /*
                 The system automatically transitions from delay to playing state when
@@ -756,6 +810,12 @@ namespace AshTaiko
                     EndDrumroll();
                 }
             }
+            
+            /*
+                Check for song completion when all notes have been processed and
+                the song has reached its end time.
+            */
+            CheckForSongCompletion();
         }
 
         #endregion
@@ -839,7 +899,6 @@ namespace AshTaiko
                 return false;
             }
             
-            // Additional check: ensure the note hasn't been marked for destruction
             if (note.gameObject == null || note.gameObject.scene.name == null)
             {
                 Debug.LogWarning($"Note validation failed: GameObject is being destroyed for note at {note.HitTime}s");
@@ -1020,6 +1079,12 @@ namespace AshTaiko
         /// </remarks>
         public float GetSmoothedSongTime()
         {
+            // If game is paused, return the last known song time without advancing
+            if (_isPaused)
+            {
+                return _songTime;
+            }
+            
             // Use synchronized time from audio source for more accurate timing
             return GetSynchronizedSongTime();
         }
@@ -1438,8 +1503,10 @@ namespace AshTaiko
         {
             _score = 0;
             _combo = 0;
+            _maxCombo = 0; // Reset max combo for new game
             _gauge = 0f; // Start at 0 - player must earn gauge by hitting notes
             _songTime = -3f; // Start in delay period
+            _timingState = TimingState.Delay; // Reset timing state
             _nextNoteIndex = 0;
             _nextJudgableNoteIndex = 0;
 
@@ -1467,10 +1534,17 @@ namespace AshTaiko
                 }
             }
             _activeDrumrollBridges.Clear();
+            
+            // Reset hit statistics
+            _hitGoods = 0;
+            _hitOkays = 0;
+            _hitBads = 0;
 
             OnScoreChange?.Invoke(_score);
             OnComboChange?.Invoke(_combo);
             OnAccuracyChange?.Invoke(GetAccuracy());
+            
+
         }
 
         #endregion
@@ -1812,6 +1886,7 @@ namespace AshTaiko
             {
                 _drumrollHits++;
                 _combo++;
+                _maxCombo = Mathf.Max(_maxCombo, _combo); // Update max combo
                 OnComboChange?.Invoke(_combo);
                 // Award points for each drumroll hit (smaller than regular hits)
                 _score += 10; // Adjust scoring as needed
@@ -1948,6 +2023,7 @@ namespace AshTaiko
                     _hitGoods++;
                     _debugJudgementIndicator.text = "Good!";
                     _combo++;
+                    _maxCombo = Mathf.Max(_maxCombo, _combo); // Update max combo
                     _score += 100; // Base score for Good
                     OnComboChange?.Invoke(_combo);
                     OnNoteHit?.Invoke(note);
@@ -1960,6 +2036,7 @@ namespace AshTaiko
                     _debugJudgementIndicator.text = "Okay!";
                     _hitOkays++;
                     _combo++;
+                    _maxCombo = Mathf.Max(_maxCombo, _combo); // Update max combo
                     _score += 50;
                     OnComboChange?.Invoke(_combo);
                     OnNoteHit?.Invoke(note);
@@ -2018,7 +2095,7 @@ namespace AshTaiko
         /// <remarks>
         /// The accuracy calculation uses the standard osu! Taiko formula which weights different judgement types appropriately for fair performance measurement across various skill levels.
         /// </remarks>
-        private float GetAccuracy()
+        public float GetAccuracy()
         {
             // uses the osu taiko formula
             float nominator = _hitGoods + _hitOkays * 0.5f;
@@ -2616,6 +2693,60 @@ namespace AshTaiko
             Debug.Log("Manual note system auto-fix triggered");
             CheckAndAutoFixNoteSystem();
         }
+        
+        /// <summary>
+        /// Immediately ends the current song and returns to main menu.
+        /// This is useful for testing and development purposes.
+        /// </summary>
+        [ContextMenu("End Song Immediately")]
+        public void EndSongImmediately()
+        {
+            EndSongImmediatelyInternal();
+        }
+
+        [ContextMenu("Restart Current Song")]
+        public void RestartCurrentSongFromContextMenu()
+        {
+            RestartCurrentSong();
+        }
+        
+        /// <summary>
+        /// Public method to immediately end the current song and return to main menu.
+        /// Can be called from UI buttons or other scripts.
+        /// </summary>
+        public void EndSongImmediatelyPublic()
+        {
+            EndSongImmediatelyInternal();
+        }
+        
+        /// <summary>
+        /// Internal implementation of song ending logic.
+        /// </summary>
+        private void EndSongImmediatelyInternal()
+        {
+            if (_timingState == TimingState.Completed)
+            {
+                Debug.Log("Song is already completed");
+                return;
+            }
+            
+            if (_currentChart == null)
+            {
+                Debug.LogWarning("No chart loaded - cannot end song");
+                return;
+            }
+            
+            Debug.Log("=== MANUALLY ENDING SONG ===");
+            Debug.Log($"Current state: {_timingState}");
+            Debug.Log($"Current song time: {_songTime:F3}s");
+            Debug.Log($"Chart length: {_currentChart.TotalLength:F3}s");
+            
+            // Force completion by setting state and returning to main menu
+            CompleteSong();
+            
+            Debug.Log("Song ended manually");
+            Debug.Log("=== END MANUAL SONG END ===");
+        }
 
         /// <summary>
         /// Updates the next judgable note index to point to the first unjudged note.
@@ -2681,6 +2812,54 @@ namespace AshTaiko
             }
             
             Debug.Log("=== END STUCK NOTE DETECTION ===");
+        }
+        
+        /// <summary>
+        /// Checks if the song has been completed and triggers return to main menu.
+        /// </summary>
+        private void CheckForSongCompletion()
+        {
+            // Only check for completion if we're in the playing state and have a chart loaded
+            if (_timingState != TimingState.Playing || _currentChart == null)
+            {
+                return;
+            }
+            
+            // Check if all notes have been processed and we're past the last note's time
+            if (_nextNoteIndex >= _notes.Count && _activeNotes.Count == 0)
+            {
+                // Check if we've reached the end of the song (with a small buffer)
+                float currentTime = GetSmoothedSongTime();
+                float songEndTime = _currentChart.TotalLength;
+                
+                if (currentTime >= songEndTime)
+                {
+                    CompleteSong();
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Handles song completion by transitioning to the completed state and returning to main menu.
+        /// </summary>
+        private void CompleteSong()
+        {
+            if (_timingState == TimingState.Completed)
+            {
+                return; // Already completed
+            }
+            
+            Debug.Log("=== SONG COMPLETED ===");
+            Debug.Log($"Final Score: {_score:N0}");
+            Debug.Log($"Final Accuracy: {GetAccuracy():F2}%");
+            Debug.Log($"Max Combo: {_maxCombo:N0}");
+            Debug.Log("========================");
+            
+            // Set state to completed
+            _timingState = TimingState.Completed;
+            
+            // Return to main menu
+            SceneManager.LoadScene("Menu");
         }
     }
 

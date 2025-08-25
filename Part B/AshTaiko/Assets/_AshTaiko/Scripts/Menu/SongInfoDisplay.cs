@@ -21,17 +21,26 @@ namespace AshTaiko.Menu
         #region UI References
 
         [Header("Song Information")]
-        [SerializeField] private TextMeshProUGUI _songTitleText;
-        [SerializeField] private TextMeshProUGUI _songArtistText;
-        [SerializeField] private TextMeshProUGUI _songCreatorText;
-        [SerializeField] private TextMeshProUGUI _songLengthText;
-        [SerializeField] private TextMeshProUGUI _songBPMText;
-        [SerializeField] private TextMeshProUGUI _songFormatText;
-        [SerializeField] private Image _songCoverImage;
+        [SerializeField] 
+        private TextMeshProUGUI _songTitleText;
+        [SerializeField] 
+        private TextMeshProUGUI _songArtistText;
+        [SerializeField] 
+        private TextMeshProUGUI _songCreatorText;
+        [SerializeField] 
+        private TextMeshProUGUI _songLengthText;
+        [SerializeField] 
+        private TextMeshProUGUI _songBPMText;
+        [SerializeField] 
+        private TextMeshProUGUI _songFormatText;
+        [SerializeField] 
+        private Image _songCoverImage;
         
         [Header("Image Display Settings")]
-        [SerializeField] private bool _preserveAspectRatio = true;
-        [SerializeField] private Image.Type _imageType = Image.Type.Simple;
+        [SerializeField] 
+        private bool _preserveAspectRatio = true;
+        [SerializeField] 
+        private Image.Type _imageType = Image.Type.Simple;
 
         #endregion
 

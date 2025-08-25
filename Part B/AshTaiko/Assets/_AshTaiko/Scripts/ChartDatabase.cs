@@ -8,8 +8,11 @@ namespace AshTaiko
 {
     public class ChartDatabase : MonoBehaviour
     {
-        [SerializeField] private SongDatabase database;
-        [SerializeField] private string songsDirectory = "Songs";
+        [SerializeField] 
+        private SongDatabase database;
+        
+        [SerializeField] 
+        private string songsDirectory = "Songs";
         
         public static ChartDatabase Instance { get; private set; }
         
@@ -60,7 +63,14 @@ namespace AshTaiko
                 return;
             }
             
-            // Scan for osu! files
+            // Scan for .osz files first (compressed osu! beatmaps)
+            string[] oszFiles = Directory.GetFiles(fullPath, "*.osz", SearchOption.AllDirectories);
+            foreach (string oszFile in oszFiles)
+            {
+                ImportOszFile(oszFile);
+            }
+            
+            // Scan for individual .osu files
             string[] osuFiles = Directory.GetFiles(fullPath, "*.osu", SearchOption.AllDirectories);
             foreach (string osuFile in osuFiles)
             {
@@ -124,6 +134,57 @@ namespace AshTaiko
             }
         }
         
+        /// <summary>
+        /// Imports a .osz file containing compressed osu! beatmaps.
+        /// </summary>
+        /// <param name="oszFilePath">Path to the .osz file to import.</param>
+        private void ImportOszFile(string oszFilePath)
+        {
+            try
+            {
+                Debug.Log($"Starting import of .osz file: {oszFilePath}");
+                OszImporter importer = new OszImporter();
+                List<SongEntry> songs = importer.ImportOszFile(oszFilePath);
+                
+                if (songs != null && songs.Count > 0)
+                {
+                    Debug.Log($"Successfully imported {songs.Count} songs from .osz file: {oszFilePath}");
+                    
+                    foreach (SongEntry song in songs)
+                    {
+                        if (song != null)
+                        {
+                            // Check if this song already exists in the database
+                            SongEntry existingSong = FindExistingSong(song.Title, song.Artist);
+                            if (existingSong != null)
+                            {
+                                // Merge charts from the new song into the existing one
+                                int chartsBefore = existingSong.Charts.Count;
+                                MergeCharts(existingSong, song);
+                                int chartsAfter = existingSong.Charts.Count;
+                                Debug.Log($"Merged charts into existing song: {existingSong.Title} - {existingSong.Artist} ({chartsBefore} -> {chartsAfter} charts)");
+                            }
+                            else
+                            {
+                                // Add as new song
+                                database.AddSong(song);
+                                Debug.Log($"Added new song to database: {song.Title} - {song.Artist} with {song.Charts.Count} charts");
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"No songs imported from .osz file: {oszFilePath}");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to import .osz file {oszFilePath}: {e.Message}");
+                Debug.LogError($"Stack trace: {e.StackTrace}");
+            }
+        }
+        
         private void ImportTjaFile(string filePath)
         {
             try
@@ -150,8 +211,9 @@ namespace AshTaiko
                 // Mark the database as dirty so Unity knows it needs to be saved
                 #if UNITY_EDITOR
                 UnityEditor.EditorUtility.SetDirty(database);
+                UnityEditor.AssetDatabase.SaveAssets();
                 #endif
-                Debug.Log("Database marked for saving");
+                Debug.Log("Database saved to disk");
             }
         }
         

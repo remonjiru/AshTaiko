@@ -10,12 +10,16 @@ namespace AshTaiko.Menu
     public class SongSelectionDebugHelper : MonoBehaviour
     {
         [Header("Debug Controls")]
-        [SerializeField] private Button _testSongSelectionButton;
-        [SerializeField] private Button _testDifficultySelectionButton;
-        [SerializeField] private Button _testPlayButton;
+        [SerializeField] 
+        private Button _testSongSelectionButton;
+        [SerializeField] 
+        private Button _testDifficultySelectionButton;
+        [SerializeField] 
+        private Button _testPlayButton;
         
         [Header("References")]
-        [SerializeField] private SongSelectionManager _songSelectionManager;
+        [SerializeField] 
+        private SongSelectionManager _songSelectionManager;
         
         private void Start()
         {

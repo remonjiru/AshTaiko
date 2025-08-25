@@ -22,15 +22,22 @@ namespace AshTaiko.Menu
         #region UI References
 
         [Header("Song List")]
-        [SerializeField] private Transform _songListContent;
-        [SerializeField] private GameObject _songListItemPrefab;
-        [SerializeField] private ScrollRect _songListScrollRect;
+        [SerializeField] 
+        private Transform _songListContent;
+        [SerializeField] 
+        private GameObject _songListItemPrefab;
+        [SerializeField] 
+        private ScrollRect _songListScrollRect;
         
         [Header("Search and Filter")]
-        [SerializeField] private TMP_InputField _searchInput;
-        [SerializeField] private TMP_Dropdown _sortDropdown;
-        [SerializeField] private TMP_Dropdown _sortOrderDropdown;
-        [SerializeField] private TMP_Dropdown _difficultyFilterDropdown;
+        [SerializeField] 
+        private TMP_InputField _searchInput;
+        [SerializeField] 
+        private TMP_Dropdown _sortDropdown;
+        [SerializeField] 
+        private TMP_Dropdown _sortOrderDropdown;
+        [SerializeField] 
+        private TMP_Dropdown _difficultyFilterDropdown;
 
         #endregion
 
@@ -250,8 +257,13 @@ namespace AshTaiko.Menu
             if (database != null)
             {
                 _allSongs = database.GetSongsList();
-                RefreshSongList();
                 Debug.Log($"Loaded {_allSongs.Count} songs from database");
+                
+                // Log summary for debugging
+                int totalCharts = _allSongs.Sum(s => s.Charts?.Count ?? 0);
+                Debug.Log($"Loaded {_allSongs.Count} songs with {totalCharts} total charts from database");
+                
+                RefreshSongList();
             }
             else
             {
@@ -321,9 +333,11 @@ namespace AshTaiko.Menu
         */
         public void RefreshSongList()
         {
+            Debug.Log($"RefreshSongList called - {_allSongs.Count} total songs, {_filteredSongs.Count} filtered songs");
             ApplyFilters();
             ApplySorting();
             UpdateSongListUI();
+            Debug.Log($"RefreshSongList completed - {_filteredSongs.Count} songs after filtering");
         }
 
         /*
